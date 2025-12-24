@@ -1,9 +1,11 @@
 import React from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { Wallet, TrendingUp, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
     const { expenses, budgets, categories } = useFinanceStore();
+    const navigate = useNavigate();
 
     const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -28,7 +30,10 @@ const Dashboard: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Total Card */}
-            <div className="bg-blue-600 rounded-3xl p-6 text-white shadow-xl shadow-blue-200 relative overflow-hidden">
+            <div
+                onClick={() => navigate('/history')}
+                className="bg-blue-600 rounded-3xl p-6 text-white shadow-xl shadow-blue-200 relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer"
+            >
                 <div className="relative z-10">
                     <p className="text-blue-100 text-xs font-bold uppercase tracking-wider mb-1">Total Spent This Month</p>
                     <h2 className="text-4xl font-black">RM {totalSpent.toFixed(2)}</h2>
@@ -54,17 +59,21 @@ const Dashboard: React.FC = () => {
                         <p className="text-center text-gray-400 py-4 text-sm italic">No budget data for this month.</p>
                     ) : (
                         categoryStats.map(stat => (
-                            <div key={stat.cat} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                            <div
+                                key={stat.cat}
+                                onClick={() => navigate(`/history?category=${stat.cat}`)}
+                                className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm active:scale-[0.98] transition-all cursor-pointer group"
+                            >
                                 <div className="flex justify-between items-end mb-2">
                                     <div>
-                                        <span className="text-xs font-bold text-gray-400 uppercase block">{stat.cat}</span>
-                                        <span className="font-bold text-gray-900">RM {stat.spent.toFixed(2)}</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase block group-hover:text-blue-600 transition-colors">{stat.cat}</span>
+                                        <span className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">RM {stat.spent.toFixed(2)}</span>
                                     </div>
                                     <div className="text-right">
                                         <span className="text-[10px] text-gray-400 block">LIMIT: {stat.limit > 0 ? `RM ${stat.limit.toFixed(2)}` : 'N/A'}</span>
                                         {stat.limit > 0 && stat.percent > 100 && (
-                                            <span className="text-[10px] text-red-500 font-bold flex items-center justify-end gap-1">
-                                                <AlertTriangle className="w-2 h-2" /> OVER BUDGET
+                                            <span className="text-[10px] text-red-500 font-bold flex items-center justify-end gap-1 uppercase tracking-tighter">
+                                                <AlertTriangle className="w-2 h-2" /> Over
                                             </span>
                                         )}
                                     </div>

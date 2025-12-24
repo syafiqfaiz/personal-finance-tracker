@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { db, type Expense, type Budget } from '../db/db';
+export type { Expense, Budget };
 import { v4 as uuidv4 } from 'uuid';
 
 interface FinanceState {
