@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
-import { Save, ShieldCheck, Cloud, BrainCircuit, RefreshCw, UploadCloud } from 'lucide-react';
+import { ShieldCheck, Cloud, BrainCircuit, RefreshCw, X } from 'lucide-react';
 import { performFullBackup } from '../services/s3Service';
 
 const Settings: React.FC = () => {
@@ -44,128 +44,145 @@ const Settings: React.FC = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto p-6 space-y-8">
-            <header className="flex items-center space-x-3 border-b pb-4">
-                <ShieldCheck className="w-8 h-8 text-blue-600" />
-                <h1 className="text-2xl font-bold">Local Settings</h1>
-            </header>
+        <div className="space-y-10 animate-slide-up pb-10">
+            {/* Profile Header */}
+            <div className="text-center space-y-4 pt-4">
+                <div className="w-24 h-24 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto border-4 border-white shadow-slate-200">
+                    <div className="w-full h-full bg-blue-500 rounded-full flex items-center justify-center text-3xl font-serif text-white">
+                        U
+                    </div>
+                </div>
+                <div>
+                    <h1 className="text-3xl font-serif text-slate-900">User Profile</h1>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Member since {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+                </div>
+            </div>
 
             {status.type && (
-                <div className={`p-4 rounded-lg flex items-center justify-between ${status.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    <span>{status.message}</span>
+                <div className={`mx-4 p-4 rounded-2xl flex items-center justify-between animate-in fade-in slide-in-from-top-2 ${status.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                    <span className="text-xs font-bold uppercase tracking-tight">{status.message}</span>
                     <button onClick={() => setStatus({ type: null, message: '' })} className="hover:opacity-75">
-                        <RefreshCw className="w-4 h-4" />
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
             )}
 
-            {/* AI Configuration */}
-            <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
-                <div className="flex items-center space-x-2">
-                    <BrainCircuit className="w-5 h-5 text-purple-600" />
-                    <h2 className="text-xl font-semibold">AI Assistant (Gemini)</h2>
-                </div>
-                <p className="text-sm text-gray-600">Enter your Google Gemini API key to enable AI-powered expense extraction.</p>
-                <form onSubmit={handleSaveAI} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">API Key</label>
-                        <input
-                            type="password"
-                            value={localGeminiKey}
-                            onChange={(e) => setLocalGeminiKey(e.target.value)}
-                            placeholder="AIzaSy..."
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
-                        />
+            <div className="space-y-6 px-1">
+                {/* AI Configuration */}
+                <section className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-6">
+                    <div className="flex items-center space-x-4">
+                        <div className="bg-purple-50 p-3 rounded-2xl text-purple-600">
+                            <BrainCircuit className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">AI Intelligence</h2>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Google Gemini Pro</p>
+                        </div>
                     </div>
-                    <button
-                        type="submit"
-                        className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <Save className="w-4 h-4" />
-                        <span>Save AI Key</span>
-                    </button>
-                </form>
-            </section>
 
-            {/* S3 Configuration */}
-            <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <Cloud className="w-5 h-5 text-blue-500" />
-                        <h2 className="text-xl font-semibold">Cloud Backup (S3)</h2>
-                    </div>
-                    {s3Config.accessKeyId && (
+                    <form onSubmit={handleSaveAI} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">API Key</label>
+                            <input
+                                type="password"
+                                value={localGeminiKey}
+                                onChange={(e) => setLocalGeminiKey(e.target.value)}
+                                placeholder="AIzaSy..."
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-4 px-6 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                            />
+                        </div>
                         <button
-                            onClick={async () => {
-                                try {
-                                    setStatus({ type: 'success', message: 'Starting S3 backup...' });
-                                    await performFullBackup(s3Config);
-                                    setStatus({ type: 'success', message: 'Backup uploaded successfully to S3!' });
-                                } catch (err: any) {
-                                    setStatus({ type: 'error', message: `Backup failed: ${err.message || 'Check your CORS/Credentials'}` });
-                                }
-                            }}
-                            className="flex items-center space-x-1 text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 transition-colors"
+                            type="submit"
+                            className="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs"
                         >
-                            <UploadCloud className="w-3 h-3" />
-                            <span>Backup Now</span>
+                            Save AI Config
                         </button>
-                    )}
-                </div>
-                <p className="text-sm text-gray-600">Configure your AWS S3 bucket for daily backups and receipt storage.</p>
-                <form onSubmit={handleSaveS3} className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Bucket Name</label>
-                            <input
-                                type="text"
-                                value={localS3.bucket}
-                                onChange={(e) => setLocalS3({ ...localS3, bucket: e.target.value })}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Region</label>
-                            <input
-                                type="text"
-                                value={localS3.region}
-                                onChange={(e) => setLocalS3({ ...localS3, region: e.target.value })}
-                                placeholder="ap-southeast-1"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Access Key ID</label>
-                        <input
-                            type="text"
-                            value={localS3.accessKeyId}
-                            onChange={(e) => setLocalS3({ ...localS3, accessKeyId: e.target.value })}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Secret Access Key</label>
-                        <input
-                            type="password"
-                            value={localS3.secretAccessKey}
-                            onChange={(e) => setLocalS3({ ...localS3, secretAccessKey: e.target.value })}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <Save className="w-4 h-4" />
-                        <span>Save S3 Config</span>
-                    </button>
-                </form>
-            </section>
+                    </form>
+                </section>
 
-            <footer className="text-center text-xs text-gray-500 pt-8 pb-4 border-t">
-                <p>🔒 All keys are stored locally in your browser and never touch our servers.</p>
-                <p className="mt-1">Ensure your S3 bucket has CORS enabled for this domain.</p>
+                {/* S3 Configuration */}
+                <section className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-blue-50 p-3 rounded-2xl text-blue-500">
+                                <Cloud className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Cloud Vault</h2>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase">Amazon S3 Storage</p>
+                            </div>
+                        </div>
+                        {s3Config.accessKeyId && (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        setStatus({ type: 'success', message: 'Syncing...' });
+                                        await performFullBackup(s3Config);
+                                        setStatus({ type: 'success', message: 'Backup Success!' });
+                                    } catch (err: any) {
+                                        setStatus({ type: 'error', message: 'Sync Failed' });
+                                    }
+                                }}
+                                className="bg-blue-50 text-blue-600 p-2.5 rounded-full hover:bg-blue-100 transition-colors border border-blue-100"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    <form onSubmit={handleSaveS3} className="space-y-4 pt-2">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Bucket</label>
+                                <input
+                                    type="text"
+                                    value={localS3.bucket}
+                                    onChange={(e) => setLocalS3({ ...localS3, bucket: e.target.value })}
+                                    className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Region</label>
+                                <input
+                                    type="text"
+                                    value={localS3.region}
+                                    onChange={(e) => setLocalS3({ ...localS3, region: e.target.value })}
+                                    className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Access Key</label>
+                            <input
+                                type="text"
+                                value={localS3.accessKeyId}
+                                onChange={(e) => setLocalS3({ ...localS3, accessKeyId: e.target.value })}
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Secret Key</label>
+                            <input
+                                type="password"
+                                value={localS3.secretAccessKey}
+                                onChange={(e) => setLocalS3({ ...localS3, secretAccessKey: e.target.value })}
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs"
+                        >
+                            Save S3 Config
+                        </button>
+                    </form>
+                </section>
+            </div>
+
+            <footer className="text-center space-y-1 py-4">
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center justify-center gap-1">
+                    <ShieldCheck className="w-3 h-3" /> Encrypted Local Storage
+                </p>
             </footer>
         </div>
     );

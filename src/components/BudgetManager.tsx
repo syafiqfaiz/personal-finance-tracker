@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
-import { Target, Save, Calendar } from 'lucide-react';
+import { Target, Save } from 'lucide-react';
 
 const BudgetManager: React.FC = () => {
     const { categories, budgets, upsertBudget } = useFinanceStore();
@@ -23,46 +23,51 @@ const BudgetManager: React.FC = () => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
-            <div className="flex items-center space-x-2 border-b pb-2 mb-4">
-                <Target className="w-5 h-5 text-red-600" />
-                <h2 className="font-bold text-lg">Set Monthly Budgets</h2>
+        <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-6 animate-slide-up">
+            <div className="flex items-center space-x-4 border-b border-slate-50 pb-4">
+                <div className="bg-red-50 p-3 rounded-2xl text-red-500">
+                    <Target className="w-5 h-5" />
+                </div>
+                <div>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Adjust Limits</h2>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Period: {currentMonth}</p>
+                </div>
             </div>
 
-            <div className="flex items-center space-x-2 text-xs text-gray-400 mb-2">
-                <Calendar className="w-3 h-3" />
-                <span>Period: {currentMonth}</span>
-            </div>
-
-            <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase">Category</label>
+            <form onSubmit={handleSave} className="space-y-6 pt-2">
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Select Category</label>
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 text-sm"
+                            className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-4 px-6 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-bold text-slate-700 transition-all appearance-none"
                         >
                             {categories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase">Monthly Limit (RM)</label>
-                        <input
-                            type="number"
-                            placeholder={currentBudget ? `Current: ${currentBudget.limit}` : "0.00"}
-                            value={limit}
-                            onChange={(e) => setLimit(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 text-sm"
-                        />
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Monthly Budget (RM)</label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                placeholder={currentBudget ? `Current: ${currentBudget.limit}` : "0.00"}
+                                value={limit}
+                                onChange={(e) => setLimit(e.target.value)}
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-4 px-12 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-lg font-black text-slate-900 transition-all"
+                            />
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs uppercase">RM</span>
+                        </div>
                     </div>
                 </div>
+
                 <button
                     type="submit"
-                    className="w-full flex items-center justify-center space-x-2 bg-red-600 font-bold text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
+                    className="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs flex items-center justify-center space-x-2"
                 >
                     <Save className="w-4 h-4" />
-                    <span>Save Budget</span>
+                    <span>Update Budget</span>
                 </button>
             </form>
         </div>

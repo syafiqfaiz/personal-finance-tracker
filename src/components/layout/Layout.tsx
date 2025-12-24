@@ -4,9 +4,9 @@ import BottomNav from './BottomNav';
 
 const Layout: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
+        <div className="flex-1 flex flex-col relative">
             {/* Scrollable Main Content */}
-            <main className="flex-1 overflow-y-auto p-4 max-w-lg mx-auto w-full">
+            <main className="flex-1 pb-32">
                 <Outlet />
             </main>
 

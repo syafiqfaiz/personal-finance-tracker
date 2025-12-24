@@ -4,62 +4,56 @@ import { Home, History, Plus, Target, Settings } from 'lucide-react';
 
 const BottomNav: React.FC = () => {
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex items-center justify-around pb-safe-area-inset-bottom h-16 shadow-[0_-4px_10px_rgba(0,0,0,0.03)] z-50">
-            <NavLink
-                to="/"
-                className={({ isActive }) =>
-                    `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400'
-                    }`
-                }
-            >
-                <Home className="w-5 h-5" />
-                <span className="text-[10px] font-bold uppercase tracking-tighter">Home</span>
-            </NavLink>
+        <div className="absolute bottom-6 left-0 right-0 px-4 z-50 pointer-events-none">
+            <nav className="max-w-[360px] mx-auto bg-white/90 backdrop-blur-xl border border-white/50 rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.08)] flex items-center justify-between px-2 py-2 pointer-events-auto">
+                <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                        `flex flex-col items-center justify-center flex-1 py-2 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`
+                    }
+                >
+                    <Home className="w-5 h-5" />
+                </NavLink>
 
-            <NavLink
-                to="/history"
-                className={({ isActive }) =>
-                    `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400'
-                    }`
-                }
-            >
-                <History className="w-5 h-5" />
-                <span className="text-[10px] font-bold uppercase tracking-tighter">History</span>
-            </NavLink>
+                <NavLink
+                    to="/history"
+                    className={({ isActive }) =>
+                        `flex flex-col items-center justify-center flex-1 py-2 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`
+                    }
+                >
+                    <History className="w-5 h-5" />
+                </NavLink>
 
-            {/* Primary Action Button */}
-            <NavLink
-                to="/add"
-                className={({ isActive }) =>
-                    `flex flex-col items-center justify-center -mt-8 flex-shrink-0 w-14 h-14 rounded-full shadow-lg shadow-purple-200 transition-all ${isActive ? 'bg-purple-700 scale-110' : 'bg-purple-600 hover:scale-105'
-                    } text-white`
-                }
-            >
-                <Plus className="w-8 h-8" />
-            </NavLink>
+                {/* Primary Action Button */}
+                <NavLink
+                    to="/add"
+                    className={({ isActive }) =>
+                        `flex items-center justify-center w-14 h-14 -mt-10 rounded-full bg-slate-900 shadow-[0_8px_20px_rgba(30,41,59,0.3)] transition-all ${isActive ? 'scale-110 bg-blue-600' : 'hover:scale-105 active:scale-95'
+                        } text-white`
+                    }
+                >
+                    <Plus className="w-7 h-7" />
+                </NavLink>
 
-            <NavLink
-                to="/budgets"
-                className={({ isActive }) =>
-                    `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400'
-                    }`
-                }
-            >
-                <Target className="w-5 h-5" />
-                <span className="text-[10px] font-bold uppercase tracking-tighter">Budgets</span>
-            </NavLink>
+                <NavLink
+                    to="/budgets"
+                    className={({ isActive }) =>
+                        `flex flex-col items-center justify-center flex-1 py-2 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`
+                    }
+                >
+                    <Target className="w-5 h-5" />
+                </NavLink>
 
-            <NavLink
-                to="/settings"
-                className={({ isActive }) =>
-                    `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400'
-                    }`
-                }
-            >
-                <Settings className="w-5 h-5" />
-                <span className="text-[10px] font-bold uppercase tracking-tighter">Settings</span>
-            </NavLink>
-        </nav>
+                <NavLink
+                    to="/settings"
+                    className={({ isActive }) =>
+                        `flex flex-col items-center justify-center flex-1 py-2 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`
+                    }
+                >
+                    <Settings className="w-5 h-5" />
+                </NavLink>
+            </nav>
+        </div>
     );
 };
 
