@@ -3,6 +3,8 @@ import Settings from './components/Settings'
 import ExpenseForm from './components/ExpenseForm'
 import ExpenseList from './components/ExpenseList'
 import CategoryManager from './components/CategoryManager'
+import BudgetManager from './components/BudgetManager'
+import Dashboard from './components/Dashboard'
 import AIChat from './components/AIChat'
 import { useFinanceStore } from './store/useFinanceStore'
 import { Settings as SettingsIcon, LayoutDashboard, Sparkles } from 'lucide-react'
@@ -50,6 +52,8 @@ function App() {
           <Settings />
         ) : (
           <>
+            <Dashboard />
+
             <section className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-5 h-5 text-purple-600" />
@@ -69,6 +73,7 @@ function App() {
 
             <ExpenseForm />
             <CategoryManager />
+            <BudgetManager />
             <ExpenseList />
           </>
         )}
