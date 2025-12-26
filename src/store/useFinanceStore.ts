@@ -9,6 +9,7 @@ interface FinanceState {
     expenses: Expense[];
     budgets: Budget[];
     categories: string[];
+    categoryIcons: Record<string, string>; // Map category name -> icon name
     isLoading: boolean;
 
     // Actions
@@ -17,9 +18,10 @@ interface FinanceState {
     updateExpense: (id: string, updates: Partial<Expense>) => Promise<void>;
     deleteExpense: (id: string) => Promise<void>;
 
-    addCategory: (name: string) => Promise<void>;
+    addCategory: (name: string, icon?: string) => Promise<void>;
+    updateCategoryIcon: (name: string, icon: string) => Promise<void>;
     deleteCategory: (name: string) => Promise<void>;
-
+    renameCategory: (oldName: string, newName: string) => Promise<void>;
     upsertBudget: (budget: Omit<Budget, 'id'>) => Promise<void>;
 }
 
@@ -34,32 +36,45 @@ export const DEFAULT_CATEGORIES = [
 ];
 
 export const SYSTEM_CATEGORY = 'Uncategorized';
+export const DEFAULT_ICON = 'Tag';
 
 export const useFinanceStore = create<FinanceState>((set, get) => ({
     expenses: [],
     budgets: [],
     categories: [],
+    categoryIcons: {},
     isLoading: true,
 
     loadAppData: async () => {
         set({ isLoading: true });
 
-        // Load categories from unique expenses + defaults
-        const allExpenses = await db.expenses.toArray();
-        const storedCategories = await db.settings.get('categories');
-        let categories = storedCategories?.value ? JSON.parse(storedCategories.value) : DEFAULT_CATEGORIES;
+        // Load data
+        const [expenses, budgets] = await Promise.all([
+            db.expenses.toArray(),
+            db.budgets.toArray()
+        ]);
 
-        if (!categories.includes(SYSTEM_CATEGORY)) {
-            categories.push(SYSTEM_CATEGORY);
-        }
+        // Load settings
+        const settingsArray = await db.settings.toArray();
+        const settingsMap = settingsArray.reduce((acc, curr) => {
+            acc[curr.key] = curr.value;
+            return acc;
+        }, {} as Record<string, any>);
 
-        const budgets = await db.budgets.toArray();
+        const savedCategories = settingsMap['categories']
+            ? JSON.parse(settingsMap['categories'])
+            : [SYSTEM_CATEGORY, 'Food', 'Transport', 'Housing', 'Utilities', 'Entertainment', 'Health'];
+
+        const savedIcons = settingsMap['categoryIcons']
+            ? JSON.parse(settingsMap['categoryIcons'])
+            : {};
 
         set({
-            expenses: allExpenses.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
+            expenses: expenses.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
             budgets,
-            categories,
-            isLoading: false,
+            categories: savedCategories,
+            categoryIcons: savedIcons,
+            isLoading: false
         });
     },
 
@@ -114,20 +129,35 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         }));
     },
 
-    addCategory: async (name) => {
-        const { categories } = get();
+    addCategory: async (name, icon = DEFAULT_ICON) => {
+        const { categories, categoryIcons } = get();
         if (categories.includes(name)) return;
 
         const newCategories = [...categories, name];
+        const newIcons = { ...categoryIcons, [name]: icon };
+
         await db.settings.put({ key: 'categories', value: JSON.stringify(newCategories) });
-        set({ categories: newCategories });
+        await db.settings.put({ key: 'categoryIcons', value: JSON.stringify(newIcons) });
+
+        set({ categories: newCategories, categoryIcons: newIcons });
+    },
+
+    updateCategoryIcon: async (name, icon) => {
+        const { categoryIcons } = get();
+        const newIcons = { ...categoryIcons, [name]: icon };
+        await db.settings.put({ key: 'categoryIcons', value: JSON.stringify(newIcons) });
+        set({ categoryIcons: newIcons });
     },
 
     deleteCategory: async (name) => {
         if (name === SYSTEM_CATEGORY) return;
 
-        const { categories, expenses } = get();
+        const { categories, expenses, budgets, categoryIcons } = get();
         const newCategories = categories.filter((c) => c !== name);
+
+        // Remove icon
+        const newIcons = { ...categoryIcons };
+        delete newIcons[name];
 
         // Move expenses to Uncategorized
         const relatedExpenses = expenses.filter((e) => e.category === name);
@@ -135,11 +165,67 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             relatedExpenses.map((e) => db.expenses.update(e.id, { category: SYSTEM_CATEGORY }))
         );
 
+        // Delete associated budgets
+        const relatedBudgets = budgets.filter((b) => b.category === name);
+        await Promise.all(
+            relatedBudgets.map((b) => db.budgets.delete(b.id))
+        );
+
         await db.settings.put({ key: 'categories', value: JSON.stringify(newCategories) });
+        await db.settings.put({ key: 'categoryIcons', value: JSON.stringify(newIcons) });
 
         set({
             categories: newCategories,
-            expenses: expenses.map((e) => e.category === name ? { ...e, category: SYSTEM_CATEGORY } : e)
+            categoryIcons: newIcons,
+            expenses: expenses.map((e) => e.category === name ? { ...e, category: SYSTEM_CATEGORY } : e),
+            budgets: budgets.filter((b) => b.category !== name)
+        });
+    },
+
+    renameCategory: async (oldName, newName) => {
+        if (!oldName || !newName || oldName === newName) return;
+        const { categories, expenses, budgets, categoryIcons } = get();
+
+        // 1. Update Categories List & Icons
+        let newCategories = [...categories];
+        let newIcons = { ...categoryIcons };
+        const icon = newIcons[oldName] || DEFAULT_ICON;
+
+        if (!categories.includes(newName)) {
+            newCategories = categories.map(c => c === oldName ? newName : c);
+            newIcons[newName] = icon;
+            delete newIcons[oldName];
+        } else {
+            // Target exists, just remove old one (merge)
+            newCategories = categories.filter(c => c !== oldName);
+            // newName keeps its own icon, oldName's icon is discarded
+            delete newIcons[oldName];
+        }
+
+        await db.settings.put({ key: 'categories', value: JSON.stringify(newCategories) });
+        await db.settings.put({ key: 'categoryIcons', value: JSON.stringify(newIcons) });
+
+        // 2. Migrate Expenses
+        const relatedExpenses = expenses.filter(e => e.category === oldName);
+        if (relatedExpenses.length > 0) {
+            await Promise.all(
+                relatedExpenses.map(e => db.expenses.update(e.id, { category: newName }))
+            );
+        }
+
+        // 3. Migrate Budgets
+        const relatedBudgets = budgets.filter(b => b.category === oldName);
+        if (relatedBudgets.length > 0) {
+            await Promise.all(
+                relatedBudgets.map(b => db.budgets.update(b.id, { category: newName }))
+            );
+        }
+
+        set({
+            categories: newCategories,
+            categoryIcons: newIcons,
+            expenses: expenses.map(e => e.category === oldName ? { ...e, category: newName } : e),
+            budgets: budgets.map(b => b.category === oldName ? { ...b, category: newName } : b)
         });
     },
 

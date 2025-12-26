@@ -1,7 +1,6 @@
 import React from 'react';
 import Settings from '../components/Settings';
-import CategoryManager from '../components/CategoryManager';
-import { Shield, BookOpen, Database } from 'lucide-react';
+import { Shield, Database } from 'lucide-react';
 
 const SettingsPage: React.FC = () => {
     return (
@@ -17,15 +16,6 @@ const SettingsPage: React.FC = () => {
                     <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest">Connectivity & Security</h2>
                 </div>
                 <Settings />
-            </section>
-
-            {/* Category Management */}
-            <section className="space-y-4">
-                <div className="flex items-center space-x-2 px-1">
-                    <BookOpen className="w-4 h-4 text-gray-400" />
-                    <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest">Organization</h2>
-                </div>
-                <CategoryManager />
             </section>
 
             {/* App Info / Version */}

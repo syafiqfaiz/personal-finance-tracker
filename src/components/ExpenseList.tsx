@@ -1,14 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinanceStore } from '../store/useFinanceStore';
-import { Trash2, ShoppingBag } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
+import ExpenseCard from './ExpenseCard';
 
 interface ExpenseListProps {
     filterCategory?: string;
     searchQuery?: string;
+    filterMonth?: number | null; // 0-indexed, null = all months
+    filterYear?: number;
 }
 
-const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery }) => {
+const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, filterMonth, filterYear }) => {
     const { expenses, deleteExpense } = useFinanceStore();
     const navigate = useNavigate();
 
@@ -18,6 +21,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery }
             if (!searchQuery) return true;
             const query = searchQuery.toLowerCase();
             return e.name.toLowerCase().includes(query) || (e.notes?.toLowerCase().includes(query));
+        })
+        .filter(e => {
+            // Month/Year filter
+            if (filterYear === undefined) return true;
+            const date = new Date(e.timestamp);
+            const yearMatch = date.getFullYear() === filterYear;
+            if (filterMonth === null || filterMonth === undefined) return yearMatch;
+            return yearMatch && date.getMonth() === filterMonth;
         });
 
     // Group expenses by month
@@ -43,35 +54,17 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery }
             {Object.entries(groupedExpenses).map(([month, items]) => (
                 <div key={month} className="space-y-4">
                     <h3 className="text-xl font-serif text-slate-900 border-b border-slate-100 pb-2 ml-1">{month}</h3>
-                    <div className="divide-y divide-slate-50">
+                    <div className="space-y-4">
                         {items.map((expense) => (
-                            <div
+                            <ExpenseCard
                                 key={expense.id}
+                                expense={expense}
                                 onClick={() => navigate(`/history/${expense.id}`)}
-                                className="py-4 px-1 flex items-center justify-between active:bg-slate-50 transition-colors cursor-pointer group"
-                            >
-                                <div className="space-y-1">
-                                    <p className="font-bold text-slate-900 text-[15px] group-hover:text-blue-600 transition-colors">
-                                        {expense.name} <span className="text-slate-400 font-medium text-xs ml-1">({expense.category})</span>
-                                    </p>
-                                    <div className="flex items-center space-x-3 text-[12px] text-slate-400 font-medium">
-                                        <span>RM {expense.amount.toFixed(0)}</span>
-                                        <span>•</span>
-                                        <span>{new Date(expense.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (confirm('Delete this record?')) deleteExpense(expense.id);
-                                        }}
-                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
+                                onDelete={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm('Delete this record?')) deleteExpense(expense.id);
+                                }}
+                            />
                         ))}
                     </div>
                 </div>

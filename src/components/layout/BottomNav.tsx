@@ -4,7 +4,7 @@ import { Home, History, Plus, Target, Settings } from 'lucide-react';
 
 const BottomNav: React.FC = () => {
     return (
-        <div className="absolute bottom-6 left-0 right-0 px-4 z-50 pointer-events-none">
+        <div className="fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none">
             <nav className="max-w-[360px] mx-auto bg-white/90 backdrop-blur-xl border border-white/50 rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.08)] flex items-center justify-between px-2 py-2 pointer-events-auto">
                 <NavLink
                     to="/"

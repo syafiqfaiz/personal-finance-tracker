@@ -1,7 +1,7 @@
-import React from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
-import { Bell, Sparkles, Car, Wallet } from 'lucide-react';
+import { Bell, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ExpenseCard from './ExpenseCard';
 
 const Dashboard: React.FC = () => {
     const { expenses, budgets, categories } = useFinanceStore();
@@ -48,28 +48,7 @@ const Dashboard: React.FC = () => {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 3);
 
-    // Category icons
-    const getCategoryIcon = (category: string) => {
-        const icons: Record<string, React.ReactNode> = {
-            'Transport': <Car className="w-5 h-5" />,
-            'Food': <span>🍔</span>,
-            'Shopping': <span>🛒</span>,
-            'Entertainment': <span>🎬</span>,
-            'Bills': <span>📱</span>,
-        };
-        return icons[category] || <Wallet className="w-5 h-5" />;
-    };
 
-    const getCategoryColor = (category: string) => {
-        const colors: Record<string, string> = {
-            'Transport': 'bg-green-100',
-            'Food': 'bg-red-100',
-            'Shopping': 'bg-purple-100',
-            'Entertainment': 'bg-blue-100',
-            'Bills': 'bg-yellow-100',
-        };
-        return colors[category] || 'bg-slate-100';
-    };
 
     return (
         <div className="animate-slide-up">
@@ -140,10 +119,10 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Expenses */}
             <div className="pb-8">
                 <div className="flex justify-between items-center mb-3">
-                    <h2 className="font-semibold text-lg text-slate-900">Recent Activity</h2>
+                    <h2 className="font-semibold text-lg text-slate-900">Recent Expenses</h2>
                     <button
                         onClick={() => navigate('/history')}
                         className="text-xs text-slate-500 hover:text-slate-700"
@@ -159,26 +138,11 @@ const Dashboard: React.FC = () => {
                         </div>
                     ) : (
                         recentExpenses.map(expense => (
-                            <div
+                            <ExpenseCard
                                 key={expense.id}
+                                expense={expense}
                                 onClick={() => navigate(`/history/${expense.id}`)}
-                                className="flex justify-between items-center bg-white p-4 rounded-[20px] shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]"
-                            >
-                                <div className="flex gap-3 items-center">
-                                    <div className={`w-10 h-10 rounded-full ${getCategoryColor(expense.category)} flex items-center justify-center`}>
-                                        {getCategoryIcon(expense.category)}
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-slate-900">{expense.name}</p>
-                                        <p className="text-xs text-slate-500">
-                                            {new Date(expense.timestamp).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                                        </p>
-                                    </div>
-                                </div>
-                                <p className="font-medium text-red-500 whitespace-nowrap">
-                                    - RM {expense.amount.toFixed(0)}
-                                </p>
-                            </div>
+                            />
                         ))
                     )}
                 </div>

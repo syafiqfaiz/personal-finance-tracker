@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ExpenseList from '../components/ExpenseList';
-import { Search } from 'lucide-react';
+import { Search, Calendar } from 'lucide-react';
 import { useFinanceStore } from '../store/useFinanceStore';
 
 const History: React.FC = () => {
     const { categories } = useFinanceStore();
     const [searchParams, setSearchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Get current date for defaults
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+
+    // Month/Year filter state
+    const [selectedMonth, setSelectedMonth] = useState<number | null>(null); // null = All months
+    const [selectedYear, setSelectedYear] = useState<number>(currentYear);
 
     // Sync state with URL params
     const selectedCategory = searchParams.get('category') || 'All';
@@ -21,10 +30,20 @@ const History: React.FC = () => {
         setSearchParams(searchParams);
     };
 
+    // Generate year options (last 5 years)
+    const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+    // Month names
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
     return (
         <div className="space-y-6 pb-4 animate-slide-up">
-            <header className="px-1 pt-4">
-                <h1 className="text-3xl font-serif text-slate-900 border-b border-slate-100 pb-4">Logs</h1>
+            <header className="px-1 pt-4 pb-4 border-b border-slate-200">
+                <h1 className="text-3xl font-serif text-slate-900">Expense</h1>
+                <p className="text-sm text-slate-500 mt-1">Track and manage your spending</p>
             </header>
 
             {/* Search & Filter Bar */}
@@ -40,6 +59,31 @@ const History: React.FC = () => {
                     />
                 </div>
 
+                {/* Month/Year Filter */}
+                <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-slate-400" />
+                    <select
+                        value={selectedMonth === null ? '' : selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value === '' ? null : parseInt(e.target.value))}
+                        className="flex-1 bg-white border border-slate-200 rounded-xl py-2 px-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                    >
+                        <option value="">All Months</option>
+                        {months.map((month, index) => (
+                            <option key={month} value={index}>{month}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                        className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                    >
+                        {yearOptions.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Category Pills */}
                 <div className="flex items-center space-x-2 overflow-x-auto pb-2 no-scrollbar px-1">
                     <button
                         onClick={() => handleCategoryChange('All')}
@@ -62,7 +106,12 @@ const History: React.FC = () => {
             </div>
 
             <div className="px-1">
-                <ExpenseList filterCategory={selectedCategory === 'All' ? undefined : selectedCategory} searchQuery={searchQuery} />
+                <ExpenseList
+                    filterCategory={selectedCategory === 'All' ? undefined : selectedCategory}
+                    searchQuery={searchQuery}
+                    filterMonth={selectedMonth}
+                    filterYear={selectedYear}
+                />
             </div>
         </div>
     );
