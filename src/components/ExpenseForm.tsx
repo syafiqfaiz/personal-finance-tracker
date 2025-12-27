@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFinanceStore, SYSTEM_CATEGORY, type Expense } from '../store/useFinanceStore';
 import { PlusCircle, Camera, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { compressImage, blobToDataURL } from '../services/imageService';
+import { toast } from 'sonner';
 
 interface ExpenseFormProps {
     initialData?: Partial<Expense>;
@@ -66,8 +67,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
 
         if (isEditing && initialData.id) {
             await updateExpense(initialData.id, expenseData);
+            toast.success('Transaction updated successfully');
         } else {
             await addExpense(expenseData);
+            toast.success('Expense added successfully');
         }
 
         if (onSuccess) {

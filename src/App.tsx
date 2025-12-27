@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Toaster } from 'sonner'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
@@ -9,14 +10,17 @@ import AddExpense from './pages/AddExpense'
 import Budgets from './pages/Budgets'
 import SettingsPage from './pages/SettingsPage'
 import { useFinanceStore } from './store/useFinanceStore'
+import { useSettingsStore } from './store/useSettingsStore'
 import './App.css'
 
 function App() {
   const { loadAppData, isLoading } = useFinanceStore();
+  const { loadSettings } = useSettingsStore();
 
   useEffect(() => {
     loadAppData();
-  }, [loadAppData]);
+    loadSettings();
+  }, [loadAppData, loadSettings]);
 
   if (isLoading) {
     return (
@@ -28,6 +32,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster position="top-center" richColors />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

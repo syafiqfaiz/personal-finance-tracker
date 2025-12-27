@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AIChat from '../components/AIChat';
 import ExpenseForm from '../components/ExpenseForm';
 import { Sparkles, Keyboard } from 'lucide-react';
 
+import { useSettingsStore } from '../store/useSettingsStore';
+
 const AddExpense: React.FC = () => {
-    const [mode, setMode] = useState<'ai' | 'manual'>('ai');
+    const { geminiKey } = useSettingsStore();
+    const navigate = useNavigate();
+    const [mode, setMode] = useState<'ai' | 'manual'>(geminiKey ? 'ai' : 'manual');
+
+    const handleSuccess = () => {
+        navigate('/history');
+    };
 
     return (
         <div className="space-y-8 animate-slide-up pb-10">
@@ -45,10 +54,10 @@ const AddExpense: React.FC = () => {
                                 </p>
                             </div>
                         </div>
-                        <AIChat />
+                        <AIChat onSuccess={handleSuccess} />
                     </div>
                 ) : (
-                    <ExpenseForm />
+                    <ExpenseForm onSuccess={handleSuccess} />
                 )}
             </div>
         </div>

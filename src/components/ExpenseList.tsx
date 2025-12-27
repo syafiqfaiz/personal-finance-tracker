@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { ShoppingBag } from 'lucide-react';
 import ExpenseCard from './ExpenseCard';
+import { toast } from 'sonner';
+import ConfirmDialog from './ConfirmDialog';
 
 interface ExpenseListProps {
     filterCategory?: string;
@@ -14,6 +16,7 @@ interface ExpenseListProps {
 const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, filterMonth, filterYear }) => {
     const { expenses, deleteExpense } = useFinanceStore();
     const navigate = useNavigate();
+    const [deleteConfirmation, setDeleteConfirmation] = React.useState<string | null>(null);
 
     const filteredExpenses = expenses
         .filter(e => !filterCategory || e.category === filterCategory)
@@ -62,13 +65,27 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
                                 onClick={() => navigate(`/history/${expense.id}`)}
                                 onDelete={(e) => {
                                     e.stopPropagation();
-                                    if (confirm('Delete this record?')) deleteExpense(expense.id);
+                                    setDeleteConfirmation(expense.id);
                                 }}
                             />
                         ))}
                     </div>
                 </div>
             ))}
+
+            <ConfirmDialog
+                isOpen={!!deleteConfirmation}
+                title="Delete Expense?"
+                message="This action cannot be undone. Are you sure you want to remove this record?"
+                onConfirm={() => {
+                    if (deleteConfirmation) {
+                        deleteExpense(deleteConfirmation);
+                        toast.success('Expense deleted');
+                        setDeleteConfirmation(null);
+                    }
+                }}
+                onCancel={() => setDeleteConfirmation(null)}
+            />
         </div>
     );
 };

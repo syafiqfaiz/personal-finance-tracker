@@ -3,6 +3,8 @@ import { useFinanceStore, SYSTEM_CATEGORY, DEFAULT_ICON } from '../store/useFina
 import { Tag, Pencil, Trash2, Plus, ArrowLeft, X } from 'lucide-react';
 import IconPicker from './IconPicker';
 import { getIconComponent } from '../utils/iconUtils';
+import { toast } from 'sonner';
+import ConfirmDialog from './ConfirmDialog';
 
 interface EditingCategory {
     originalName: string;
@@ -14,6 +16,7 @@ interface EditingCategory {
 const CategoryBudgetManager: React.FC = () => {
     const { categories, budgets, expenses, categoryIcons, addCategory, updateCategoryIcon, deleteCategory, renameCategory, upsertBudget } = useFinanceStore();
     const [editing, setEditing] = useState<EditingCategory | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string } | null>(null);
 
     const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -58,17 +61,20 @@ const CategoryBudgetManager: React.FC = () => {
         // CREATE MODE
         if (!editing.originalName) {
             await addCategory(categoryName, editing.icon);
+            toast.success(`Category "${categoryName}" created`);
         }
         // EDIT MODE
         else {
             if (editing.name !== editing.originalName) {
                 await renameCategory(editing.originalName, categoryName);
+                toast.success(`Renamed to "${categoryName}"`);
             }
 
             // Icon update logic
             const currentIcon = categoryIcons[categoryName] || DEFAULT_ICON;
             if (editing.icon !== currentIcon) {
                 await updateCategoryIcon(categoryName, editing.icon);
+                toast.success('Category icon updated');
             }
         }
 
@@ -84,11 +90,19 @@ const CategoryBudgetManager: React.FC = () => {
         setEditing(null);
     };
 
-    const handleDelete = async (cat: string) => {
-        if (confirm(`Are you sure you want to delete "${cat}"?\n\nDeleting a category moves its expenses to "${SYSTEM_CATEGORY}".`)) {
-            await deleteCategory(cat);
-            setEditing(null);
-        }
+    const handleDeleteClick = (cat: string) => {
+        setDeleteConfirmation({ id: cat });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirmation) return;
+        const cat = deleteConfirmation.id;
+
+        await deleteCategory(cat);
+        toast.success(`Category "${cat}" deleted`);
+
+        setDeleteConfirmation(null);
+        setEditing(null);
     };
 
     // Full-page edit popup
@@ -165,7 +179,7 @@ const CategoryBudgetManager: React.FC = () => {
 
                             {editing.originalName && (
                                 <button
-                                    onClick={() => handleDelete(editing.originalName)}
+                                    onClick={() => handleDeleteClick(editing.originalName)}
                                     className="w-full text-red-500 font-medium py-4 rounded-full hover:bg-red-50 transition-all flex items-center justify-center space-x-2"
                                 >
                                     <Trash2 className="w-5 h-5" />
@@ -259,6 +273,14 @@ const CategoryBudgetManager: React.FC = () => {
             <p className="text-[10px] text-slate-400 font-medium italic text-center px-4">
                 * Deleting a category moves its expenses to "{SYSTEM_CATEGORY}".
             </p>
+
+            <ConfirmDialog
+                isOpen={!!deleteConfirmation}
+                title="Delete Category?"
+                message={`Are you sure you want to delete "${deleteConfirmation?.id}"? usage history will be moved to "${SYSTEM_CATEGORY}".`}
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteConfirmation(null)}
+            />
         </div>
     );
 };

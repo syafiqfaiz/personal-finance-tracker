@@ -4,7 +4,13 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import { extractExpenseWithAI, type ExtractedExpense } from '../services/aiService';
 import { Send, Sparkles, Check, X, AlertCircle, Loader2, MessageSquare } from 'lucide-react';
 
-const AIChat: React.FC = () => {
+import { toast } from 'sonner';
+
+interface AIChatProps {
+    onSuccess?: () => void;
+}
+
+const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const { categories, addExpense } = useFinanceStore();
     const { geminiKey } = useSettingsStore();
 
@@ -44,7 +50,12 @@ const AIChat: React.FC = () => {
             isTaxDeductible: false,
         });
 
+        toast.success('Expense added via AI');
         setSuggestion(null);
+
+        if (onSuccess) {
+            onSuccess();
+        }
     };
 
     if (!geminiKey) {
