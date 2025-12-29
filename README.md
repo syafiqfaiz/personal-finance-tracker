@@ -23,7 +23,6 @@ A private, offline-first personal finance tracker built as a React PWA. This app
 npm install
 npm run dev
 ```
-npm run dev
 ```
 
 ### 2. Running Tests
@@ -59,7 +58,16 @@ Obtain an API key from the [Google AI Studio](https://aistudio.google.com/) and 
 ## 🌍 Deployment (Cloudflare Pages)
 This app is optimized for static deployment on **Cloudflare Pages**.
 
-### Steps:
+### Method 1: CLI Deployment (Recommended)
+We have configured a direct deployment script using Wrangler.
+1.  **Login**: `npx wrangler login` (One time setup)
+2.  **Deploy**:
+    ```bash
+    npm run deploy
+    ```
+    This will build the project and upload it to a new deployment url.
+
+### Method 2: Git Integration
 1.  **Push to Git**: Ensure your code is pushed to a GitHub or GitLab repository.
 2.  **Create Project**: Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) > **Workers & Pages** > **Create Application** > **Connect to Git**.
 3.  **Build Settings**:
