@@ -41,6 +41,7 @@ const BudgetCard: React.FC<BudgetCardProps> = ({
                     {category !== SYSTEM_CATEGORY && (
                         <button
                             onClick={() => onEdit(category)}
+                            aria-label="Edit budget"
                             className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
                         >
                             <Pencil className="w-4 h-4" />

@@ -82,7 +82,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         // 2. Created At (descending) - for same day entries
         const sortExpenses = (list: Expense[]) => {
             return list.sort((a, b) => {
-                const dateDiff = b.timestamp.getTime() - a.timestamp.getTime();
+                const dateDiff = (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0);
                 if (dateDiff !== 0) return dateDiff;
                 const createdA = a.createdAt?.getTime() || 0;
                 const createdB = b.createdAt?.getTime() || 0;
@@ -123,7 +123,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             // Re-sort using same logic
             return {
                 expenses: list.sort((a, b) => {
-                    const dateDiff = b.timestamp.getTime() - a.timestamp.getTime();
+                    const dateDiff = (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0);
                     if (dateDiff !== 0) return dateDiff;
                     const createdA = a.createdAt?.getTime() || 0;
                     const createdB = b.createdAt?.getTime() || 0;
