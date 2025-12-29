@@ -54,7 +54,7 @@ const Settings: React.FC = () => {
                 </div>
                 <div>
                     <h1 className="text-3xl font-serif text-slate-900">User Profile</h1>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Member since {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+                    <p className="text-xs font-bold font-jakarta text-slate-500 uppercase tracking-widest mt-1">Member since {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
                 </div>
             </div>
 
@@ -75,25 +75,25 @@ const Settings: React.FC = () => {
                             <BrainCircuit className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">AI Intelligence</h2>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase">Google Gemini Pro</p>
+                            <h2 className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">AI Intelligence</h2>
+                            <p className="text-[10px] text-slate-500 font-bold font-jakarta uppercase">Google Gemini Pro</p>
                         </div>
                     </div>
 
                     <form onSubmit={handleSaveAI} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">API Key</label>
+                            <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">API Key</label>
                             <input
                                 type="password"
                                 value={localGeminiKey}
                                 onChange={(e) => setLocalGeminiKey(e.target.value)}
                                 placeholder="AIzaSy..."
-                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-4 px-6 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-4 px-6 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta transition-all"
                             />
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs"
+                            className="w-full bg-slate-900 text-white font-bold font-jakarta uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs"
                         >
                             Save AI Config
                         </button>
@@ -108,8 +108,8 @@ const Settings: React.FC = () => {
                                 <Cloud className="w-5 h-5" />
                             </div>
                             <div>
-                                <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Cloud Vault</h2>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase">Amazon S3 Storage</p>
+                                <h2 className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">Cloud Vault</h2>
+                                <p className="text-[10px] text-slate-500 font-bold font-jakarta uppercase">Amazon S3 Storage</p>
                             </div>
                         </div>
                         {s3Config.accessKeyId && (
@@ -133,45 +133,45 @@ const Settings: React.FC = () => {
                     <form onSubmit={handleSaveS3} className="space-y-4 pt-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Bucket</label>
+                                <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Bucket</label>
                                 <input
                                     type="text"
                                     value={localS3.bucket}
                                     onChange={(e) => setLocalS3({ ...localS3, bucket: e.target.value })}
-                                    className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                    className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta transition-all"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Region</label>
+                                <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Region</label>
                                 <input
                                     type="text"
                                     value={localS3.region}
                                     onChange={(e) => setLocalS3({ ...localS3, region: e.target.value })}
-                                    className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                    className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta transition-all"
                                 />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Access Key</label>
+                            <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Access Key</label>
                             <input
                                 type="text"
                                 value={localS3.accessKeyId}
                                 onChange={(e) => setLocalS3({ ...localS3, accessKeyId: e.target.value })}
-                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta transition-all"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">Secret Key</label>
+                            <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Secret Key</label>
                             <input
                                 type="password"
                                 value={localS3.secretAccessKey}
                                 onChange={(e) => setLocalS3({ ...localS3, secretAccessKey: e.target.value })}
-                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all"
+                                className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-3.5 px-5 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta transition-all"
                             />
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs"
+                            className="w-full bg-slate-900 text-white font-bold font-jakarta uppercase tracking-widest py-4 rounded-full shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-xs"
                         >
                             Save S3 Config
                         </button>
@@ -180,7 +180,7 @@ const Settings: React.FC = () => {
             </div>
 
             <footer className="text-center space-y-1 py-4">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center justify-center gap-1">
+                <p className="text-[10px] font-bold font-jakarta text-slate-400 uppercase tracking-widest flex items-center justify-center gap-1">
                     <ShieldCheck className="w-3 h-3" /> Encrypted Local Storage
                 </p>
             </footer>

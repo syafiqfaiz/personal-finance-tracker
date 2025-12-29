@@ -20,19 +20,19 @@ const AddExpense: React.FC = () => {
             <header className="px-1 pt-4 flex items-center justify-between">
                 <div>
                     <h1 className="text-4xl font-serif text-slate-900">Add Entry</h1>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Record your spending</p>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Record your spending</p>
                 </div>
                 <div className="flex bg-slate-100 p-1 rounded-full border border-slate-200 shadow-inner">
                     <button
                         onClick={() => setMode('ai')}
-                        className={`p-2.5 rounded-full transition-all flex items-center justify-center ${mode === 'ai' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`p-2.5 rounded-full transition-all flex items-center justify-center ${mode === 'ai' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-600'}`}
                         title="AI Mode"
                     >
                         <Sparkles className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setMode('manual')}
-                        className={`p-2.5 rounded-full transition-all flex items-center justify-center ${mode === 'manual' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`p-2.5 rounded-full transition-all flex items-center justify-center ${mode === 'manual' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-600'}`}
                         title="Manual Mode"
                     >
                         <Keyboard className="w-5 h-5" />
@@ -49,7 +49,7 @@ const AddExpense: React.FC = () => {
                                 <div className="bg-purple-50 w-10 h-10 rounded-xl flex items-center justify-center text-purple-600">
                                     <Sparkles className="w-5 h-5" />
                                 </div>
-                                <p className="text-sm font-medium text-slate-600 leading-relaxed italic">
+                                <p className="text-sm font-medium text-slate-500 leading-relaxed italic">
                                     "I'm ready! Just tell me what you spent on, and I'll extract all the details for you instantly."
                                 </p>
                             </div>

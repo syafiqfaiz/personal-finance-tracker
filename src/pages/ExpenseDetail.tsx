@@ -40,19 +40,19 @@ const ExpenseDetail: React.FC = () => {
     return (
         <div className="space-y-8 animate-slide-up pb-10">
             <header className="flex items-center justify-between pt-2">
-                <button onClick={() => navigate('/history')} className="p-2 -ml-2 text-slate-400 hover:text-blue-600 transition-colors bg-white rounded-full shadow-sm border border-slate-100">
+                <button onClick={() => navigate('/history')} className="p-2 -ml-2 text-slate-500 hover:text-blue-600 transition-colors bg-white rounded-full shadow-sm border border-slate-200">
                     <ChevronLeft className="w-5 h-5" />
                 </button>
                 <div className="flex space-x-3">
                     <Link
                         to={`/history/${expense.id}/edit`}
-                        className="p-3 bg-white text-slate-900 rounded-full border border-slate-100 shadow-sm transition-all active:scale-95"
+                        className="p-3 bg-white text-slate-900 rounded-full border border-slate-200 shadow-sm transition-all active:scale-95"
                     >
                         <Edit3 className="w-5 h-5" />
                     </Link>
                     <button
                         onClick={handleDelete}
-                        className="p-3 bg-white text-red-500 rounded-full border border-slate-100 shadow-sm transition-all active:scale-95"
+                        className="p-3 bg-white text-red-500 rounded-full border border-slate-200 shadow-sm transition-all active:scale-95"
                     >
                         <Trash2 className="w-5 h-5" />
                     </button>
@@ -60,27 +60,27 @@ const ExpenseDetail: React.FC = () => {
             </header>
 
             <div className="text-center space-y-2">
-                <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 border border-blue-100">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold font-jakarta uppercase tracking-widest mb-2 border border-blue-100">
                     {expense.category}
                 </div>
                 <h2 className="text-4xl font-serif text-slate-900">{expense.name}</h2>
                 <div className="flex items-center justify-center space-x-1 mt-4">
-                    <span className="text-slate-400 font-bold text-lg">RM</span>
-                    <span className="text-5xl font-black text-slate-900 tracking-tighter">{expense.amount.toFixed(0)}</span>
-                    <span className="text-slate-400 font-bold text-lg pt-4">.{expense.amount.toFixed(2).split('.')[1]}</span>
+                    <span className="text-slate-500 font-bold text-lg font-jakarta">RM</span>
+                    <span className="text-5xl font-bold font-jakarta text-slate-900 tracking-tighter">{expense.amount.toFixed(0)}</span>
+                    <span className="text-slate-500 font-bold text-lg pt-4 font-jakarta">.{expense.amount.toFixed(2).split('.')[1]}</span>
                 </div>
-                <p className="text-sm text-slate-400 font-medium mt-2">{new Date(expense.timestamp).toLocaleDateString(undefined, { dateStyle: 'full' })}</p>
+                <p className="text-sm text-slate-500 font-medium mt-2">{new Date(expense.timestamp).toLocaleDateString(undefined, { dateStyle: 'full' })}</p>
             </div>
 
             <div className="space-y-6">
-                <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-6">
+                <div className="bg-white rounded-[28px] border border-slate-200 p-6 shadow-sm space-y-6">
                     <div className="flex justify-between items-center group">
                         <div className="flex items-center space-x-4">
                             <div className="bg-slate-50 p-3.5 rounded-2xl text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
                                 <CreditCard className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Payment Method</p>
+                                <p className="text-[10px] font-bold font-jakarta text-slate-500 uppercase tracking-widest mb-0.5">Payment Method</p>
                                 <p className="font-bold text-slate-900">{expense.paymentMethod}</p>
                             </div>
                         </div>
@@ -92,7 +92,7 @@ const ExpenseDetail: React.FC = () => {
                                 <Calendar className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Recorded At</p>
+                                <p className="text-[10px] font-bold font-jakarta text-slate-500 uppercase tracking-widest mb-0.5">Recorded At</p>
                                 <p className="font-bold text-slate-900">{new Date(expense.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
                         </div>
@@ -105,8 +105,8 @@ const ExpenseDetail: React.FC = () => {
                                     <FileText className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Notes</p>
-                                    <p className="text-sm font-medium text-slate-600 leading-relaxed italic border-l-2 border-slate-100 pl-4 py-1">
+                                    <p className="text-[10px] font-bold font-jakarta text-slate-500 uppercase tracking-widest mb-1.5">Notes</p>
+                                    <p className="text-sm font-medium text-slate-500 leading-relaxed italic border-l-2 border-slate-200 pl-4 py-1">
                                         "{expense.notes}"
                                     </p>
                                 </div>

@@ -48,14 +48,14 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onClick, onDelete })
             </div>
 
             <div className="flex items-center gap-3">
-                <p className="font-medium text-slate-700 whitespace-nowrap">
+                <p className="font-bold font-jakarta text-slate-900 whitespace-nowrap">
                     RM {expense.amount.toFixed(0)}
                 </p>
 
                 {onDelete && (
                     <button
                         onClick={onDelete}
-                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                         title="Delete record"
                     >
                         <Trash2 className="w-4 h-4" />

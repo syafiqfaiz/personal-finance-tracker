@@ -66,7 +66,7 @@ const History: React.FC = () => {
                         <select
                             value={selectedMonth === null ? '' : selectedMonth}
                             onChange={(e) => setSelectedMonth(e.target.value === '' ? null : parseInt(e.target.value))}
-                            className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-3 pr-10 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none"
+                            className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-3 pr-10 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none"
                         >
                             <option value="">All Months</option>
                             {months.map((month, index) => (
@@ -79,7 +79,7 @@ const History: React.FC = () => {
                         <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                            className="bg-white border border-slate-200 rounded-xl py-2 pl-3 pr-10 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none"
+                            className="bg-white border border-slate-200 rounded-xl py-2 pl-3 pr-10 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none"
                         >
                             {yearOptions.map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -93,7 +93,7 @@ const History: React.FC = () => {
                 <div className="flex items-center space-x-2 overflow-x-auto pb-2 no-scrollbar px-1">
                     <button
                         onClick={() => handleCategoryChange('All')}
-                        className={`flex-shrink-0 px-6 py-2 rounded-full text-xs font-bold font-jakarta transition-all ${selectedCategory === 'All' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white text-slate-400 border border-slate-100'
+                        className={`flex-shrink-0 px-6 py-2 rounded-full text-xs font-bold font-jakarta transition-all ${selectedCategory === 'All' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white text-slate-500 border border-slate-200'
                             }`}
                     >
                         All
@@ -102,7 +102,7 @@ const History: React.FC = () => {
                         <button
                             key={cat}
                             onClick={() => handleCategoryChange(cat)}
-                            className={`flex-shrink-0 px-6 py-2 rounded-full text-xs font-bold font-jakarta transition-all ${selectedCategory === cat ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white text-slate-400 border border-slate-100'
+                            className={`flex-shrink-0 px-6 py-2 rounded-full text-xs font-bold font-jakarta transition-all ${selectedCategory === cat ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white text-slate-500 border border-slate-200'
                                 }`}
                         >
                             {cat}

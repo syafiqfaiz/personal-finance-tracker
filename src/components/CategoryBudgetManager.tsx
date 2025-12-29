@@ -138,7 +138,7 @@ const CategoryBudgetManager: React.FC = () => {
                                     type="text"
                                     value={editing.name}
                                     onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                                    className="flex-1 bg-white rounded-2xl border border-slate-200 py-4 px-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-medium text-slate-900 transition-all"
+                                    className="flex-1 bg-white rounded-2xl border border-slate-200 py-4 px-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-bold font-jakarta text-slate-900 transition-all"
                                     placeholder="Category name"
                                 />
                             </div>
@@ -153,10 +153,10 @@ const CategoryBudgetManager: React.FC = () => {
                                     type="number"
                                     value={editing.limit}
                                     onChange={(e) => setEditing({ ...editing, limit: e.target.value })}
-                                    className="w-full bg-white rounded-2xl border border-slate-200 py-4 pl-14 pr-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-medium text-slate-900 transition-all"
+                                    className="w-full bg-white rounded-2xl border border-slate-200 py-4 pl-14 pr-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-bold font-jakarta text-slate-900 transition-all"
                                     placeholder="0"
                                 />
-                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold font-jakarta text-sm">
                                     RM
                                 </span>
                             </div>
@@ -172,7 +172,7 @@ const CategoryBudgetManager: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => setEditing(null)}
-                                className="w-full bg-white text-slate-600 font-medium py-4 rounded-full border border-slate-200 hover:bg-slate-50 transition-all"
+                                className="w-full bg-white text-slate-600 font-bold font-jakarta py-4 rounded-full border border-slate-200 hover:bg-slate-50 transition-all"
                             >
                                 Cancel
                             </button>
@@ -183,7 +183,7 @@ const CategoryBudgetManager: React.FC = () => {
                                     className="w-full text-red-500 font-medium py-4 rounded-full hover:bg-red-50 transition-all flex items-center justify-center space-x-2"
                                 >
                                     <Trash2 className="w-5 h-5" />
-                                    <span>Delete Category</span>
+                                    <span className="font-bold font-jakarta">Delete Category</span>
                                 </button>
                             )}
                         </div>
@@ -201,8 +201,8 @@ const CategoryBudgetManager: React.FC = () => {
                     <Tag className="w-5 h-5" />
                 </div>
                 <div>
-                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Categories & Budgets</h2>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">Manage your spending categories</p>
+                    <h2 className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">Categories & Budgets</h2>
+                    <p className="text-[10px] text-slate-500 font-bold font-jakarta uppercase">Manage your spending categories</p>
                 </div>
             </div>
 
@@ -216,8 +216,8 @@ const CategoryBudgetManager: React.FC = () => {
                                     {getIconComponent(categoryIcons[cat] || DEFAULT_ICON, { className: 'w-5 h-5' })}
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-900 text-sm">{cat}</h3>
-                                    <p className="text-xs text-slate-400">
+                                    <h3 className="font-bold font-jakarta text-slate-900 text-sm">{cat}</h3>
+                                    <p className="text-xs text-slate-500 font-medium">
                                         {limit > 0 ? `RM ${limit} / month` : 'No budget set'}
                                     </p>
                                 </div>
@@ -246,10 +246,10 @@ const CategoryBudgetManager: React.FC = () => {
                                     />
                                 </div>
                                 <div className="flex justify-between text-[10px]">
-                                    <span className={`font-bold uppercase ${isOver ? 'text-red-500' : 'text-slate-400'}`}>
+                                    <span className={`font-bold font-jakarta uppercase ${isOver ? 'text-red-500' : 'text-slate-400'}`}>
                                         {isOver ? 'Exceeded' : `${percent.toFixed(0)}% used`}
                                     </span>
-                                    <span className="text-slate-400 font-medium">
+                                    <span className="text-slate-500 font-bold font-jakarta text-[10px]">
                                         RM {spent.toFixed(0)} spent
                                     </span>
                                 </div>
@@ -263,14 +263,14 @@ const CategoryBudgetManager: React.FC = () => {
             <div className="pt-4">
                 <button
                     onClick={handleCreate}
-                    className="w-full bg-slate-900 text-white font-bold py-4 rounded-[20px] shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center space-x-2"
+                    className="w-full bg-slate-900 text-white font-bold font-jakarta py-4 rounded-[20px] shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center space-x-2"
                 >
                     <Plus className="w-5 h-5" />
                     <span>Add Category</span>
                 </button>
             </div>
 
-            <p className="text-[10px] text-slate-400 font-medium italic text-center px-4">
+            <p className="text-[10px] text-slate-500 font-medium italic text-center px-4">
                 * Deleting a category moves its expenses to "{SYSTEM_CATEGORY}".
             </p>
 

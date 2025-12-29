@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
                     <h1 className="font-serif text-3xl text-slate-900">
                         {greeting},<br />User
                     </h1>
-                    <button className="text-sm border border-slate-200 px-3 py-1 rounded-full text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+                    <button className="text-sm font-jakarta font-medium border border-slate-200 px-3 py-1 rounded-full text-slate-900 bg-white hover:bg-slate-50 transition-colors">
                         Sign Out
                     </button>
                 </div>
@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
                             <p className="font-semibold text-slate-900">
                                 Budget Alert: {exceededBudgets[0].cat} Exceeded
                             </p>
-                            <p className="text-sm text-slate-700">
+                            <p className="text-sm text-slate-500">
                                 You've spent RM {exceededBudgets[0].spent.toFixed(0)} this month ({exceededBudgets[0].percent}% of your RM {exceededBudgets[0].limit.toFixed(0)} limit).
                             </p>
                         </div>
@@ -87,15 +87,15 @@ const Dashboard: React.FC = () => {
             <div className="mb-4 grid grid-cols-3 gap-3">
                 <div className="bg-white p-4 rounded-[20px] text-center shadow-sm">
                     <p className="text-xs text-slate-500">Today</p>
-                    <p className="font-semibold text-lg whitespace-nowrap">RM {totalSpentToday.toFixed(0)}</p>
+                    <p className="font-bold font-jakarta text-lg whitespace-nowrap text-slate-900">RM {totalSpentToday.toFixed(0)}</p>
                 </div>
                 <div className="bg-white p-4 rounded-[20px] text-center shadow-sm">
                     <p className="text-xs text-slate-500">This Month</p>
-                    <p className="font-semibold text-lg whitespace-nowrap">RM {totalSpentMonth.toFixed(0)}</p>
+                    <p className="font-bold font-jakarta text-lg whitespace-nowrap text-slate-900">RM {totalSpentMonth.toFixed(0)}</p>
                 </div>
                 <div className="bg-white p-4 rounded-[20px] text-center shadow-sm">
                     <p className="text-xs text-slate-500">Balance</p>
-                    <p className={`font-semibold text-lg whitespace-nowrap ${balance < 0 ? 'text-red-500' : ''}`}>
+                    <p className={`font-bold font-jakarta text-lg whitespace-nowrap ${balance < 0 ? 'text-red-500' : 'text-slate-900'}`}>
                         RM {balance.toFixed(0)}
                     </p>
                 </div>
@@ -109,7 +109,7 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div>
                         <p className="font-semibold text-slate-900">AI Financial Insight</p>
-                        <p className="text-sm text-slate-700">
+                        <p className="text-sm text-slate-500">
                             {todayExpenses.length === 0
                                 ? "No expenses recorded today. Start tracking to get personalized insights!"
                                 : `Based on your spending this week, you're on track. You've recorded ${todayExpenses.length} expense${todayExpenses.length > 1 ? 's' : ''} today totaling RM ${totalSpentToday.toFixed(0)}. Keep it up!`
@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
             {/* Recent Expenses */}
             <div className="pb-8">
                 <div className="flex justify-between items-center mb-3">
-                    <h2 className="font-semibold text-lg text-slate-900">Recent Expenses</h2>
+                    <h2 className="font-serif text-lg text-slate-900">Recent Expenses</h2>
                     <button
                         onClick={() => navigate('/history')}
                         className="text-xs text-slate-500 hover:text-slate-700"

@@ -102,7 +102,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                     <PlusCircle className="w-8 h-8 text-blue-500 opacity-20" />
                 </div>
                 <h2 className="text-3xl font-serif text-slate-900">{isEditing ? 'Edit Record' : 'Add Expense'}</h2>
-                <p className="text-sm text-slate-400 font-medium px-4">
+                <p className="text-sm text-slate-500 font-medium px-4">
                     Log your spending details with category, amount, and more.
                 </p>
             </div>
@@ -110,22 +110,22 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
             <div className="space-y-8">
                 {/* Merchant Name */}
                 <div className="space-y-4">
-                    <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Description</label>
+                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Description</label>
                     <input
                         type="text"
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="What did you buy?"
-                        className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-center font-bold text-slate-900 transition-all placeholder:text-slate-300"
+                        className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-center font-bold font-jakarta text-slate-900 transition-all placeholder:text-slate-400"
                     />
                 </div>
 
                 {/* Amount Section (The big one) */}
                 <div className="space-y-4">
-                    <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Cost</label>
+                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Cost</label>
                     <div className="relative max-w-[240px] mx-auto">
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">RM</span>
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold font-jakarta text-slate-400">RM</span>
                         <input
                             type="number"
                             step="0.01"
@@ -133,7 +133,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0"
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 pl-14 pr-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-2xl font-black text-slate-900 text-center transition-all"
+                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 pl-14 pr-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-2xl font-bold font-jakarta text-slate-900 text-center transition-all"
                         />
                     </div>
                 </div>
@@ -142,11 +142,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                 <div className="grid grid-cols-1 gap-6">
                     {/* Category Selection */}
                     <div className="space-y-4">
-                        <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Category</label>
+                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Category</label>
                         <select
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-slate-900 appearance-none text-center transition-all"
+                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold font-jakarta text-slate-900 appearance-none text-center transition-all"
                         >
                             {categories.map((c) => (
                                 <option key={c} value={c}>{c}</option>
@@ -156,11 +156,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
 
                     {/* Payment Method Selection */}
                     <div className="space-y-4">
-                        <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Payment Method</label>
+                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Payment Method</label>
                         <select
                             value={paymentMethod}
                             onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-slate-900 appearance-none text-center transition-all"
+                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold font-jakarta text-slate-900 appearance-none text-center transition-all"
                         >
                             {['Cash', 'Debit Card', 'Credit Card', 'Bank Transfer'].map((method) => (
                                 <option key={method} value={method}>{method}</option>
@@ -170,19 +170,19 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
 
                     {/* Date Selection */}
                     <div className="space-y-4">
-                        <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Date</label>
+                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Date</label>
                         <input
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold text-slate-900 text-center transition-all"
+                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold font-jakarta text-slate-900 text-center transition-all"
                         />
                     </div>
                 </div>
 
                 {/* Receipt Photo Section */}
                 <div className="space-y-4">
-                    <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Receipt Photo</label>
+                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Receipt Photo</label>
                     {receiptPreview ? (
                         <div className="relative group rounded-[28px] overflow-hidden border border-slate-100 aspect-video bg-white shadow-sm flex items-center justify-center">
                             {receiptBlob?.type === 'application/pdf' ? (
@@ -209,7 +209,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                             <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors">
                                 <Upload className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
                             </div>
-                            <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Upload Receipt</span>
+                            <span className="text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Upload Receipt</span>
                             <span className="text-[10px] text-slate-400 font-medium mt-1">PDF or Images</span>
                             <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} />
                         </label>
@@ -218,13 +218,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
 
                 {/* Notes Input */}
                 <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <label className="block text-center text-xs font-black text-slate-900 uppercase tracking-widest">Notes</label>
+                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Notes</label>
                     <textarea
                         id="notes-area"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Add your notes here..."
-                        className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium text-slate-600 transition-all"
+                        className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta text-slate-600 transition-all"
                         rows={3}
                     />
                 </div>
@@ -234,7 +234,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
             <div className="pt-6">
                 <button
                     type="submit"
-                    className="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-5 rounded-full shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all"
+                    className="w-full bg-slate-900 text-white font-bold font-jakarta uppercase tracking-widest py-5 rounded-full shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all"
                 >
                     {isEditing ? 'Update Record' : 'Save Expense'}
                 </button>

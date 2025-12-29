@@ -47,7 +47,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
         return (
             <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
                 <ShoppingBag className="w-10 h-10 text-slate-200 mx-auto mb-2" />
-                <p className="text-slate-400 text-sm italic font-serif">Empty logs.</p>
+                <p className="text-slate-500 text-sm italic font-serif">Empty logs.</p>
             </div>
         );
     }
