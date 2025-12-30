@@ -3,6 +3,10 @@ import { useFinanceStore, SYSTEM_CATEGORY, type Expense } from '../store/useFina
 import { PlusCircle, Upload, FileText, Trash2 } from 'lucide-react';
 import { compressImage, blobToDataURL } from '../services/imageService';
 import { toast } from 'sonner';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
+import { Select } from './ui/Select';
+import { TextArea } from './ui/TextArea';
 
 interface ExpenseFormProps {
     initialData?: Partial<Expense>;
@@ -109,75 +113,63 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
 
             <div className="space-y-8">
                 {/* Merchant Name */}
-                <div className="space-y-4">
-                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Description</label>
-                    <input
-                        type="text"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="What did you buy?"
-                        className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-center font-bold font-jakarta text-slate-900 transition-all placeholder:text-slate-400"
-                    />
-                </div>
+                <Input
+                    label="Description"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="What did you buy?"
+                    centerText
+                    required
+                />
 
                 {/* Amount Section (The big one) */}
-                <div className="space-y-4">
-                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Cost</label>
-                    <div className="relative max-w-[240px] mx-auto">
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 font-bold font-jakarta text-slate-400">RM</span>
-                        <input
-                            type="number"
-                            step="0.01"
-                            required
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="0"
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 pl-14 pr-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-2xl font-bold font-jakarta text-slate-900 text-center transition-all"
-                        />
-                    </div>
-                </div>
+                <Input
+                    label="Cost"
+                    type="number"
+                    step="0.01"
+                    required
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0"
+                    centerText
+                    className="text-2xl"
+                    leftIcon={<span className="font-bold font-jakarta">RM</span>}
+                />
 
                 {/* Grid controls */}
                 <div className="grid grid-cols-1 gap-6">
                     {/* Category Selection */}
-                    <div className="space-y-4">
-                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Category</label>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold font-jakarta text-slate-900 appearance-none text-center transition-all"
-                        >
-                            {categories.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        label="Category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        centerText
+                    >
+                        {categories.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </Select>
 
                     {/* Payment Method Selection */}
-                    <div className="space-y-4">
-                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Payment Method</label>
-                        <select
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold font-jakarta text-slate-900 appearance-none text-center transition-all"
-                        >
-                            {['Cash', 'Debit Card', 'Credit Card', 'Bank Transfer'].map((method) => (
-                                <option key={method} value={method}>{method}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        label="Payment Method"
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        centerText
+                    >
+                        {['Cash', 'Debit Card', 'Credit Card', 'Bank Transfer'].map((method) => (
+                            <option key={method} value={method}>{method}</option>
+                        ))}
+                    </Select>
 
                     {/* Date Selection */}
-                    <div className="space-y-4">
-                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Date</label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 font-bold font-jakarta text-slate-900 text-center transition-all"
-                        />
-                    </div>
+                    <Input
+                        label="Date"
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        centerText
+                    />
                 </div>
 
                 {/* Receipt Photo Section */}
@@ -217,14 +209,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                 </div>
 
                 {/* Notes Input */}
-                <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Notes</label>
-                    <textarea
+                <div className="pt-4 border-t border-slate-100">
+                    <TextArea
+                        label="Notes"
                         id="notes-area"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Add your notes here..."
-                        className="w-full bg-white rounded-[20px] border border-slate-100 shadow-sm py-5 px-6 outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta text-slate-600 transition-all"
                         rows={3}
                     />
                 </div>
@@ -232,12 +223,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
 
             {/* Form Actions */}
             <div className="pt-6">
-                <button
-                    type="submit"
-                    className="w-full bg-slate-900 text-white font-bold font-jakarta uppercase tracking-widest py-5 rounded-full shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all"
-                >
+                <Button type="submit" fullWidth>
                     {isEditing ? 'Update Record' : 'Save Expense'}
-                </button>
+                </Button>
             </div>
         </form>
     );

@@ -2,6 +2,7 @@ import { useFinanceStore } from '../store/useFinanceStore';
 import { Bell, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ExpenseCard from './ExpenseCard';
+import { Button } from './ui/Button';
 
 const Dashboard: React.FC = () => {
     const { expenses, budgets, categories } = useFinanceStore();
@@ -58,9 +59,9 @@ const Dashboard: React.FC = () => {
                     <h1 className="font-serif text-3xl text-slate-900">
                         {greeting},<br />User
                     </h1>
-                    <button className="text-sm font-jakarta font-medium border border-slate-200 px-3 py-1 rounded-full text-slate-900 bg-white hover:bg-slate-50 transition-colors">
+                    <Button variant="secondary" size="sm">
                         Sign Out
-                    </button>
+                    </Button>
                 </div>
             </div>
 

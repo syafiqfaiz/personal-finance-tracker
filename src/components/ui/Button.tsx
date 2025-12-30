@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
     isLoading?: boolean;
     fullWidth?: boolean;
+    size?: 'sm' | 'md' | 'lg';
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -13,10 +14,17 @@ export const Button: React.FC<ButtonProps> = ({
     isLoading = false,
     fullWidth = false,
     className = '',
+    size = 'md',
     disabled,
     ...props
 }) => {
-    const baseStyles = "font-bold font-jakarta uppercase tracking-widest py-4 px-6 rounded-full transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-sm";
+    const baseStyles = "font-bold font-jakarta uppercase tracking-widest rounded-full transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed";
+
+    const sizes = {
+        sm: "py-2 px-4 text-xs",
+        md: "py-4 px-6 text-sm",
+        lg: "py-5 px-8 text-base"
+    };
 
     const variants = {
         primary: "bg-slate-900 text-white shadow-lg shadow-slate-200 hover:bg-slate-800 active:scale-95",
@@ -27,7 +35,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     return (
         <button
-            className={`${baseStyles} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}
+            className={`${baseStyles} ${sizes[size]} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}
             disabled={disabled || isLoading}
             {...props}
         >
