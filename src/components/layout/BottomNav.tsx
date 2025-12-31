@@ -16,7 +16,7 @@ const BottomNav: React.FC = () => {
                 </NavLink>
 
                 <NavLink
-                    to="/history"
+                    to="/expenses"
                     className={({ isActive }) =>
                         `flex flex-col items-center justify-center flex-1 py-2 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`
                     }

@@ -28,7 +28,7 @@ const ExpenseDetail: React.FC = () => {
         return (
             <div className="text-center py-20">
                 <p className="text-gray-500">Expense not found.</p>
-                <button onClick={() => navigate('/history')} className="text-blue-600 font-bold mt-4">Go Back</button>
+                <button onClick={() => navigate('/expenses')} className="text-blue-600 font-bold mt-4">Go Back</button>
             </div>
         );
     }
@@ -36,18 +36,18 @@ const ExpenseDetail: React.FC = () => {
     const handleDelete = async () => {
         await deleteExpense(expense.id);
         toast.success('Expense deleted');
-        navigate('/history');
+        navigate('/expenses');
     };
 
     return (
         <div className="space-y-8 animate-slide-up pb-10">
             <header className="flex items-center justify-between pt-2">
-                <button onClick={() => navigate('/history')} className="p-2 -ml-2 text-slate-500 hover:text-blue-600 transition-colors bg-white rounded-full shadow-sm border border-slate-200">
+                <button onClick={() => navigate('/expenses')} className="p-2 -ml-2 text-slate-500 hover:text-blue-600 transition-colors bg-white rounded-full shadow-sm border border-slate-200">
                     <ChevronLeft className="w-5 h-5" />
                 </button>
                 <div className="flex space-x-3">
                     <Link
-                        to={`/history/${expense.id}/edit`}
+                        to={`/expenses/${expense.id}/edit`}
                         className="p-3 bg-white text-slate-900 rounded-full border border-slate-200 shadow-sm transition-all active:scale-95"
                     >
                         <Edit3 className="w-5 h-5" />

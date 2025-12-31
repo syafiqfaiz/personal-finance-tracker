@@ -15,7 +15,7 @@ const EditExpense: React.FC = () => {
         return (
             <div className="text-center py-20">
                 <p className="text-slate-500">Expense not found.</p>
-                <button onClick={() => navigate('/history')} className="text-blue-600 font-bold mt-4">Go Back</button>
+                <button onClick={() => navigate('/expenses')} className="text-blue-600 font-bold mt-4">Go Back</button>
             </div>
         );
     }
@@ -23,7 +23,7 @@ const EditExpense: React.FC = () => {
     return (
         <div className="space-y-6">
             <header className="flex items-center space-x-2">
-                <button onClick={() => navigate(`/history/${id}`)} className="p-2 -ml-2 text-slate-500 hover:text-blue-600 transition-colors">
+                <button onClick={() => navigate(`/expenses/${id}`)} className="p-2 -ml-2 text-slate-500 hover:text-blue-600 transition-colors">
                     <ChevronLeft className="w-6 h-6" />
                 </button>
                 <h1 className="text-3xl font-serif text-slate-900">Edit Transaction</h1>
@@ -31,7 +31,7 @@ const EditExpense: React.FC = () => {
 
             <ExpenseForm
                 initialData={expense}
-                onSuccess={() => navigate(`/history/${id}`)}
+                onSuccess={() => navigate(`/expenses/${id}`)}
             />
         </div>
     );

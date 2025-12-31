@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-between items-center mb-3">
                     <h2 className="font-serif text-lg text-slate-900">Recent Expenses</h2>
                     <button
-                        onClick={() => navigate('/history')}
+                        onClick={() => navigate('/expenses')}
                         className="text-xs text-slate-500 hover:text-slate-700"
                     >
                         See all
@@ -142,7 +142,7 @@ const Dashboard: React.FC = () => {
                             <ExpenseCard
                                 key={expense.id}
                                 expense={expense}
-                                onClick={() => navigate(`/history/${expense.id}`)}
+                                onClick={() => navigate(`/expenses/${expense.id}`)}
                             />
                         ))
                     )}

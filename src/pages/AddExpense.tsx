@@ -12,7 +12,7 @@ const AddExpense: React.FC = () => {
     const [mode, setMode] = useState<'ai' | 'manual'>(geminiKey ? 'ai' : 'manual');
 
     const handleSuccess = () => {
-        navigate('/history');
+        navigate('/expenses');
     };
 
     return (

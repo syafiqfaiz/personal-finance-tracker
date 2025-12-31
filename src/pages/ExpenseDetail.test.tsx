@@ -110,7 +110,7 @@ describe('ExpenseDetail Page', () => {
         await waitFor(() => {
             expect(mockDeleteExpense).toHaveBeenCalledWith('123');
             expect(toast.success).toHaveBeenCalledWith('Expense deleted');
-            expect(mockNavigate).toHaveBeenCalledWith('/history');
+            expect(mockNavigate).toHaveBeenCalledWith('/expenses');
         });
     });
 
@@ -289,7 +289,7 @@ describe('ExpenseDetail Page', () => {
         // Wait for state to settle to avoid ACT warnings
         await screen.findByAltText('Receipt');
 
-        const editLink = screen.getAllByRole('link').find(l => l.getAttribute('href') === '/history/123/edit');
+        const editLink = screen.getAllByRole('link').find(l => l.getAttribute('href') === '/expenses/123/edit');
         expect(editLink).toBeInTheDocument();
     });
 });

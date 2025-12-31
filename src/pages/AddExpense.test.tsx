@@ -97,7 +97,7 @@ describe('AddExpense Page', () => {
         const successBtn = screen.getByText('Trigger Success');
         fireEvent.click(successBtn);
 
-        expect(mockNavigate).toHaveBeenCalledWith('/history');
+        expect(mockNavigate).toHaveBeenCalledWith('/expenses');
     });
 
     it('navigates to history on success in Manual mode', () => {
@@ -112,6 +112,6 @@ describe('AddExpense Page', () => {
         const successBtn = screen.getByText('Trigger Success');
         fireEvent.click(successBtn);
 
-        expect(mockNavigate).toHaveBeenCalledWith('/history');
+        expect(mockNavigate).toHaveBeenCalledWith('/expenses');
     });
 });

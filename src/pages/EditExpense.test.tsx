@@ -60,7 +60,7 @@ describe('EditExpense Page', () => {
         const backButton = screen.getAllByRole('button')[0]; // ChevronLeft button
         fireEvent.click(backButton);
 
-        expect(mockNavigate).toHaveBeenCalledWith('/history/123');
+        expect(mockNavigate).toHaveBeenCalledWith('/expenses/123');
     });
 
     it('shows not found state for invalid id', () => {
@@ -72,7 +72,7 @@ describe('EditExpense Page', () => {
 
         const goBackButton = screen.getByText('Go Back');
         fireEvent.click(goBackButton);
-        expect(mockNavigate).toHaveBeenCalledWith('/history');
+        expect(mockNavigate).toHaveBeenCalledWith('/expenses');
     });
 
     it('navigates to detail on success', () => {
@@ -82,6 +82,6 @@ describe('EditExpense Page', () => {
         const submitButton = screen.getByText('Submit');
         fireEvent.click(submitButton);
 
-        expect(mockNavigate).toHaveBeenCalledWith('/history/123');
+        expect(mockNavigate).toHaveBeenCalledWith('/expenses/123');
     });
 });

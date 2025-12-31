@@ -62,7 +62,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
                             <ExpenseCard
                                 key={expense.id}
                                 expense={expense}
-                                onClick={() => navigate(`/history/${expense.id}`)}
+                                onClick={() => navigate(`/expenses/${expense.id}`)}
                                 onDelete={(e) => {
                                     e.stopPropagation();
                                     setDeleteConfirmation(expense.id);

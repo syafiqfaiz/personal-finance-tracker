@@ -36,9 +36,9 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/history/:id" element={<ExpenseDetail />} />
-          <Route path="/history/:id/edit" element={<EditExpense />} />
+          <Route path="/expenses" element={<History />} />
+          <Route path="/expenses/:id" element={<ExpenseDetail />} />
+          <Route path="/expenses/:id/edit" element={<EditExpense />} />
           <Route path="/add" element={<AddExpense />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/settings" element={<SettingsPage />} />
