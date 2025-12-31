@@ -67,7 +67,7 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => handleChange('name', e.target.value)}
-                                className="flex-1 bg-white rounded-2xl border border-slate-200 py-4 px-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-bold font-jakarta text-slate-900 transition-all"
+                                className="flex-1 bg-white rounded-2xl border border-slate-200 py-3 px-4 sm:py-4 sm:px-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base sm:text-lg font-bold font-jakarta text-slate-900 transition-all"
                                 placeholder="Category name"
                             />
                         </div>
@@ -82,7 +82,7 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
                                 type="number"
                                 value={formData.limit}
                                 onChange={(e) => handleChange('limit', e.target.value)}
-                                className="w-full bg-white rounded-2xl border border-slate-200 py-4 pl-14 pr-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-bold font-jakarta text-slate-900 transition-all"
+                                className="w-full bg-white rounded-2xl border border-slate-200 py-3 pl-12 pr-4 sm:py-4 sm:pl-14 sm:pr-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base sm:text-lg font-bold font-jakarta text-slate-900 transition-all"
                                 placeholder="0"
                             />
                             <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold font-jakarta text-sm">
@@ -95,13 +95,13 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
                     <div className="pt-4 space-y-3">
                         <button
                             onClick={() => onSave(formData)}
-                            className="w-full bg-slate-900 text-white font-bold py-4 rounded-full shadow-lg hover:bg-slate-800 transition-all"
+                            className="w-full bg-slate-900 text-white font-bold py-3 sm:py-4 rounded-full shadow-lg hover:bg-slate-800 transition-all"
                         >
                             {formData.originalName ? 'Save Changes' : 'Create Category'}
                         </button>
                         <button
                             onClick={onCancel}
-                            className="w-full bg-white text-slate-600 font-bold font-jakarta py-4 rounded-full border border-slate-200 hover:bg-slate-50 transition-all"
+                            className="w-full bg-white text-slate-600 font-bold font-jakarta py-3 sm:py-4 rounded-full border border-slate-200 hover:bg-slate-50 transition-all"
                         >
                             Cancel
                         </button>
@@ -109,7 +109,7 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
                         {formData.originalName && (
                             <button
                                 onClick={() => setShowDeleteConfirm(true)}
-                                className="w-full text-red-500 font-medium py-4 rounded-full hover:bg-red-50 transition-all flex items-center justify-center space-x-2"
+                                className="w-full text-red-500 font-medium py-3 sm:py-4 rounded-full hover:bg-red-50 transition-all flex items-center justify-center space-x-2"
                             >
                                 <Trash2 className="w-5 h-5" />
                                 <span className="font-bold font-jakarta">Delete Category</span>
