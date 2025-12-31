@@ -205,7 +205,7 @@ const Settings: React.FC = () => {
 
             <footer className="text-center space-y-1 py-4">
                 <p className="text-[10px] font-bold font-jakarta text-slate-400 uppercase tracking-widest flex items-center justify-center gap-1">
-                    <ShieldCheck className="w-3 h-3" /> Encrypted Local Storage
+                    <ShieldCheck className="w-3 h-3" /> Your data stays on your device
                 </p>
             </footer>
         </div>

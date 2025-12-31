@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Toaster } from 'sonner'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import History from './pages/History'
@@ -11,13 +11,28 @@ import Budgets from './pages/Budgets'
 import SettingsPage from './pages/SettingsPage'
 import { useFinanceStore } from './store/useFinanceStore'
 import { useSettingsStore } from './store/useSettingsStore'
+import { AnalyticsService } from './services/analytics'
 import './App.css'
+
+// Route Tracker Component
+const RouteTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    AnalyticsService.logPageView(location.pathname + location.search);
+  }, [location]);
+
+  return null;
+};
 
 function App() {
   const { loadAppData, isLoading } = useFinanceStore();
   const { loadSettings } = useSettingsStore();
 
   useEffect(() => {
+    // Initialize Analytics
+    AnalyticsService.init();
+
     loadAppData();
     loadSettings();
   }, [loadAppData, loadSettings]);
@@ -32,6 +47,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <RouteTracker />
       <Toaster position="top-center" richColors />
       <Routes>
         <Route element={<Layout />}>

@@ -18,7 +18,17 @@ A private, offline-first personal finance tracker built as a React PWA. This app
 
 ## ⚙️ Setup & Configuration
 
-### 1. Installation
+### 1. Environment Variables
+This app uses **analytics and bug tracking** which are **disabled by default in development** (`npm run dev`).
+
+To enable them in production, set the following variables in your deployment platform (e.g., Cloudflare Pages):
+
+| Variable | Description |
+| :--- | :--- |
+| `VITE_GA_ID` | Google Analytics Measurement ID (e.g., `G-XXXXX`). |
+| `VITE_SENTRY_DSN` | Sentry DSN URL for error tracking. |
+
+### 2. Installation
 ```bash
 npm install
 npm run dev
