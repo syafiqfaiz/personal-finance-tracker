@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import IconPicker from '../IconPicker';
 import ConfirmDialog from '../ConfirmDialog';
@@ -35,7 +36,7 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 bg-slate-50 z-50 animate-slide-up">
             <div className="max-w-md mx-auto px-6 py-6">
                 {/* Header */}
@@ -128,7 +129,8 @@ const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({
                 }}
                 onCancel={() => setShowDeleteConfirm(false)}
             />
-        </div>
+        </div>,
+        document.body
     );
 };
 

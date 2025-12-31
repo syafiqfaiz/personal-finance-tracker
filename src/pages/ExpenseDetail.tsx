@@ -2,7 +2,9 @@ import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { ChevronLeft, Edit3, Trash2, Calendar, CreditCard, FileText, Maximize2, X } from 'lucide-react';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { blobToDataURL } from '../services/imageService';
+import { toast } from 'sonner';
 
 const ExpenseDetail: React.FC = () => {
     const { id } = useParams();
@@ -12,6 +14,7 @@ const ExpenseDetail: React.FC = () => {
     const expense = expenses.find((e) => e.id === id);
     const [receiptUrl, setReceiptUrl] = React.useState<string | null>(null);
     const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
 
     React.useEffect(() => {
         if (expense?.localReceipt) {
@@ -31,10 +34,9 @@ const ExpenseDetail: React.FC = () => {
     }
 
     const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this expense?')) {
-            await deleteExpense(expense.id);
-            navigate('/history');
-        }
+        await deleteExpense(expense.id);
+        toast.success('Expense deleted');
+        navigate('/history');
     };
 
     return (
@@ -51,8 +53,9 @@ const ExpenseDetail: React.FC = () => {
                         <Edit3 className="w-5 h-5" />
                     </Link>
                     <button
-                        onClick={handleDelete}
+                        onClick={() => setShowDeleteConfirm(true)}
                         className="p-3 bg-white text-red-500 rounded-full border border-slate-200 shadow-sm transition-all active:scale-95"
+                        aria-label="Delete Expense"
                     >
                         <Trash2 className="w-5 h-5" />
                     </button>
@@ -186,6 +189,14 @@ const ExpenseDetail: React.FC = () => {
                     />
                 </div>
             )}
+            {/* Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={showDeleteConfirm}
+                title="Delete Expense?"
+                message="Are you sure you want to delete this expense? This action cannot be undone."
+                onConfirm={handleDelete}
+                onCancel={() => setShowDeleteConfirm(false)}
+            />
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { toast } from 'sonner';
 import ExpenseDetail from './ExpenseDetail';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { useParams, useNavigate, MemoryRouter } from 'react-router-dom';
@@ -17,6 +18,11 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('../store/useFinanceStore');
 vi.mock('../services/imageService');
+vi.mock('sonner', () => ({
+    toast: {
+        success: vi.fn()
+    }
+}));
 
 describe('ExpenseDetail Page', () => {
     const mockNavigate = vi.fn();
@@ -83,30 +89,29 @@ describe('ExpenseDetail Page', () => {
         // Trash2 is an SVG. We can look for containing button.
         // Or finding by known class or role.
         // Let's use custom matcher or just get all buttons and check children or position.
-
         // Safer approach: Get the container of the Trash2 icon
         // But since we mock Lucide icons slightly differently or they render as SVGs...
         // Let's assume Lucide components render SVGs.
         // Best way: add data-testid to the source if needed, OR index safely.
 
-        const allButtons = screen.getAllByRole('button');
-        // We expect Back and Delete in header + View Receipt in body = 3 buttons.
-        // Delete should be the second button in the header group, or index 1 overall.
+        const deleteButton = screen.getByRole('button', { name: /delete expense/i });
+        await fireEvent.click(deleteButton);
 
-        // Let's try index 1.
-        await fireEvent.click(allButtons[1]);
+        // Mock window.confirm is NO LONGER USED.
+        // Instead, we expect the ConfirmDialog to appear.
+        expect(screen.getByText('Delete Expense?')).toBeInTheDocument();
 
-        expect(window.confirm).toHaveBeenCalled();
-        // The handler is async:
-        // handleDelete = async () => { ... await deleteExpense(...); navigate(...) }
-        // We need to wait for the promise to resolve.
-        // Since deleteExpense mock is effectively sync (returns undefined immediately),
-        // the microtask queue needs to flush.
+        // Find and click the confirm button in the dialog
+        // The confirm button in ConfirmDialog has text "Yes, Delete" by default
+        const confirmButton = screen.getByText('Yes, Delete');
+        await fireEvent.click(confirmButton);
 
-        await vi.waitUntil(() => mockNavigate.mock.calls.length > 0);
-
-        expect(mockDeleteExpense).toHaveBeenCalledWith('123');
-        expect(mockNavigate).toHaveBeenCalledWith('/history');
+        // Wait for navigation
+        await waitFor(() => {
+            expect(mockDeleteExpense).toHaveBeenCalledWith('123');
+            expect(toast.success).toHaveBeenCalledWith('Expense deleted');
+            expect(mockNavigate).toHaveBeenCalledWith('/history');
+        });
     });
 
     it('cancels deletion when user declines confirmation', async () => {
@@ -121,11 +126,18 @@ describe('ExpenseDetail Page', () => {
 
         await screen.findByAltText('Receipt');
 
-        const allButtons = screen.getAllByRole('button');
-        const deleteButton = allButtons[1]; // Assuming same index as previous test
+        const deleteButton = screen.getByRole('button', { name: /delete expense/i });
         await fireEvent.click(deleteButton);
 
-        expect(window.confirm).toHaveBeenCalled();
+        // Expect dialog
+        expect(screen.getByText('Delete Expense?')).toBeInTheDocument();
+
+        // Click Cancel
+        const cancelButton = screen.getByText('Cancel');
+        await fireEvent.click(cancelButton);
+
+        // Verify dialog closed and delete NOT called
+        expect(screen.queryByText('Delete Expense?')).not.toBeInTheDocument();
         expect(mockDeleteExpense).not.toHaveBeenCalled();
         expect(mockNavigate).not.toHaveBeenCalled();
     });
