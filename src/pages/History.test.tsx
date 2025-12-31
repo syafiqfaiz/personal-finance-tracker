@@ -10,7 +10,7 @@ vi.mock('react-router-dom', () => ({
     useSearchParams: vi.fn()
 }));
 vi.mock('../components/ExpenseList', () => ({
-    default: ({ filterCategory, searchQuery, filterMonth, filterYear }: any) => (
+    default: ({ filterCategory, searchQuery, filterMonth, filterYear }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
         <div data-testid="expense-list">
             List: {filterCategory || 'All'} - {searchQuery} - {filterMonth} - {filterYear}
         </div>
@@ -20,14 +20,14 @@ vi.mock('../components/ExpenseList', () => ({
 describe('History Page', () => {
     const mockCategories = ['Food', 'Transport'];
     let mockSearchParams: URLSearchParams;
-    let mockSetSearchParams: any;
+    let mockSetSearchParams: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     beforeEach(() => {
         vi.clearAllMocks();
         mockSearchParams = new URLSearchParams();
         mockSetSearchParams = vi.fn();
-        (useSearchParams as any).mockReturnValue([mockSearchParams, mockSetSearchParams]);
-        (useFinanceStore as any).mockReturnValue({
+        (useSearchParams as any).mockReturnValue([mockSearchParams, mockSetSearchParams]); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useFinanceStore as any).mockReturnValue({ // eslint-disable-line @typescript-eslint/no-explicit-any
             categories: mockCategories
         });
     });

@@ -29,7 +29,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
             const result = await extractExpenseWithAI(geminiKey, input, categories);
             setSuggestion(result);
             setInput('');
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(err.message || 'AI failed to process. Check your API key.');
         } finally {
             setIsProcessing(false);

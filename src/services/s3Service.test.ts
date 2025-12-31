@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 describe('s3Service', () => {
-    let s3Service: any;
+    let s3Service: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    let PutObjectCommandMock: any;
-    let mockSend: any;
-    let db: any;
+    let PutObjectCommandMock: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let mockSend: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let db: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const config = {
         bucket: 'test-bucket',

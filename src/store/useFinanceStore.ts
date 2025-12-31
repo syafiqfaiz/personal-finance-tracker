@@ -95,7 +95,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         const settingsMap = settingsArray.reduce((acc, curr) => {
             acc[curr.key] = curr.value;
             return acc;
-        }, {} as Record<string, any>);
+        }, {} as Record<string, string>);
 
         const savedCategories = settingsMap['categories']
             ? JSON.parse(settingsMap['categories'])

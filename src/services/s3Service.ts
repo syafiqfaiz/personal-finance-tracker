@@ -43,7 +43,8 @@ export const performFullBackup = async (config: S3Config) => {
         version: 1,
         timestamp: new Date().toISOString(),
         data: {
-            expenses: expenses.map(({ localReceipt, ...rest }) => rest), // Strip blobs
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            expenses: expenses.map(({ localReceipt: _localReceipt, ...rest }) => rest), // Strip blobs
             budgets,
             categories: categories?.value ? JSON.parse(categories.value) : [],
         },

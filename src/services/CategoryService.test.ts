@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 describe('CategoryService', () => {
-    let CategoryService: any;
-    let db: any;
-    let mockCollection: any;
+    let CategoryService: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let db: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let mockCollection: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     beforeEach(async () => {
         vi.resetModules();

@@ -1,20 +1,19 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-declare var global: any;
-
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+const ResizeObserverMock = vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
 }));
+vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 
 // Mock IndexedDB
-const indexedDB = {
+const indexedDBMock = {
     open: vi.fn(),
 };
-global.indexedDB = indexedDB as any;
+vi.stubGlobal('indexedDB', indexedDBMock);
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -66,7 +65,8 @@ vi.mock('@google/generative-ai', () => {
 
 // Mock DB module completely to avoid actual IndexedDB calls
 // Mock DB implementation with in-memory storage for better "integration-like" testing
-const createMockTable = (_name: string) => {
+const createMockTable = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let storage: any[] = [];
     return {
         toArray: vi.fn(() => Promise.resolve([...storage])),
@@ -116,9 +116,9 @@ const createMockTable = (_name: string) => {
     };
 };
 
-const mockExpenses = createMockTable('expenses');
-const mockBudgets = createMockTable('budgets');
-const mockSettings = createMockTable('settings');
+const mockExpenses = createMockTable();
+const mockBudgets = createMockTable();
+const mockSettings = createMockTable();
 
 vi.mock('../db/db', () => ({
     db: {

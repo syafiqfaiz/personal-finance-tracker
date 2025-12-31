@@ -34,16 +34,16 @@ describe('ExpenseDetail Page', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (useNavigate as any).mockReturnValue(mockNavigate);
-        (useFinanceStore as any).mockReturnValue({
+        (useNavigate as any).mockReturnValue(mockNavigate); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useFinanceStore as any).mockReturnValue({ // eslint-disable-line @typescript-eslint/no-explicit-any
             expenses: [mockExpense],
             deleteExpense: mockDeleteExpense
         });
-        (imageService.blobToDataURL as any).mockResolvedValue('data:image/jpeg;base64,test');
+        (imageService.blobToDataURL as any).mockResolvedValue('data:image/jpeg;base64,test'); // eslint-disable-line @typescript-eslint/no-explicit-any
     });
 
     it('renders expense details correctly', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         render(
             <MemoryRouter>
@@ -67,7 +67,7 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('handles deletion interaction', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         vi.spyOn(window, 'confirm').mockReturnValue(true);
 
         render(
@@ -110,7 +110,7 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('cancels deletion when user declines confirmation', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         vi.spyOn(window, 'confirm').mockReturnValue(false);
 
         render(
@@ -131,10 +131,10 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('renders correctly without receipt', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         const expenseNoReceipt = { ...mockExpense, localReceipt: undefined };
 
-        (useFinanceStore as any).mockReturnValue({
+        (useFinanceStore as any).mockReturnValue({ // eslint-disable-line @typescript-eslint/no-explicit-any
             expenses: [expenseNoReceipt],
             deleteExpense: mockDeleteExpense
         });
@@ -151,7 +151,7 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('shows not found for invalid id', () => {
-        (useParams as any).mockReturnValue({ id: '999' });
+        (useParams as any).mockReturnValue({ id: '999' }); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         render(
             <MemoryRouter>
@@ -163,8 +163,8 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('renders PDF receipt correctly', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
-        (imageService.blobToDataURL as any).mockResolvedValue('data:application/pdf;base64,test');
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (imageService.blobToDataURL as any).mockResolvedValue('data:application/pdf;base64,test'); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         render(
             <MemoryRouter>
@@ -178,7 +178,7 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('opens and closes lightbox for image receipt', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         // Default mock is image
 
         render(
@@ -216,8 +216,8 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('opens PDF in new window', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
-        (imageService.blobToDataURL as any).mockResolvedValue('data:application/pdf;base64,test');
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (imageService.blobToDataURL as any).mockResolvedValue('data:application/pdf;base64,test'); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         const mockWrite = vi.fn();
         const mockOpen = vi.fn().mockReturnValue({ document: { write: mockWrite } });
@@ -242,8 +242,8 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('handles popup blocked when opening PDF', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
-        (imageService.blobToDataURL as any).mockResolvedValue('data:application/pdf;base64,test');
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (imageService.blobToDataURL as any).mockResolvedValue('data:application/pdf;base64,test'); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         const mockOpen = vi.fn().mockReturnValue(null); // Blocked
         vi.stubGlobal('open', mockOpen);
@@ -266,7 +266,7 @@ describe('ExpenseDetail Page', () => {
     });
 
     it('navigates to edit page', async () => {
-        (useParams as any).mockReturnValue({ id: '123' });
+        (useParams as any).mockReturnValue({ id: '123' }); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         render(
             <MemoryRouter>

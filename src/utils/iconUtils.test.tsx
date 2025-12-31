@@ -7,7 +7,7 @@ describe('iconUtils', () => {
     describe('getIconComponent', () => {
         it('returns correct component for known icon name', () => {
             const iconName = 'ShoppingBag';
-            const { container } = render(getIconComponent(iconName, { 'data-testid': 'icon' } as any));
+            const { container } = render(getIconComponent(iconName, { 'data-testid': 'icon' } as any)); // eslint-disable-line @typescript-eslint/no-explicit-any
 
             // Allow flexibility in how lucide renders, effectively checking it renders *something*
             // and that it corresponds to the expected component logic
@@ -15,7 +15,7 @@ describe('iconUtils', () => {
         });
 
         it('returns default icon (Tag) for unknown icon name', () => {
-            const { container } = render(getIconComponent('UnknownIconRandom', { 'data-testid': 'icon' } as any));
+            const { container } = render(getIconComponent('UnknownIconRandom', { 'data-testid': 'icon' } as any)); // eslint-disable-line @typescript-eslint/no-explicit-any
             expect(container.querySelector('svg')).toBeInTheDocument();
         });
 

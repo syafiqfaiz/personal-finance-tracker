@@ -13,7 +13,7 @@ vi.mock('../services/ExpenseService', () => ({
     ExpenseService: {
         addExpense: vi.fn(async (data) => data),
         updateExpense: vi.fn(async (_id, data) => data),
-        deleteExpense: vi.fn(async (_id) => { }),
+        deleteExpense: vi.fn(async () => { }),
     }
 }));
 
@@ -85,7 +85,7 @@ describe('Expense Actions', () => {
     it('adds expense and updates state', async () => {
         const newExpense = { amount: 100, category: 'Food', timestamp: new Date(), name: 'Test' };
 
-        await useFinanceStore.getState().addExpense(newExpense as any);
+        await useFinanceStore.getState().addExpense(newExpense as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         const { expenses } = useFinanceStore.getState();
         expect(expenses).toHaveLength(1);
@@ -94,7 +94,7 @@ describe('Expense Actions', () => {
 
     it('updates expense in place', async () => {
         const initial = { id: '1', amount: 100, timestamp: new Date() };
-        useFinanceStore.setState({ expenses: [initial] as any });
+        useFinanceStore.setState({ expenses: [initial] as any }); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         await useFinanceStore.getState().updateExpense('1', { amount: 200 });
 
@@ -103,7 +103,7 @@ describe('Expense Actions', () => {
     });
 
     it('deletes expense from state', async () => {
-        useFinanceStore.setState({ expenses: [{ id: '1' }] as any });
+        useFinanceStore.setState({ expenses: [{ id: '1' }] as any }); // eslint-disable-line @typescript-eslint/no-explicit-any
         await useFinanceStore.getState().deleteExpense('1');
         expect(useFinanceStore.getState().expenses).toHaveLength(0);
         expect(ExpenseService.deleteExpense).toHaveBeenCalledWith('1');
@@ -158,7 +158,7 @@ describe('Budget Actions', () => {
     it('updates existing budget', async () => {
         const existing = { id: '1', category: 'Food', limit: 100, monthPeriod: '2023-01' };
         await db.budgets.add(existing);
-        useFinanceStore.setState({ budgets: [existing] as any });
+        useFinanceStore.setState({ budgets: [existing] as any }); // eslint-disable-line @typescript-eslint/no-explicit-any
 
         await useFinanceStore.getState().upsertBudget({
             category: 'Food',

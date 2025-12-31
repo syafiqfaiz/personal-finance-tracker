@@ -49,8 +49,8 @@ describe('useSettingsStore', () => {
     describe('loadSettings', () => {
         it('loads settings from DB correctly', async () => {
             // Setup mock returns
-            (db.settings.get as any).mockImplementation((key: string) => {
-                const values: Record<string, any> = {
+            (db.settings.get as any).mockImplementation((key: string) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                const values: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
                     'gemini_key': { value: 'saved-gemini' },
                     's3_bucket': { value: 'saved-bucket' },
                     's3_region': { value: 'saved-region' },
@@ -74,7 +74,7 @@ describe('useSettingsStore', () => {
         });
 
         it('handles missing settings gracefully', async () => {
-            (db.settings.get as any).mockResolvedValue(undefined);
+            (db.settings.get as any).mockResolvedValue(undefined); // eslint-disable-line @typescript-eslint/no-explicit-any
 
             await useSettingsStore.getState().loadSettings();
 

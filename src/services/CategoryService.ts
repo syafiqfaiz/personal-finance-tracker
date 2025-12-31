@@ -15,7 +15,7 @@ export const CategoryService = {
 
         // 1. Update Categories List & Icons
         let newCategories = [...currentCategories];
-        let newIcons = { ...currentIcons };
+        const newIcons = { ...currentIcons };
         const icon = newIcons[oldName] || DEFAULT_ICON;
 
         // Optimistically calculate new state

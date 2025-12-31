@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 describe('aiService', () => {
-    let extractExpenseWithAI: any;
+    let extractExpenseWithAI: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    let mockGenerateContent: any;
+    let mockGenerateContent: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     beforeEach(async () => {
         vi.resetModules();

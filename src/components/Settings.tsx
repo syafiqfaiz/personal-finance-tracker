@@ -15,6 +15,7 @@ const Settings: React.FC = () => {
     }, [loadSettings]);
 
     useEffect(() => {
+        // eslint-disable-next-line
         setLocalGeminiKey(geminiKey);
         setLocalS3(s3Config);
     }, [geminiKey, s3Config]);
@@ -28,7 +29,7 @@ const Settings: React.FC = () => {
         try {
             await setGeminiKey(localGeminiKey);
             setStatus({ type: 'success', message: 'Gemini API key saved successfully!' });
-        } catch (err) {
+        } catch {
             setStatus({ type: 'error', message: 'Failed to save Gemini key.' });
         }
     };
@@ -38,7 +39,7 @@ const Settings: React.FC = () => {
         try {
             await setS3Config(localS3);
             setStatus({ type: 'success', message: 'S3 configuration saved successfully!' });
-        } catch (err) {
+        } catch {
             setStatus({ type: 'error', message: 'Failed to save S3 configuration.' });
         }
     };
@@ -119,7 +120,7 @@ const Settings: React.FC = () => {
                                         setStatus({ type: 'success', message: 'Syncing...' });
                                         await performFullBackup(s3Config);
                                         setStatus({ type: 'success', message: 'Backup Success!' });
-                                    } catch (err: any) {
+                                    } catch {
                                         setStatus({ type: 'error', message: 'Sync Failed' });
                                     }
                                 }}
