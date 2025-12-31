@@ -1,16 +1,20 @@
 import { useFinanceStore } from '../store/useFinanceStore';
-import { Bell, Sparkles } from 'lucide-react';
+import { useSettingsStore } from '../store/useSettingsStore';
+import { Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ExpenseCard from './ExpenseCard';
-import { Button } from './ui/Button';
+import MonthExpenseSnapshot from './MonthExpenseSnapshot';
+import MonthlyBudgetProgress from './MonthlyBudgetProgress';
+
 
 const Dashboard: React.FC = () => {
     const { expenses, budgets, categories } = useFinanceStore();
+    const { userName } = useSettingsStore();
     const navigate = useNavigate();
 
     const now = new Date();
     const currentMonth = now.toISOString().slice(0, 7);
-    const today = now.toISOString().slice(0, 10);
+
 
     // Get time-based greeting
     const hour = now.getHours();
@@ -20,18 +24,13 @@ const Dashboard: React.FC = () => {
         new Date(e.timestamp).toISOString().slice(0, 7) === currentMonth
     );
 
-    const todayExpenses = expenses.filter(e =>
-        new Date(e.timestamp).toISOString().slice(0, 10) === today
-    );
+
 
     const totalSpentMonth = monthlyExpenses.reduce((sum, e) => sum + e.amount, 0);
-    const totalSpentToday = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
-
     // Calculate total budget and remaining balance
     const totalBudget = budgets
         .filter(b => b.monthPeriod === currentMonth)
         .reduce((sum, b) => sum + b.limit, 0);
-    const balance = totalBudget - totalSpentMonth;
 
     // Find exceeded budgets
     const exceededBudgets = categories.map(cat => {
@@ -57,11 +56,9 @@ const Dashboard: React.FC = () => {
             <div className="pt-6 pb-4">
                 <div className="flex justify-between items-start">
                     <h1 className="font-serif text-3xl text-slate-900">
-                        {greeting},<br />User
+                        {greeting},<br />{userName || 'User'}
                     </h1>
-                    <Button variant="secondary" size="sm">
-                        Sign Out
-                    </Button>
+
                 </div>
             </div>
 
@@ -84,40 +81,16 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Stats Grid */}
-            <div className="mb-4 grid grid-cols-3 gap-3">
-                <div className="bg-white p-4 rounded-[20px] text-center shadow-sm">
-                    <p className="text-xs text-slate-500">Today</p>
-                    <p className="font-bold font-jakarta text-lg whitespace-nowrap text-slate-900">RM {totalSpentToday.toFixed(0)}</p>
-                </div>
-                <div className="bg-white p-4 rounded-[20px] text-center shadow-sm">
-                    <p className="text-xs text-slate-500">This Month</p>
-                    <p className="font-bold font-jakarta text-lg whitespace-nowrap text-slate-900">RM {totalSpentMonth.toFixed(0)}</p>
-                </div>
-                <div className="bg-white p-4 rounded-[20px] text-center shadow-sm">
-                    <p className="text-xs text-slate-500">Balance</p>
-                    <p className={`font-bold font-jakarta text-lg whitespace-nowrap ${balance < 0 ? 'text-red-500' : 'text-slate-900'}`}>
-                        RM {balance.toFixed(0)}
-                    </p>
-                </div>
-            </div>
+            {/* Monthly Budget Progress */}
+            <MonthlyBudgetProgress totalSpent={totalSpentMonth} totalBudget={totalBudget} />
 
-            {/* AI Insight */}
-            <div className="mb-6 p-4 rounded-[20px] bg-purple-100 border border-purple-200 shadow-sm">
-                <div className="flex gap-3">
-                    <div className="text-purple-600">
-                        <Sparkles className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <p className="font-semibold text-slate-900">AI Financial Insight</p>
-                        <p className="text-sm text-slate-500">
-                            {todayExpenses.length === 0
-                                ? "No expenses recorded today. Start tracking to get personalized insights!"
-                                : `Based on your spending this week, you're on track. You've recorded ${todayExpenses.length} expense${todayExpenses.length > 1 ? 's' : ''} today totaling RM ${totalSpentToday.toFixed(0)}. Keep it up!`
-                            }
-                        </p>
-                    </div>
-                </div>
+            {/* Monthly Snapshot */}
+            <div className="mb-6">
+                <MonthExpenseSnapshot
+                    expenses={monthlyExpenses}
+                    totalAmount={totalSpentMonth}
+                    budgets={budgets.filter(b => b.monthPeriod === currentMonth)}
+                />
             </div>
 
             {/* Recent Expenses */}

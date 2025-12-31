@@ -3,6 +3,7 @@ import { db } from '../db/db';
 
 interface SettingsState {
     geminiKey: string;
+    userName: string;
     s3Config: {
         bucket: string;
         region: string;
@@ -11,12 +12,14 @@ interface SettingsState {
     };
     isLoading: boolean;
     setGeminiKey: (key: string) => Promise<void>;
+    setUserName: (name: string) => Promise<void>;
     setS3Config: (config: SettingsState['s3Config']) => Promise<void>;
     loadSettings: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
     geminiKey: '',
+    userName: '',
     s3Config: {
         bucket: '',
         region: '',
@@ -28,6 +31,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     loadSettings: async () => {
         set({ isLoading: true });
         const geminiKey = await db.settings.get('gemini_key');
+        const userName = await db.settings.get('user_name');
         const s3Bucket = await db.settings.get('s3_bucket');
         const s3Region = await db.settings.get('s3_region');
         const s3AccessKey = await db.settings.get('s3_access_key');
@@ -35,6 +39,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
         set({
             geminiKey: geminiKey?.value || '',
+            userName: userName?.value || '',
             s3Config: {
                 bucket: s3Bucket?.value || '',
                 region: s3Region?.value || '',
@@ -48,6 +53,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     setGeminiKey: async (value: string) => {
         await db.settings.put({ key: 'gemini_key', value });
         set({ geminiKey: value });
+    },
+
+    setUserName: async (value: string) => {
+        await db.settings.put({ key: 'user_name', value });
+        set({ userName: value });
     },
 
     setS3Config: async (config) => {

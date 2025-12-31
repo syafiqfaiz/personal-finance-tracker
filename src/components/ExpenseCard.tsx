@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFinanceStore, DEFAULT_ICON } from '../store/useFinanceStore';
 import { getIconComponent } from '../utils/iconUtils';
+import { formatCurrencyPrecise } from '../utils/formatters';
 import { Trash2 } from 'lucide-react';
 
 interface ExpenseCardProps {
@@ -49,7 +50,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onClick, onDelete })
 
             <div className="flex items-center gap-3">
                 <p className="font-bold font-jakarta text-slate-900 whitespace-nowrap">
-                    RM {expense.amount.toFixed(0)}
+                    {formatCurrencyPrecise(expense.amount)}
                 </p>
 
                 {onDelete && (

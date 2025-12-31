@@ -14,4 +14,7 @@ export default defineConfig({
             reporter: ['text', 'json', 'html'],
         },
     },
+    define: {
+        __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    },
 });
