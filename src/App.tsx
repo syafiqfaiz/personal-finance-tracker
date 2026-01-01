@@ -15,6 +15,7 @@ import { AnalyticsService } from './services/analytics'
 import './App.css'
 
 import LandingPage from './pages/LandingPage'
+import Playground from './pages/Playground'
 
 // Route Tracker Component
 const RouteTracker = () => {
@@ -63,6 +64,7 @@ function App() {
       <Routes>
         {/* Public Route */}
         <Route path="/welcome" element={<LandingPage />} />
+        <Route path="/playground" element={<Playground />} />
 
         {/* Protected App Routes */}
         <Route element={
