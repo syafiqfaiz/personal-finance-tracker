@@ -1,94 +1,81 @@
-# AI-First Personal Finance Tracker (PWA)
+# AI-First Personal Finance Tracker (PWA & Serverless)
 
-A private, offline-first personal finance tracker built as a React PWA. This app follows a **"Bring Your Own (BYO) Keys"** architecture—all your financial data and secrets (S3, Gemini) stay strictly in your browser's IndexedDB.
+A private, offline-first personal finance tracker built as a React PWA, backed by a secure Serverless Backend for AI and Cloud Storage orchestration.
 
 ## 🚀 Key Features
 - **Offline-First**: Track expenses anywhere, even without internet.
-- **AI-Powered (Optional)**: Natural language expense entry using Google Gemini.
-- **Direct Cloud Sync (Optional)**: Daily backups to your own AWS S3 bucket.
-- **Zero Backend**: No central server, maximum privacy.
-- **Mobile-First**: Optimized for a premium PWA experience on iOS and Android.
+- **AI-Powered**: Natural language expense entry using Google Gemini (via secure backend).
+- **Secure Cloud Storage**: Direct uploads to AWS S3 using presigned URLs.
+- **Privacy-Centric**: "Bring Your Own Key" architecture for local data, with backend acting as a secure proxy.
+- **Observability**: Integrated Sentry error tracking and Admin API.
 
 ## 🛠 Tech Stack
 - **Frontend**: React (TypeScript), Vite, Tailwind-like CSS, Lucide Icons.
-- **Storage**: IndexedDB (via Dexie.js) for persistent local storage.
-- **State**: Zustand for reactive UI state.
-- **Cloud**: AWS SDK for direct S3 interaction.
-- **AI**: Google Generative AI SDK for Gemini integration.
+- **Backend**: Cloudflare Pages Functions (Hono Framework).
+- **Data**: IndexedDB (Local), Cloudflare KV (Licenses), AWS S3 (Receipts).
+- **AI**: Google Gemini 2.0 Flash.
 
 ## ⚙️ Setup & Configuration
 
 ### 1. Environment Variables
-This app uses **analytics and bug tracking** which are **disabled by default in development** (`npm run dev`).
+To run the full stack (Frontend + Backend), configure these variables in your deployment platform (Cloudflare Pages) or `.dev.vars` for local development:
 
-To enable them in production, set the following variables in your deployment platform (e.g., Cloudflare Pages):
-
-| Variable | Description |
-| :--- | :--- |
-| `VITE_GA_ID` | Google Analytics Measurement ID (e.g., `G-XXXXX`). |
-| `VITE_SENTRY_DSN` | Sentry DSN URL for error tracking. |
+| Variable | Description | Required |
+| :--- | :--- | :--- |
+| `VITE_GA_ID` | Google Analytics Measurement ID (e.g., `G-XXXXX`). | No |
+| `VITE_SENTRY_DSN` | Sentry DSN URL for error tracking. | No |
+| `VITE_GEMINI_API_KEY` | Google Gemini API Key. | **Yes** (Backend) |
+| `LICENSE_STORE` | Cloudflare KV Namespace ID. | **Yes** (Backend) |
+| `AWS_ACCESS_KEY_ID` | AWS IAM Access Key for S3. | **Yes** (Backend) |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM Secret Key. | **Yes** (Backend) |
+| `AWS_BUCKET_NAME` | S3 Bucket Name. | **Yes** (Backend) |
+| `AWS_REGION` | AWS Region (e.g., `us-east-1`). | **Yes** (Backend) |
+| `ADMIN_SECRET` | Secret key for Admin API access. | **Yes** (Backend) |
 
 ### 2. Installation
 ```bash
 npm install
+```
+
+### 3. Development
+Run the frontend and backend locally:
+```bash
 npm run dev
 ```
-```
+*   Frontend: `http://localhost:5173`
+*   Backend: `http://localhost:8788` (if using `wrangler pages dev`)
 
-### 2. Running Tests
-To run the automated test suite (Unit & Integration):
+## 🧪 Testing
+
+### Automated Tests
+Run the full test suite (Unit & Integration):
 ```bash
+# Frontend Tests
 npm test
-```
-To run tests with UI and coverage:
-```bash
-npx vitest --ui --coverage
+
+# Backend Functions Tests
+npx vitest run functions
 ```
 
-### 3. AWS S3 Configuration (Critical)
-To enable cloud backups, you must enable **CORS** on your S3 bucket to allow the PWA's domain to upload files directly.
-
-**Minimal CORS Template (AWS Console):**
-```json
-[
-    {
-        "AllowedHeaders": ["*"],
-        "AllowedMethods": ["PUT", "POST", "GET", "HEAD"],
-        "AllowedOrigins": ["*"],
-        "ExposedHeaders": ["ETag"]
-    }
-]
-```
-> [!TIP]
-> For better security, replace `"*"` in `AllowedOrigins` with your actual PWA deployment URL.
-
-### 3. Google Gemini
-Obtain an API key from the [Google AI Studio](https://aistudio.google.com/) and enter it in the app's **Settings** tab.
+### Manual Testing
+- **API Docs (Swagger UI)**: Access `http://localhost:8788/api/docs` (or your production URL) to interactively test backend endpoints.
 
 ## 🌍 Deployment (Cloudflare Pages)
-This app is optimized for static deployment on **Cloudflare Pages**.
 
 ### Method 1: CLI Deployment (Recommended)
-We have configured a direct deployment script using Wrangler.
-1.  **Login**: `npx wrangler login` (One time setup)
+1.  **Login**: `npx wrangler login`
 2.  **Deploy**:
     ```bash
     npm run deploy
     ```
-    This will build the project and upload it to a new deployment url.
 
 ### Method 2: Git Integration
-1.  **Push to Git**: Ensure your code is pushed to a GitHub or GitLab repository.
-2.  **Create Project**: Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) > **Workers & Pages** > **Create Application** > **Connect to Git**.
-3.  **Build Settings**:
-    *   **Framework Preset**: `Vite`
-    *   **Build Command**: `npm run build`
-    *   **Output Directory**: `dist`
-4.  **Save & Deploy**: Cloudflare will build the site and provide a `.pages.dev` URL.
-
-> [!NOTE]
-> A `public/_redirects` file is included to handle client-side routing (redirecting all paths to `index.html`), preventing 404 errors on refresh.
+Connect your repository to Cloudflare Pages.
+*   **Build Command**: `npm run build`
+*   **Output Directory**: `dist`
+*   **Functions**: Automatically detected in `/functions`.
 
 ## 🔒 Security & Privacy
-- **Local Secret Management (LSM)**: Secrets are stored in IndexedDB, which is generally safer than LocalStorage against script injection but still requires device-level security (passcodes).
-- **Encryption**: Data is stored unencrypted locally. It is recommended to use this app on a device with full-disk encryption enabled (Standard on modern iOS/Android/macOS).
+- **Local Secret Management**: Personal secrets are stored in IndexedDB.
+- **Serverless Proxy**: Sensitive API keys (Gemini, AWS) are stored securely in Cloudflare environment variables, never exposed to the client.
+- **Strict CORS**: Backend enforces strict origin checks (Localhost + Production Domain).
