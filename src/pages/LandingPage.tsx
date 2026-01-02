@@ -107,6 +107,16 @@ const LandingPage: React.FC = () => {
                                 Experience the clarity of intelligent expense tracking.
                                 Built for privacy, powered by AI, and designed for your life.
                             </p>
+
+                            <div>
+                                <button
+                                    onClick={() => navigate('/playground')}
+                                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-full transition-colors"
+                                >
+                                    <Sparkles className="w-4 h-4" />
+                                    Try AI Demo
+                                </button>
+                            </div>
                         </div>
 
                         {/* Onboarding Input */}
