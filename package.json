@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
+    "test:functions": "vitest functions/",
     "deploy": "npm run build && wrangler pages deploy dist --project-name personal-finance-tracker"
   },
   "dependencies": {

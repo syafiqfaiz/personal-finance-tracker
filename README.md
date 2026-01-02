@@ -7,7 +7,8 @@ A private, offline-first personal finance tracker built as a React PWA, backed b
 - **AI-Powered**: Natural language expense entry using Google Gemini (via secure backend).
 - **Secure Cloud Storage**: Direct uploads to AWS S3 using presigned URLs.
 - **Privacy-Centric**: "Bring Your Own Key" architecture for local data, with backend acting as a secure proxy.
-- **Observability**: Integrated Sentry error tracking and Admin API.
+- **Admin License Management**: Dedicated API for creating, updating, and managing user licenses.
+- **Observability**: Integrated Sentry error tracking.
 
 ## 🛠 Tech Stack
 - **Frontend**: React (TypeScript), Vite, Tailwind-like CSS, Lucide Icons.
@@ -18,6 +19,12 @@ A private, offline-first personal finance tracker built as a React PWA, backed b
 ## ⚙️ Setup & Configuration
 
 ### 1. Environment Variables
+Copy the template files to create your local configuration:
+```bash
+cp .env.copy .env
+cp .dev.vars.copy .dev.vars
+```
+
 To run the full stack (Frontend + Backend), configure these variables in your deployment platform (Cloudflare Pages) or `.dev.vars` for local development:
 
 | Variable | Description | Required |
@@ -54,7 +61,7 @@ Run the full test suite (Unit & Integration):
 npm test
 
 # Backend Functions Tests
-npx vitest run functions
+npm run test:functions
 ```
 
 ### Manual Testing

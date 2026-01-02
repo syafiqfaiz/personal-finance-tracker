@@ -2,6 +2,7 @@
 
 export interface License {
     id: string;
+    email?: string; // Optional for searchability
     created_at: string;
     status: 'active' | 'revoked' | 'expired';
     tier: 'basic' | 'pro' | 'enterprise';
@@ -23,13 +24,14 @@ export interface License {
 export class LicenseRepository {
     constructor(private kv: KVNamespace) { }
 
-    async create(tier: 'basic' | 'pro' | 'enterprise' = 'pro'): Promise<string> {
+    async create(tier: 'basic' | 'pro' | 'enterprise' = 'pro', email?: string): Promise<string> {
         const id = crypto.randomUUID();
         const now = new Date().toISOString();
         const currentMonth = now.slice(0, 7); // YYYY-MM
 
         const defaultLicense: License = {
             id,
+            email,
             created_at: now,
             status: 'active',
             tier,
@@ -94,5 +96,56 @@ export class LicenseRepository {
             allowed: true,
             remaining: licenseData.limits.ai_requests_per_month - licenseData.usage.ai_requests_used
         };
+    }
+    async update(id: string, updates: Partial<License>): Promise<void> {
+        const key = `license:${id}`;
+        const existing = await this.kv.get<License>(key, 'json');
+
+        if (!existing) {
+            throw new Error('License not found');
+        }
+
+        // Merge updates carefully
+        const updated: License = {
+            ...existing,
+            ...updates,
+            features: {
+                ...existing.features,
+                ...(updates.features || {})
+            },
+            limits: {
+                ...existing.limits,
+                ...(updates.limits || {})
+            },
+            usage: {
+                ...existing.usage,
+                ...(updates.usage || {})
+            }
+        };
+
+        // Protect immutable fields
+        updated.id = existing.id;
+        updated.created_at = existing.created_at;
+
+        await this.kv.put(key, JSON.stringify(updated));
+    }
+
+    async list(filters?: { tier?: string; email?: string }): Promise<License[]> {
+        const listResult = await this.kv.list({ prefix: 'license:' });
+        const keys = listResult.keys.map(k => k.name);
+
+        // Fetch all licenses in parallel
+        const licenses = await Promise.all(
+            keys.map(key => this.kv.get<License>(key, 'json'))
+        );
+
+        // Filter and return non-null licenses
+        return licenses
+            .filter((l): l is License => l !== null)
+            .filter(l => {
+                if (filters?.tier && l.tier !== filters.tier) return false;
+                if (filters?.email && l.email !== filters.email) return false;
+                return true;
+            });
     }
 }

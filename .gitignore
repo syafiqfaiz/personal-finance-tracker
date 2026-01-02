@@ -27,3 +27,4 @@ dist-ssr
 coverage
 .env
 .wrangler
+.dev.vars
