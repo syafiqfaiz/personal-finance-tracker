@@ -12,7 +12,7 @@ interface AIChatProps {
 
 const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const { categories, addExpense } = useFinanceStore();
-    const { geminiKey } = useSettingsStore();
+    const { licenseKey } = useSettingsStore();
 
     const [input, setInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -21,12 +21,12 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input || !geminiKey) return;
+        if (!input || !licenseKey) return;
 
         setIsProcessing(true);
         setError(null);
         try {
-            const result = await extractExpenseWithAI(geminiKey, input, categories);
+            const result = await extractExpenseWithAI(input, categories);
             setSuggestion(result);
             setInput('');
         } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -58,15 +58,15 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
         }
     };
 
-    if (!geminiKey) {
+    if (!licenseKey) {
         return (
             <div className="bg-purple-50 p-8 rounded-[28px] border border-purple-100 text-center space-y-4 animate-slide-up">
                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm border border-purple-100">
                     <Sparkles className="w-8 h-8 text-purple-600" />
                 </div>
                 <div>
-                    <h3 className="text-sm font-black text-purple-900 uppercase tracking-widest">AI Intelligence Disabled</h3>
-                    <p className="text-xs text-purple-700 font-medium mt-2 leading-relaxed px-4">Provide a Google Gemini API Key in your profile to enable voice/text expense extraction.</p>
+                    <h3 className="text-sm font-black text-purple-900 uppercase tracking-widest">License Required</h3>
+                    <p className="text-xs text-purple-700 font-medium mt-2 leading-relaxed px-4">Provide a License Key in your profile to enable AI expense extraction.</p>
                 </div>
             </div>
         );
