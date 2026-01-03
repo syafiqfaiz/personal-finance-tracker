@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Toaster } from 'sonner'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from './components/layout/Layout'
@@ -28,7 +28,7 @@ const RouteTracker = () => {
 };
 
 // Auth Guard
-const RequireUser = ({ children }: { children: JSX.Element }) => {
+const RequireUser = ({ children }: { children: React.ReactNode }) => {
   const { userName } = useSettingsStore();
   if (!userName) {
     return <Navigate to="/welcome" replace />;
