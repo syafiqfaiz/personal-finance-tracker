@@ -28,6 +28,8 @@ coverage
 .env
 .env.staging
 .env.production
+.env.staging
+.env.production
 .wrangler
 .dev.vars
-wrangler.toml
+
