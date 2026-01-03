@@ -42,7 +42,7 @@ describe('AddExpense Page', () => {
     });
 
     it('renders correctly', () => {
-        (useSettingsStore as any).mockReturnValue({ geminiKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         render(
             <BrowserRouter>
                 <AddExpense />
@@ -54,7 +54,7 @@ describe('AddExpense Page', () => {
     });
 
     it('defaults to AI mode if API key exists', () => {
-        (useSettingsStore as any).mockReturnValue({ geminiKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         render(
             <BrowserRouter>
                 <AddExpense />
@@ -64,7 +64,7 @@ describe('AddExpense Page', () => {
     });
 
     it('defaults to Manual mode if API key is missing', () => {
-        (useSettingsStore as any).mockReturnValue({ geminiKey: '' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useSettingsStore as any).mockReturnValue({ licenseKey: '' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         render(
             <BrowserRouter>
                 <AddExpense />
@@ -74,7 +74,7 @@ describe('AddExpense Page', () => {
     });
 
     it('switches to Manual mode when clicked', () => {
-        (useSettingsStore as any).mockReturnValue({ geminiKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         render(
             <BrowserRouter>
                 <AddExpense />
@@ -87,7 +87,7 @@ describe('AddExpense Page', () => {
     });
 
     it('navigates to history on success in AI mode', () => {
-        (useSettingsStore as any).mockReturnValue({ geminiKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'test-key' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         render(
             <BrowserRouter>
                 <AddExpense />
@@ -102,7 +102,7 @@ describe('AddExpense Page', () => {
 
     it('navigates to history on success in Manual mode', () => {
         // Force manual
-        (useSettingsStore as any).mockReturnValue({ geminiKey: '' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+        (useSettingsStore as any).mockReturnValue({ licenseKey: '' }); // eslint-disable-line @typescript-eslint/no-explicit-any
         render(
             <BrowserRouter>
                 <AddExpense />

@@ -60,6 +60,6 @@ describe('CORS Middleware', () => {
 
         expect(next).not.toHaveBeenCalled();
         expect(mockContext.body).toHaveBeenCalledWith(null, 204);
-        expect(mockContext.header).toHaveBeenCalledWith('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+        expect(mockContext.header).toHaveBeenCalledWith('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     });
 });

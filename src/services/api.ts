@@ -25,7 +25,8 @@ export const api = {
         rawText: string,
         categories: string[],
         currentDate: string,
-        availablePaymentMethods: string[]
+        availablePaymentMethods: string[],
+        capturedData?: ExtractionResult['captured_data']
     ): Promise<ExtractionResult> => {
         const { licenseKey } = useSettingsStore.getState();
 
@@ -44,6 +45,7 @@ export const api = {
                 categories,
                 current_date: currentDate,
                 available_payment_method: availablePaymentMethods,
+                captured_data: capturedData,
             }),
         });
 

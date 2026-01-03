@@ -11,19 +11,19 @@ import { db } from '../db/db';
 describe('useSettingsStore', () => {
     beforeEach(() => {
         useSettingsStore.setState({
-            geminiKey: '',
+            licenseKey: '',
             s3Config: { bucket: '', region: '', accessKeyId: '', secretAccessKey: '' },
             isLoading: true
         });
         vi.clearAllMocks();
     });
 
-    describe('setGeminiKey', () => {
+    describe('setLicenseKey', () => {
         it('updates state and persisted setting', async () => {
-            await useSettingsStore.getState().setGeminiKey('new-key');
+            await useSettingsStore.getState().setLicenseKey('new-key');
 
-            expect(useSettingsStore.getState().geminiKey).toBe('new-key');
-            expect(db.settings.put).toHaveBeenCalledWith({ key: 'gemini_key', value: 'new-key' });
+            expect(useSettingsStore.getState().licenseKey).toBe('new-key');
+            expect(db.settings.put).toHaveBeenCalledWith({ key: 'license_key', value: 'new-key' });
         });
     });
 
@@ -51,7 +51,7 @@ describe('useSettingsStore', () => {
             // Setup mock returns
             (db.settings.get as any).mockImplementation((key: string) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                 const values: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
-                    'gemini_key': { value: 'saved-gemini' },
+                    'license_key': { value: 'saved-license' },
                     's3_bucket': { value: 'saved-bucket' },
                     's3_region': { value: 'saved-region' },
                     's3_access_key': { value: 'saved-access' },
@@ -64,7 +64,7 @@ describe('useSettingsStore', () => {
 
             const state = useSettingsStore.getState();
             expect(state.isLoading).toBe(false);
-            expect(state.geminiKey).toBe('saved-gemini');
+            expect(state.licenseKey).toBe('saved-license');
             expect(state.s3Config).toEqual({
                 bucket: 'saved-bucket',
                 region: 'saved-region',
@@ -79,7 +79,7 @@ describe('useSettingsStore', () => {
             await useSettingsStore.getState().loadSettings();
 
             const state = useSettingsStore.getState();
-            expect(state.geminiKey).toBe('');
+            expect(state.licenseKey).toBe('');
             expect(state.s3Config.bucket).toBe('');
         });
     });
