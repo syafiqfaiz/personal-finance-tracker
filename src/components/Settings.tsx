@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
-import { ShieldCheck, Cloud, BrainCircuit, RefreshCw, X, User } from 'lucide-react';
+import { ShieldCheck, Cloud, RefreshCw, X, User } from 'lucide-react';
 import { performFullBackup } from '../services/s3Service';
 import { Button } from './ui/Button';
 
 const Settings: React.FC = () => {
-    const { geminiKey, userName, s3Config, setGeminiKey, setUserName, setS3Config, loadSettings, isLoading } = useSettingsStore();
+    const { userName, licenseKey, s3Config, setUserName, setLicenseKey, setS3Config, isLoading } = useSettingsStore();
 
-    const [localGeminiKey, setLocalGeminiKey] = useState(geminiKey);
     const [localUserName, setLocalUserName] = useState(userName);
+    const [localLicenseKey, setLocalLicenseKey] = useState(licenseKey);
     const [localS3, setLocalS3] = useState(s3Config);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
 
-    useEffect(() => {
-        loadSettings();
-    }, [loadSettings]);
+
 
     useEffect(() => {
         // eslint-disable-next-line
-        setLocalGeminiKey(geminiKey);
         setLocalUserName(userName);
+        setLocalLicenseKey(licenseKey);
         setLocalS3(s3Config);
-    }, [geminiKey, userName, s3Config]);
+    }, [userName, licenseKey, s3Config]);
 
     if (isLoading) {
         return <div className="flex items-center justify-center h-screen">Loading settings...</div>;
@@ -37,13 +35,13 @@ const Settings: React.FC = () => {
         }
     };
 
-    const handleSaveAI = async (e: React.FormEvent) => {
+    const handleSaveLicense = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await setGeminiKey(localGeminiKey);
-            setStatus({ type: 'success', message: 'Gemini API key saved successfully!' });
+            await setLicenseKey(localLicenseKey);
+            setStatus({ type: 'success', message: 'License key saved successfully!' });
         } catch {
-            setStatus({ type: 'error', message: 'Failed to save Gemini key.' });
+            setStatus({ type: 'error', message: 'Failed to save license key.' });
         }
     };
 
@@ -98,33 +96,50 @@ const Settings: React.FC = () => {
                     </form>
                 </section>
 
-                {/* AI Configuration */}
+                {/* License Management */}
                 <section className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-6">
                     <div className="flex items-center space-x-4">
                         <div className="bg-purple-50 p-3 rounded-2xl text-purple-600">
-                            <BrainCircuit className="w-5 h-5" />
+                            <ShieldCheck className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">AI Intelligence</h2>
-                            <p className="text-[10px] text-slate-500 font-bold font-jakarta uppercase">Google Gemini Pro</p>
+                            <h2 className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">Account & License</h2>
+                            <p className="text-[10px] text-slate-500 font-bold font-jakarta uppercase">Unlock Premium Features</p>
                         </div>
                     </div>
 
-                    <form onSubmit={handleSaveAI} className="space-y-4">
+                    <form onSubmit={handleSaveLicense} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">API Key</label>
+                            <label htmlFor="license-key" className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">License Key</label>
                             <input
-                                type="password"
-                                value={localGeminiKey}
-                                onChange={(e) => setLocalGeminiKey(e.target.value)}
-                                placeholder="AIzaSy..."
+                                id="license-key"
+                                type="text"
+                                value={localLicenseKey}
+                                onChange={(e) => setLocalLicenseKey(e.target.value)}
+                                placeholder="Enter your license key..."
                                 className="w-full bg-slate-50 rounded-2xl border border-slate-100 py-4 px-6 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-jakarta transition-all"
                             />
                         </div>
                         <Button type="submit" variant="secondary" fullWidth>
-                            Save AI Config
+                            Save License
                         </Button>
                     </form>
+
+                    {/* Education Card */}
+                    <div className="bg-slate-50 rounded-2xl p-4 space-y-2 border border-slate-100">
+                        <div className="flex items-start space-x-2">
+                            <div className="min-w-[4px] h-[4px] rounded-full bg-slate-400 mt-1.5" />
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                <span className="font-bold text-slate-700">Optional:</span> This key is only required if you wish to use the advanced AI extraction features.
+                            </p>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                            <div className="min-w-[4px] h-[4px] rounded-full bg-slate-400 mt-1.5" />
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                <span className="font-bold text-slate-700">Get Access:</span> Contact <a href="https://www.linkedin.com/in/syafiqfaiz/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Syafiq Faiz</a> to request a key.
+                            </p>
+                        </div>
+                    </div>
                 </section>
 
                 {/* S3 Configuration */}
