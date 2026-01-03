@@ -4,5 +4,5 @@ pages_build_output_dir = "dist"
 
 [[kv_namespaces]]
 binding = "LICENSE_STORE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" # Local dev doesn't care about ID
-# preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+id = "4b0d68cdf4fe48019a487d6c0f4f85b9"
+preview_id = "869aeba05c074264b77817feac82bd45"
