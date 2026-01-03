@@ -15,6 +15,7 @@ import {
     type LucideIcon
 } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import HeroChat from '../components/landing/HeroChat';
 
 const FeatureCard = ({ icon: Icon, title, description }: { icon: LucideIcon, title: string, description: string }) => (
     <div className="bg-white border border-slate-200 p-6 rounded-2xl hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 group">
@@ -65,7 +66,7 @@ const LandingPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden relative font-sans selection:bg-blue-100 selection:text-blue-900">
-            {/* Ambient Background Effects (Light Mode) */}
+            {/* Ambient Background Effects */}
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-100/40 rounded-full blur-[120px] pointer-events-none opacity-60" />
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-100/40 rounded-full blur-[120px] pointer-events-none opacity-60" />
 
@@ -90,34 +91,34 @@ const LandingPage: React.FC = () => {
                 </header>
 
                 {/* Main Hero Section */}
-                <main className="flex-1 flex flex-col justify-center items-center text-center py-20 lg:py-24">
-                    <div className="max-w-4xl mx-auto space-y-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10px] font-bold uppercase tracking-widest text-blue-600 shadow-sm">
+                <main className="flex-1 flex flex-col lg:flex-row items-center gap-12 lg:gap-24 py-12 lg:py-20">
+                    {/* Left: Text & Form */}
+                    <div className="flex-1 space-y-10 text-center lg:text-left">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-[10px] font-bold uppercase tracking-widest text-purple-600 shadow-sm mx-auto lg:mx-0">
                             <Zap className="w-3 h-3" />
-                            <span>Public Beta</span>
+                            <span>AI Assisted Finance</span>
                         </div>
 
                         <div className="space-y-6">
-                            <h1 className="text-5xl md:text-7xl font-bold font-jakarta leading-[1.1] tracking-tight text-slate-900">
-                                Master your <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">money flow.</span>
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-jakarta leading-[1.1] tracking-tight text-slate-900">
+                                Tracking expenses <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">is now a coversation.</span>
                             </h1>
 
-                            <p className="text-slate-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
-                                Experience the clarity of intelligent expense tracking.
-                                Built for privacy, powered by AI, and designed for your life.
+                            <p className="text-slate-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                                Forget complex forms. Just tell our AI what you spent, and let it handle the data entry. Secure, private, and effortless.
                             </p>
                         </div>
 
                         {/* Onboarding Input */}
-                        <form onSubmit={handleGetStarted} className="w-full max-w-md mx-auto relative group">
+                        <form onSubmit={handleGetStarted} className="w-full max-w-md mx-auto lg:mx-0 relative group">
                             <div className="relative overflow-hidden rounded-2xl bg-white border-2 border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 shadow-xl shadow-slate-200/50">
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder="What should we call you?"
-                                    className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 px-6 py-5 text-lg font-medium outline-none text-center"
+                                    className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 px-6 py-5 text-lg font-medium outline-none text-center lg:text-left"
                                 />
                             </div>
 
@@ -136,67 +137,71 @@ const LandingPage: React.FC = () => {
                                     </>
                                 )}
                             </button>
-                            <p className="mt-4 text-xs text-slate-500 flex items-center justify-center gap-1">
+                            <p className="mt-4 text-xs text-slate-500 flex items-center justify-center lg:justify-start gap-1">
                                 <ShieldCheck className="w-3 h-3" />
-                                Data stored locally on your device
+                                Expenses stored locally on your device
                             </p>
                         </form>
                     </div>
 
-                    {/* Screenshots Gallery */}
-                    <div className="mt-24 w-full overflow-hidden">
-                        <div className="flex gap-6 overflow-x-auto pb-12 pt-4 px-6 snap-x justify-start md:justify-center">
-                            {[
-                                '/app-preview2.png',
-                                '/app-preview.png',
-                                '/app-preview3.png',
-                                '/app-preview4.png'
-                            ].map((src, idx) => (
-                                <div
-                                    key={src}
-                                    className={`relative flex-none w-[280px] md:w-[320px] rounded-[2.5rem] overflow-hidden border-8 border-slate-900 shadow-2xl transform transition-transform duration-500 hover:-translate-y-4 hover:rotate-0 bg-slate-900 ${idx % 2 === 0 ? '-rotate-3 mt-8' : 'rotate-3'
-                                        }`}
-                                >
-                                    <img
-                                        src={src}
-                                        alt={`App Screen ${idx + 1}`}
-                                        className="w-full h-auto object-cover"
-                                    />
-                                    {/* Glass Reflection */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                                </div>
-                            ))}
-                        </div>
+                    {/* Right: Hero Chat Animation */}
+                    <div className="flex-1 flex justify-center lg:justify-end relative">
+                        {/* Decorative blobs behind phone */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[600px] bg-purple-500/20 blur-[80px] rounded-full pointer-events-none" />
+                        <HeroChat />
                     </div>
                 </main>
+
+                {/* Feature Highlight Image Section */}
+                <section className="py-20">
+                    <div className="rounded-[40px] bg-slate-900 overflow-hidden shadow-2xl relative group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 pointer-events-none" />
+
+                        <div className="relative z-10 p-8 md:p-12 text-center">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] font-bold uppercase tracking-widest text-white mb-6">
+                                <Sparkles className="w-3 h-3" />
+                                <span>See it in action</span>
+                            </div>
+                            <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 font-jakarta">Beautifully Intelligent.</h2>
+
+                            <div className="mt-8 rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 mx-auto max-w-4xl transform transition-transform duration-700 hover:scale-[1.01]">
+                                <img
+                                    src="/ai-expense-tracker.png"
+                                    alt="AI Expense Tracker Interface"
+                                    className="w-full h-auto object-cover"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Features Section */}
                 <section className="py-20 border-t border-slate-200">
                     <div className="text-center max-w-2xl mx-auto mb-16">
-                        <h2 className="text-3xl font-bold font-jakarta mb-4 text-slate-900">Everything you need</h2>
-                        <p className="text-slate-600">Powerful features wrapped in a minimalist design.</p>
+                        <h2 className="text-3xl font-bold font-jakarta mb-4 text-slate-900">More than just a chatbot</h2>
+                        <p className="text-slate-600">An entire financial system, simplified.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <FeatureCard
-                            icon={WifiOff}
-                            title="Offline First"
-                            description="Track expenses anywhere, anytime. No internet connection required to add or view your data."
+                            icon={Bot}
+                            title="AI Enhanced"
+                            description="Natural language processing that understands Malaysian context (Mamak, Nasi Lemak, etc)."
                         />
                         <FeatureCard
                             icon={Smartphone}
                             title="Mobile First"
-                            description="Designed for your thumb. A fluid, app-like experience optimized for iOS and Android."
+                            description="A PWA that feels indistinguishable from a native app on iOS and Android."
+                        />
+                        <FeatureCard
+                            icon={WifiOff}
+                            title="Offline First"
+                            description="No internet? No problem. Add expenses offline and sync when you're back."
                         />
                         <FeatureCard
                             icon={Download}
-                            title="Installable PWA"
-                            description="Add to your home screen for a native app feel. Performance that rivals native apps."
-                        />
-                        <FeatureCard
-                            icon={Bot}
-                            title="AI Enhanced"
-                            description="Just type naturally. 'Lunch RM25' automatically categorizes and logs the expense."
+                            title="Installable"
+                            description="Add to Home Screen for instant access. No app store downloads required."
                         />
                     </div>
                 </section>
@@ -209,27 +214,19 @@ const LandingPage: React.FC = () => {
                             <p className="text-slate-600 mb-8">
                                 Common questions about how this app handles your data and privacy.
                             </p>
-                            <a
-                                href="https://github.com/syafiqfaiz/personal-finance-tracker"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
-                            >
-                                Read full documentation <ArrowRight className="w-4 h-4" />
-                            </a>
                         </div>
                         <div className="space-y-4">
                             <FAQItem
-                                question="Where is my data stored?"
-                                answer="Your data stays 100% on your device using IndexedDB. We do not have a central server. This 'Zero Backend' architecture ensures maximum privacy."
+                                question="Is it really private?"
+                                answer="Yes. By default, all data lives in your browser's secure storage (IndexedDB). Nothing leaves your device unless you enable cloud sync."
                             />
                             <FAQItem
-                                question="Can I sync across devices?"
-                                answer="Yes, but it's optional and controlled by you. You can configure your own AWS S3 bucket in settings to sync data between devices securely."
+                                question="How does the AI work?"
+                                answer="We use a secure, enterprise-grade AI model to process your text. We strip sensitive info before processing, ensuring your financial privacy."
                             />
                             <FAQItem
                                 question="Is it free?"
-                                answer="Yes, this project is open source software. There are no subscriptions. You simply bring your own keys (Gemini, AWS) if you want advanced cloud features."
+                                answer="Currently, yes! We're fortunate to run on a zero-cost infrastructure, which allows us to provide all features—including AI—completely free. If our operating costs rise in the future, we might introduce a small plan to keep the lights on, but for now, enjoy it on the house!"
                             />
                         </div>
                     </div>
@@ -237,11 +234,10 @@ const LandingPage: React.FC = () => {
 
                 {/* Footer */}
                 <footer className="py-12 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-sm">
-                    <p>© 2025 FinanceTracker. Open-sourced under MIT License.</p>
+                    <p>© 2025 FinanceTracker. Version 0.2.0.</p>
                     <div className="flex items-center gap-6">
                         <a href="https://github.com/syafiqfaiz/personal-finance-tracker" className="hover:text-blue-600 transition-colors">GitHub</a>
                         <a href="#" className="hover:text-blue-600 transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-blue-600 transition-colors">Terms</a>
                     </div>
                 </footer>
             </div>

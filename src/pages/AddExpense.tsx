@@ -7,16 +7,16 @@ import { Sparkles, Keyboard } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
 
 const AddExpense: React.FC = () => {
-    const { geminiKey } = useSettingsStore();
+    const { licenseKey } = useSettingsStore();
     const navigate = useNavigate();
-    const [mode, setMode] = useState<'ai' | 'manual'>(geminiKey ? 'ai' : 'manual');
+    const [mode, setMode] = useState<'ai' | 'manual'>(licenseKey ? 'ai' : 'manual');
 
     const handleSuccess = () => {
         navigate('/expenses');
     };
 
     return (
-        <div className="space-y-8 animate-slide-up pb-10">
+        <div className="space-y-8 animate-slide-up pb-0">
             <header className="px-1 pt-4 flex items-center justify-between">
                 <div>
                     <h1 className="text-4xl font-serif text-slate-900">Add Entry</h1>
@@ -43,17 +43,6 @@ const AddExpense: React.FC = () => {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {mode === 'ai' ? (
                     <div className="space-y-6">
-                        <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110 duration-700" />
-                            <div className="relative z-10 space-y-3">
-                                <div className="bg-purple-50 w-10 h-10 rounded-xl flex items-center justify-center text-purple-600">
-                                    <Sparkles className="w-5 h-5" />
-                                </div>
-                                <p className="text-sm font-medium text-slate-500 leading-relaxed italic">
-                                    "I'm ready! Just tell me what you spent on, and I'll extract all the details for you instantly."
-                                </p>
-                            </div>
-                        </div>
                         <AIChat onSuccess={handleSuccess} />
                     </div>
                 ) : (

@@ -6,6 +6,7 @@ const kvMock = {
     get: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
+    list: vi.fn(),
 } as unknown as KVNamespace;
 
 const defaultLicense: License = {
@@ -48,6 +49,18 @@ describe('LicenseRepository', () => {
         (kvMock.get as Mock).mockResolvedValue(defaultLicense);
         const result = await repo.get('uuid-123');
         expect(result).toEqual(defaultLicense);
+    });
+
+    it('should return null if license not found', async () => {
+        (kvMock.get as Mock).mockResolvedValue(null);
+        const result = await repo.get('non-existent');
+        expect(result).toBeNull();
+    });
+
+    it('should strip license: prefix from key', async () => {
+        (kvMock.get as Mock).mockResolvedValue(defaultLicense);
+        await repo.get('license:123');
+        expect(kvMock.get).toHaveBeenCalledWith('license:123', 'json');
     });
 
     describe('incrementAIUsage', () => {
@@ -99,6 +112,76 @@ describe('LicenseRepository', () => {
             expect(result.allowed).toBe(false);
             expect(result.remaining).toBe(0);
             expect(kvMock.put).not.toHaveBeenCalled();
+        });
+
+        it('should return not allowed if license not found', async () => {
+            (kvMock.get as Mock).mockResolvedValue(null);
+            const result = await repo.incrementAIUsage('unknown');
+            expect(result.allowed).toBe(false);
+            expect(result.remaining).toBe(0);
+        });
+    });
+
+    describe('update', () => {
+        it('should update existing license', async () => {
+            (kvMock.get as Mock).mockResolvedValue(defaultLicense);
+            await repo.update('123', { tier: 'enterprise' });
+
+            expect(kvMock.put).toHaveBeenCalledTimes(1);
+            const [, val] = (kvMock.put as Mock).mock.calls[0];
+            const updated = JSON.parse(val);
+            expect(updated.tier).toBe('enterprise');
+            expect(updated.id).toBe('123');
+        });
+
+        it('should throw error if license not found', async () => {
+            (kvMock.get as Mock).mockResolvedValue(null);
+            await expect(repo.update('missing', { tier: 'pro' }))
+                .rejects.toThrow('License not found');
+        });
+    });
+
+    describe('list', () => {
+        it('should list and filter licenses', async () => {
+            const lic1 = { ...defaultLicense, id: '1', tier: 'basic', email: 'a@b.com' };
+            const lic2 = { ...defaultLicense, id: '2', tier: 'pro', email: 'x@y.com' };
+
+            (kvMock.list as Mock).mockResolvedValue({
+                keys: [{ name: 'license:1' }, { name: 'license:2' }],
+                list_complete: true
+            });
+            (kvMock.get as Mock)
+                .mockResolvedValueOnce(lic1)
+                .mockResolvedValueOnce(lic2);
+
+            const all = await repo.list();
+            expect(all).toHaveLength(2);
+
+            // Reset for filter
+            (kvMock.list as Mock).mockResolvedValue({
+                keys: [{ name: 'license:1' }, { name: 'license:2' }],
+                list_complete: true
+            });
+            (kvMock.get as Mock)
+                .mockResolvedValueOnce(lic1)
+                .mockResolvedValueOnce(lic2);
+
+            const filtered = await repo.list({ tier: 'basic' });
+            expect(filtered).toHaveLength(1);
+            expect(filtered[0].id).toBe('1');
+
+            // Reset for email filter
+            (kvMock.list as Mock).mockResolvedValue({
+                keys: [{ name: 'license:1' }, { name: 'license:2' }],
+                list_complete: true
+            });
+            (kvMock.get as Mock)
+                .mockResolvedValueOnce(lic1)
+                .mockResolvedValueOnce(lic2);
+
+            const emailFiltered = await repo.list({ email: 'x@y.com' });
+            expect(emailFiltered).toHaveLength(1);
+            expect(emailFiltered[0].id).toBe('2');
         });
     });
 });

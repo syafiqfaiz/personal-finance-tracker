@@ -165,6 +165,7 @@ const Settings: React.FC = () => {
                                         setStatus({ type: 'error', message: 'Sync Failed' });
                                     }
                                 }}
+                                aria-label="Sync to S3"
                                 className="bg-blue-50 text-blue-600 p-2.5 rounded-full hover:bg-blue-100 transition-colors border border-blue-100"
                             >
                                 <RefreshCw className="w-4 h-4" />
@@ -175,8 +176,9 @@ const Settings: React.FC = () => {
                     <form onSubmit={handleSaveS3} className="space-y-4 pt-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Bucket</label>
+                                <label htmlFor="s3-bucket" className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Bucket</label>
                                 <input
+                                    id="s3-bucket"
                                     type="text"
                                     value={localS3.bucket}
                                     onChange={(e) => setLocalS3({ ...localS3, bucket: e.target.value })}
@@ -184,8 +186,9 @@ const Settings: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Region</label>
+                                <label htmlFor="s3-region" className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Region</label>
                                 <input
+                                    id="s3-region"
                                     type="text"
                                     value={localS3.region}
                                     onChange={(e) => setLocalS3({ ...localS3, region: e.target.value })}
@@ -194,8 +197,9 @@ const Settings: React.FC = () => {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Access Key</label>
+                            <label htmlFor="s3-access-key" className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Access Key</label>
                             <input
+                                id="s3-access-key"
                                 type="text"
                                 value={localS3.accessKeyId}
                                 onChange={(e) => setLocalS3({ ...localS3, accessKeyId: e.target.value })}
@@ -203,8 +207,9 @@ const Settings: React.FC = () => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Secret Key</label>
+                            <label htmlFor="s3-secret-key" className="text-[10px] font-bold font-jakarta text-slate-900 uppercase tracking-widest ml-1">Secret Key</label>
                             <input
+                                id="s3-secret-key"
                                 type="password"
                                 value={localS3.secretAccessKey}
                                 onChange={(e) => setLocalS3({ ...localS3, secretAccessKey: e.target.value })}
