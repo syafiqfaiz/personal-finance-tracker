@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:staging": "tsc -b && vite build --mode staging",
+    "build:production": "tsc -b && vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
     "test:functions": "vitest functions/",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name personal-finance-tracker"
+    "deploy": "npm run build:production && wrangler pages deploy dist --project-name personal-finance-tracker",
+    "deploy:staging": "npm run build:staging && wrangler pages deploy dist --project-name personal-finance-tracker-staging"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",

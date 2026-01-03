@@ -26,5 +26,8 @@ dist-ssr
 # Test coverage
 coverage
 .env
+.env.staging
+.env.production
 .wrangler
 .dev.vars
+wrangler.toml
