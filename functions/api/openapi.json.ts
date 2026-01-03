@@ -39,28 +39,46 @@ app.get('/', (c) => {
                     requestBody: {
                         content: {
                             'application/json': {
-                                type: 'object',
-                                properties: {
-                                    raw_text: { type: 'string', example: 'beli kfc RM25' },
-                                    categories: { type: 'array', items: { type: 'string' }, example: ['Food', 'Transport'] },
-                                    current_date: { type: 'string', example: '2026-01-02' },
-                                    available_payment_method: { type: 'array', items: { type: 'string' }, example: ['Cash', 'Card'] },
-                                    captured_data: {
-                                        type: 'object',
-                                        nullable: true,
-                                        properties: {
-                                            name: { type: 'string', nullable: true, example: 'KFC' },
-                                            amount: { type: 'number', nullable: true, example: 25.00 },
-                                            category: { type: 'string', nullable: true, example: 'Food' },
-                                            payment_method: { type: 'string', nullable: true, example: 'Cash' },
-                                            date: { type: 'string', nullable: true, example: '2026-01-02' },
-                                            notes: { type: 'string', nullable: true, example: 'Dinner' },
-                                            confidence: { type: 'string', enum: ['high', 'low'], nullable: true, example: 'high' },
-                                            missing_fields: { type: 'array', items: { type: 'string' }, nullable: true, example: [] }
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        raw_text: { type: 'string' },
+                                        categories: { type: 'array', items: { type: 'string' } },
+                                        current_date: { type: 'string' },
+                                        available_payment_method: { type: 'array', items: { type: 'string' } },
+                                        captured_data: {
+                                            type: 'object',
+                                            nullable: true,
+                                            properties: {
+                                                name: { type: 'string', nullable: true },
+                                                amount: { type: 'number', nullable: true },
+                                                category: { type: 'string', nullable: true },
+                                                payment_method: { type: 'string', nullable: true },
+                                                date: { type: 'string', nullable: true },
+                                                notes: { type: 'string', nullable: true },
+                                                confidence: { type: 'string', enum: ['high', 'low'], nullable: true },
+                                                missing_fields: { type: 'array', items: { type: 'string' }, nullable: true }
+                                            }
                                         }
-                                    }
+                                    },
+                                    required: ['raw_text', 'categories', 'current_date']
                                 },
-                                required: ['raw_text', 'categories', 'current_date']
+                                example: {
+                                    raw_text: "cash, dekat ayza",
+                                    categories: ["food", "groceries"],
+                                    current_date: "2026-01-03",
+                                    available_payment_method: ["cash", "credit card", "debit card"],
+                                    captured_data: {
+                                        name: "Miscellaneous",
+                                        amount: 10,
+                                        category: "food",
+                                        payment_method: "Unknown",
+                                        date: "2026-01-03",
+                                        notes: "nasi goreng",
+                                        confidence: "low",
+                                        missing_fields: ["payment_method"]
+                                    }
+                                }
                             }
                         }
                     },

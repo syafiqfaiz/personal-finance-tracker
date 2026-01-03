@@ -1,8 +1,0 @@
-name = "personal-finance-tracker"
-compatibility_date = "2024-12-31"
-pages_build_output_dir = "dist"
-
-# [[kv_namespaces]]
-# binding = "LICENSE_STORE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" # Local dev doesn't care about ID
-# preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
