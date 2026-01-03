@@ -67,20 +67,85 @@ npm run test:functions
 ### Manual Testing
 - **API Docs (Swagger UI)**: Access `http://localhost:8788/api/docs` (or your production URL) to interactively test backend endpoints.
 
-## 🌍 Deployment (Cloudflare Pages)
+## 🌍 Deployment & Environments
 
-### Method 1: CLI Deployment (Recommended)
-1.  **Login**: `npx wrangler login`
-2.  **Deploy**:
-    ```bash
-    npm run deploy
-    ```
+### 1. Environments Overview
+We use a three-tier environment strategy to ensure stability.
 
-### Method 2: Git Integration
-Connect your repository to Cloudflare Pages.
-*   **Build Command**: `npm run build`
-*   **Output Directory**: `dist`
-*   **Functions**: Automatically detected in `/functions`.
+| Environment | Purpose | URL | Deploy Command | Config Source |
+| :--- | :--- | :--- | :--- | :--- |
+| **Local** | Development & Testing | `localhost:8788` | `npm run dev` | `.dev.vars` / `.env` |
+| **Staging** | Pre-production testing | `staging.personal-finance-tracker.pages.dev` | `npm run deploy:staging` | Dashboard / `.env.staging` |
+| **Production** | Live User App | `personal-finance-tracker.pages.dev` | `npm run deploy` | Dashboard / `.env.production` |
+
+### 2. Setting Up Staging
+To create a safe testing ground:
+1.  **Create Project**: Go to Cloudflare Dashboard > Workers & Pages > Create Application > Pages > Create Connect to Git (or CLI). Name it `personal-finance-tracker-staging`.
+2.  **Configure Vars**: Copy your secrets (Section 1) into this new project's **Settings > Environment variables**.
+3.  **Bind KV**: Create a separate KV Namespace (e.g., `LICENSE_STORE_STAGING`) and bind it to `LICENSE_STORE` in the staging project settings.
+4.  **Local Build Config**:
+    -   Create `.env.staging` with `VITE_API_URL=https://staging.personal-finance-tracker.pages.dev`
+    -   Create `.env.production` with `VITE_API_URL=https://personal-finance-tracker.pages.dev`
+    -   *Note*: `npm run deploy:staging` uses `vite build --mode staging` which loads `.env.staging`.
+
+### 3. Deployment Methods
+
+#### Method 1: CLI Deployment (Updates & Staging)
+To deploy to **Staging**:
+```bash
+npm run deploy:staging
+```
+
+To deploy to **Production**:
+```bash
+npm run deploy
+```
+
+#### Method 1.5: CLI Deployment & Secret Management (Advanced)
+If you prefer to manage everything via terminal instead of the Dashboard:
+
+**1. Configure Secrets (First Time Only)**
+Upload your secrets to Cloudflare directly via CLI. You must do this for each environment (Staging/Production).
+
+```bash
+# For Staging
+npx wrangler pages secret put VITE_GEMINI_API_KEY --project-name personal-finance-tracker-staging
+npx wrangler pages secret put AWS_ACCESS_KEY_ID --project-name personal-finance-tracker-staging
+npx wrangler pages secret put AWS_SECRET_ACCESS_KEY --project-name personal-finance-tracker-staging
+npx wrangler pages secret put AWS_BUCKET_NAME --project-name personal-finance-tracker-staging
+npx wrangler pages secret put AWS_REGION --project-name personal-finance-tracker-staging
+npx wrangler pages secret put ADMIN_SECRET --project-name personal-finance-tracker-staging
+
+# For Production (remove --project-name to use default from wrangler.toml or specify it)
+npx wrangler pages secret put VITE_GEMINI_API_KEY --project-name personal-finance-tracker
+# ... repeat for all secrets
+```
+
+**2. Configure KV Binding**
+Since Pages `wrangler.toml` doesn't support custom environments like `staging`:
+- Go to **Cloudflare Dashboard > Pages > personal-finance-tracker-staging**.
+- Settings > Functions > KV Namespace Bindings.
+- Add `LICENSE_STORE` bound to your Staging KV.
+
+**3. Deploy**
+```bash
+npm run deploy:staging
+```
+
+#### Method 2: Git Integration (Production)
+1.  **Connect Repository**: Link your GitHub/GitLab repo to Cloudflare Pages (Production Project).
+2.  **Build Settings**:
+    -   **Framework Preset**: `Vite`
+    -   **Build Command**: `npm run build`
+    -   **Output Directory**: `dist`
+3.  **Environment Variables**:
+    -   Go to **Settings > Environment variables**.
+    -   Add **Production** variables.
+4.  **KV Namespace Binding**:
+    -   Go to **Settings > Functions > KV Namespace Bindings**.
+    -   **Variable Name**: `LICENSE_STORE`
+    -   **KV Namespace**: Select you Production KV.
+5.  **Deploy**: Push to `main`.
 
 ## 🔒 Security & Privacy
 - **Local Secret Management**: Personal secrets are stored in IndexedDB.
