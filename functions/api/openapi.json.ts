@@ -12,7 +12,9 @@ app.get('/', (c) => {
             description: 'Serverless backend API for AI extraction, Cloud Storage, and License management.'
         },
         servers: [
-            { url: 'https://personal-finance-tracker.pages.dev', description: 'Production' },
+            { url: '/', description: 'Current Environment' },
+            { url: 'https://belanja.syafiqfaiz.com', description: 'Production' },
+            { url: 'https://staging.belanja-9f0.pages.dev', description: 'Staging' },
             { url: 'http://localhost:8788', description: 'Local Development' }
         ],
         components: {

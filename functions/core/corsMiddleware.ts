@@ -3,14 +3,20 @@ import { createMiddleware } from 'hono/factory';
 
 const ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    'https://personal-finance-tracker.pages.dev'
+    'https://personal-finance-tracker.pages.dev',
+    'https://belanja.syafiqfaiz.com',
+    'https://staging.belanja-9f0.pages.dev'
 ];
 
 export const corsMiddleware = createMiddleware(async (c, next) => {
     const origin = c.req.header('Origin');
 
     // Strict Origin Check
-    const isAllowed = origin && (ALLOWED_ORIGINS.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin));
+    const isAllowed = origin && (
+        ALLOWED_ORIGINS.includes(origin) ||
+        /^http:\/\/localhost:\d+$/.test(origin) ||
+        /^https:\/\/.*\.belanja-9f0\.pages\.dev$/.test(origin)
+    );
 
     if (origin && !isAllowed) {
         return c.json({ error: 'Forbidden Origin' }, 403);
@@ -26,8 +32,8 @@ export const corsMiddleware = createMiddleware(async (c, next) => {
 
     if (origin) {
         c.header('Access-Control-Allow-Origin', origin);
-        c.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        c.header('Access-Control-Allow-Headers', 'Content-Type, X-License-Key');
+        c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        c.header('Access-Control-Allow-Headers', 'Content-Type, X-License-Key, X-Admin-Secret');
     }
 
     // Handle Preflight
