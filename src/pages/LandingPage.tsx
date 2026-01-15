@@ -108,6 +108,16 @@ const LandingPage: React.FC = () => {
                             <p className="text-slate-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
                                 Forget complex forms. Just tell our AI what you spent, and let it handle the data entry. Secure, private, and effortless.
                             </p>
+
+                            <div>
+                                <button
+                                    onClick={() => navigate('/playground')}
+                                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-full transition-colors"
+                                >
+                                    <Sparkles className="w-4 h-4" />
+                                    Try AI Demo
+                                </button>
+                            </div>
                         </div>
 
                         {/* Onboarding Input */}
