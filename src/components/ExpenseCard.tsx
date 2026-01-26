@@ -2,7 +2,7 @@ import React from 'react';
 import { useFinanceStore, DEFAULT_ICON } from '../store/useFinanceStore';
 import { getIconComponent } from '../utils/iconUtils';
 import { formatCurrencyPrecise } from '../utils/formatters';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Receipt } from 'lucide-react';
 
 interface ExpenseCardProps {
     expense: {
@@ -12,12 +12,14 @@ interface ExpenseCardProps {
         category: string;
         timestamp: string | Date;
         notes?: string;
+        receiptUrl?: string;
     };
     onClick: () => void;
     onDelete?: (e: React.MouseEvent) => void;
+    onReceiptClick?: (e: React.MouseEvent) => void;
 }
 
-const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onClick, onDelete }) => {
+const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onClick, onDelete, onReceiptClick }) => {
     const { categoryIcons } = useFinanceStore();
 
     // Category icon helper
@@ -52,6 +54,16 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onClick, onDelete })
                 <p className="font-bold font-jakarta text-slate-900 whitespace-nowrap">
                     {formatCurrencyPrecise(expense.amount)}
                 </p>
+
+                {expense.receiptUrl && onReceiptClick && (
+                    <button
+                        onClick={onReceiptClick}
+                        className="p-2 text-purple-500 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-all"
+                        title="View receipt"
+                    >
+                        <Receipt className="w-4 h-4" />
+                    </button>
+                )}
 
                 {onDelete && (
                     <button

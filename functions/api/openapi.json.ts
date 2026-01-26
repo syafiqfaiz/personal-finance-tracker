@@ -34,6 +34,7 @@ app.get('/', (c) => {
         paths: {
             '/api/ai/extract': {
                 post: {
+                    tags: ['Extract'],
                     summary: 'Extract expenses from text',
                     security: [{ LicenseKey: [] }],
                     requestBody: {
@@ -115,6 +116,7 @@ app.get('/', (c) => {
             },
             '/api/storage/upload-url': {
                 post: {
+                    tags: ['URL Signing'],
                     summary: 'Get Presigned PUT URL',
                     security: [{ LicenseKey: [] }],
                     requestBody: {
@@ -150,6 +152,7 @@ app.get('/', (c) => {
             },
             '/api/storage/view-url': {
                 get: {
+                    tags: ['URL Signing'],
                     summary: 'Get Presigned GET URL',
                     security: [{ LicenseKey: [] }],
                     parameters: [
@@ -174,6 +177,7 @@ app.get('/', (c) => {
             },
             '/api/admin/licenses': {
                 get: {
+                    tags: ['Admin'],
                     summary: 'List Licenses (Admin)',
                     security: [{ AdminSecret: [] }],
                     parameters: [
@@ -209,6 +213,7 @@ app.get('/', (c) => {
                     }
                 },
                 post: {
+                    tags: ['Admin'],
                     summary: 'Create License Key (Admin)',
                     security: [{ AdminSecret: [] }],
                     requestBody: {
@@ -244,6 +249,7 @@ app.get('/', (c) => {
             },
             '/api/admin/licenses/{id}': {
                 get: {
+                    tags: ['Admin'],
                     summary: 'Get License Details (Admin)',
                     security: [{ AdminSecret: [] }],
                     parameters: [
@@ -277,6 +283,7 @@ app.get('/', (c) => {
                     }
                 },
                 put: {
+                    tags: ['Admin'],
                     summary: 'Update License (Admin)',
                     security: [{ AdminSecret: [] }],
                     parameters: [

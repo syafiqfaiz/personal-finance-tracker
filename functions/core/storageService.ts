@@ -1,8 +1,8 @@
-import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export class StorageService {
-    constructor(private s3Client: PutObjectCommand | GetObjectCommand | unknown, private bucket: string) { }
+    constructor(private s3Client: S3Client, private bucket: string) { }
 
     async generateUploadUrl(userId: string, filename: string, contentType: string): Promise<{ url: string; key: string }> {
         // Validate Filename (Prevent Path Traversal)
@@ -10,8 +10,8 @@ export class StorageService {
             throw new Error('Invalid filename');
         }
 
-        // Validate File Type (Allow images and simple docs)
-        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        // Validate File Type (Images only - no PDF)
+        const allowedTypes = ['image/jpeg', 'image/png'];
         if (!allowedTypes.includes(contentType)) {
             throw new Error('Invalid file type');
         }

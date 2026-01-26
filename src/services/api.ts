@@ -59,4 +59,106 @@ export const api = {
 
         return response.json();
     },
+
+    getUploadUrl: async (filename: string, contentType: string): Promise<{ url: string; key: string }> => {
+        const { licenseKey } = useSettingsStore.getState();
+
+        if (!licenseKey) {
+            throw new Error('LICENSE_REQUIRED');
+        }
+
+        const response = await fetch(`${API_BASE_url}/storage/upload-url`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-License-Key': licenseKey,
+            },
+            body: JSON.stringify({
+                filename,
+                content_type: contentType
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'UPLOAD_URL_FAILED');
+        }
+
+        return response.json();
+    },
+
+    extractFromReceipt: async (
+        s3Key: string,
+        categories: string[],
+        currentDate: string,
+        availablePaymentMethods: string[]
+    ): Promise<{
+        response_text: string;
+        captured_data: ExtractionResult['captured_data'];
+        receipt_metadata: {
+            s3_key: string;
+            merchant_name: string;
+            receipt_date: string;
+        };
+        usage: {
+            remaining: number;
+        };
+    }> => {
+        const { licenseKey } = useSettingsStore.getState();
+
+        if (!licenseKey) {
+            throw new Error('LICENSE_REQUIRED');
+        }
+
+        const response = await fetch(`${API_BASE_url}/ai/extract-from-receipt`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-License-Key': licenseKey,
+            },
+            body: JSON.stringify({
+                s3_key: s3Key,
+                categories,
+                current_date: currentDate,
+                available_payment_method: availablePaymentMethods,
+            }),
+        });
+
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                throw new Error('INVALID_LICENSE');
+            }
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'RECEIPT_EXTRACTION_FAILED');
+        }
+
+        return response.json();
+    },
+
+    getViewUrl: async (s3Key: string): Promise<string> => {
+        const { licenseKey } = useSettingsStore.getState();
+
+        if (!licenseKey) {
+            throw new Error('LICENSE_REQUIRED');
+        }
+
+        const response = await fetch(`${API_BASE_url}/storage/view-url`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-License-Key': licenseKey,
+            },
+            body: JSON.stringify({
+                key: s3Key
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'VIEW_URL_FAILED');
+        }
+
+        const data = await response.json();
+        return data.url;
+    },
 };

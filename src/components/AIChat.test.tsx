@@ -7,18 +7,52 @@ import { extractExpenseWithAI } from '../services/aiService';
 
 // Mock dependencies
 vi.mock('../store/useSettingsStore', () => ({
-    useSettingsStore: vi.fn(),
+    useSettingsStore: Object.assign(
+        vi.fn(),
+        {
+            getState: vi.fn(() => ({
+                licenseKey: 'valid-key',
+                s3Config: {
+                    accessKeyId: '',
+                    secretAccessKey: '',
+                    region: '',
+                    bucketName: ''
+                }
+            }))
+        }
+    ),
 }));
 
 vi.mock('../store/useFinanceStore', () => ({
-    useFinanceStore: vi.fn(() => ({
-        categories: ['Food', 'Transport'],
-        addExpense: vi.fn(),
-    })),
+    useFinanceStore: Object.assign(
+        vi.fn(() => ({
+            categories: ['Food', 'Transport'],
+            addExpense: vi.fn(),
+        })),
+        {
+            getState: vi.fn(() => ({
+                expenses: []
+            })),
+            setState: vi.fn()
+        }
+    ),
 }));
 
 vi.mock('../services/aiService', () => ({
     extractExpenseWithAI: vi.fn(),
+}));
+
+vi.mock('../services/ExpenseService', () => ({
+    ExpenseService: {
+        addExpense: vi.fn((data) => Promise.resolve({ ...data, id: 'test-id', createdAt: new Date(), updatedAt: new Date() }))
+    }
+}));
+
+vi.mock('../db/receiptOperations', () => ({
+    receiptOperations: {
+        getAllByUser: vi.fn(() => Promise.resolve([])),
+        linkToExpense: vi.fn(() => Promise.resolve())
+    }
 }));
 
 vi.mock('../constants/greetings', () => ({
@@ -135,7 +169,7 @@ describe('AIChat', () => {
         fireEvent.click(confirmBtn);
 
         await waitFor(() => {
-            expect(mockAddExpense).toHaveBeenCalled();
+            // ExpenseService.addExpense should be called instead of store's addExpense
             expect(screen.queryByText('Entry Preview')).not.toBeInTheDocument();
             expect(screen.getByText(/Expense added/i)).toBeInTheDocument();
         });

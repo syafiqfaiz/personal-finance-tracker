@@ -48,5 +48,13 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
     },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8788',
+          changeOrigin: true,
+        },
+      },
+    },
   };
 })

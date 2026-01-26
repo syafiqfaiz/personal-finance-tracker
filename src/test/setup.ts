@@ -99,9 +99,10 @@ const createMockTable = () => {
         get: vi.fn((key) => {
             return Promise.resolve(storage.find(i => i.key === key || i.id === key));
         }),
-        where: vi.fn(() => ({
+        where: vi.fn((field) => ({
             equals: vi.fn((value) => ({
-                toArray: vi.fn(() => Promise.resolve(storage.filter(i => Object.values(i).includes(value)))),
+                toArray: vi.fn(() => Promise.resolve(storage.filter(i => i[field] === value))),
+                first: vi.fn(() => Promise.resolve(storage.find(i => i[field] === value))),
                 modify: vi.fn(),
                 delete: vi.fn()
             })),
@@ -119,12 +120,47 @@ const createMockTable = () => {
 const mockExpenses = createMockTable();
 const mockBudgets = createMockTable();
 const mockSettings = createMockTable();
+const mockReceipts = createMockTable();
+
+// Add where().and() support for receipts table (used in getOrphanedReceipts)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(mockReceipts.where as any) = vi.fn((field) => ({
+    equals: vi.fn((value) => ({
+        and: vi.fn((predicate) => ({
+            toArray: vi.fn(() => {
+                const storage = mockReceipts.toArray();
+                return storage.then(items =>
+                    items.filter(item =>
+                        Object.entries(item).some(([k, v]) => k === field ? v === value : false) &&
+                        predicate(item)
+                    )
+                );
+            })
+        })),
+        first: vi.fn(() => {
+            const storage = mockReceipts.toArray();
+            return storage.then(items =>
+                items.find(item => Object.entries(item).some(([k, v]) => k === field ? v === value : false))
+            );
+        }),
+        toArray: vi.fn(() => {
+            const storage = mockReceipts.toArray();
+            return storage.then(items =>
+                items.filter(item => Object.entries(item).some(([k, v]) => k === field ? v === value : false))
+            );
+        }),
+        modify: vi.fn(),
+        delete: vi.fn()
+    })),
+    startsWith: vi.fn(),
+}));
 
 vi.mock('../db/db', () => ({
     db: {
         expenses: mockExpenses,
         budgets: mockBudgets,
         settings: mockSettings,
+        receipts: mockReceipts,
     },
     FinanceDB: vi.fn()
 }));
@@ -134,4 +170,5 @@ export const resetDb = () => {
     mockExpenses.clear();
     mockBudgets.clear();
     mockSettings.clear();
+    mockReceipts.clear();
 };

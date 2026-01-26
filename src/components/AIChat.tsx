@@ -2,9 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { extractExpenseWithAI, type ExtractedExpense } from '../services/aiService';
-import { Send, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, Sparkles, AlertCircle, Loader2, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { getRandomGreeting } from '../constants/greetings';
+import { validateReceiptFile } from '../utils/fileValidation';
+import { api } from '../services/api';
+import { receiptOperations } from '../db/receiptOperations';
+import { ExpenseService } from '../services/ExpenseService';
 
 interface AIChatProps {
     onSuccess?: () => void;
@@ -17,7 +21,7 @@ interface Message {
 }
 
 const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
-    const { categories, addExpense } = useFinanceStore();
+    const { categories } = useFinanceStore();
     const { licenseKey } = useSettingsStore();
 
     const [messages, setMessages] = useState<Message[]>(() => [
@@ -28,6 +32,15 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const [currentContext, setCurrentContext] = useState<ExtractedExpense | undefined>(undefined);
     const [error, setError] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Receipt upload state
+    const [hasUploadedReceipt, setHasUploadedReceipt] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [receiptMetadata, setReceiptMetadata] = useState<{
+        s3Key: string;
+        merchantName: string;
+        receiptDate: string;
+    } | null>(null);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -78,7 +91,10 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const handleConfirm = async () => {
         if (!currentContext) return;
 
-        await addExpense({
+        const { s3Config } = useSettingsStore.getState();
+
+        // Use ExpenseService directly to get the expense ID
+        const newExpense = await ExpenseService.addExpense({
             name: currentContext.name,
             amount: currentContext.amount,
             category: currentContext.category,
@@ -87,13 +103,36 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
             notes: currentContext.notes,
             paymentMethod: currentContext.paymentMethod || 'Cash',
             isTaxDeductible: false,
+            receiptUrl: receiptMetadata?.s3Key, // Store S3 key
+        }, s3Config);
+
+        // Manually update the store state
+        const { expenses } = useFinanceStore.getState();
+        useFinanceStore.setState({
+            expenses: [newExpense, ...expenses].sort((a, b) => {
+                const dateDiff = (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0);
+                if (dateDiff !== 0) return dateDiff;
+                const createdA = a.createdAt?.getTime() || 0;
+                const createdB = b.createdAt?.getTime() || 0;
+                return createdB - createdA;
+            })
         });
+
+        // Link receipt to expense if exists
+        if (receiptMetadata) {
+            const receipts = await receiptOperations.getAllByUser(licenseKey!);
+            const receipt = receipts.find(r => r.s3Key === receiptMetadata.s3Key && !r.expenseId);
+            if (receipt) {
+                await receiptOperations.linkToExpense(receipt.id, newExpense.id);
+            }
+        }
 
         toast.success('Expense added via AI');
         // Reset state but keep chat history? Or reset everything? 
         // User might want to start fresh.
         setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: 'Expense added! What else?' }]);
         setCurrentContext(undefined);
+        setReceiptMetadata(null);
 
         if (onSuccess) {
             onSuccess();
@@ -103,6 +142,100 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const handleDiscard = () => {
         setCurrentContext(undefined);
         setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: 'Cancelled. What else would you like to add?' }]);
+    };
+
+    const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Client-side validation
+        const validationError = validateReceiptFile(file);
+        if (validationError) {
+            toast.error(validationError);
+            return;
+        }
+
+        setIsUploading(true);
+        setError(null);
+
+        try {
+            // 1. Request presigned S3 URL
+            const uploadUrlResponse = await api.getUploadUrl(
+                file.name,
+                file.type
+            );
+
+            // 2. Upload to S3
+            const uploadResponse = await fetch(uploadUrlResponse.url, {
+                method: 'PUT',
+                body: file,
+                headers: {
+                    'Content-Type': file.type
+                }
+            });
+
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload receipt to storage');
+            }
+
+            // 3. Extract data from receipt
+            const extractionResult = await api.extractFromReceipt(
+                uploadUrlResponse.key,
+                categories,
+                new Date().toISOString().split('T')[0],
+                ['Cash', 'Credit Card', 'QR Pay', 'Transfer']
+            );
+
+            // 4. Save receipt metadata to IndexedDB
+            await receiptOperations.create({
+                userId: licenseKey!,
+                s3Key: uploadUrlResponse.key,
+                merchantName: extractionResult.receipt_metadata.merchant_name,
+                receiptDate: extractionResult.receipt_metadata.receipt_date
+            });
+
+            // 5. Update state
+            setReceiptMetadata({
+                s3Key: extractionResult.receipt_metadata.s3_key,
+                merchantName: extractionResult.receipt_metadata.merchant_name,
+                receiptDate: extractionResult.receipt_metadata.receipt_date
+            });
+            setCurrentContext({
+                name: extractionResult.captured_data.name || '',
+                amount: extractionResult.captured_data.amount || 0,
+                category: extractionResult.captured_data.category || '',
+                paymentMethod: extractionResult.captured_data.payment_method || 'Cash',
+                date: extractionResult.captured_data.date || new Date().toISOString().split('T')[0],
+                notes: extractionResult.captured_data.notes || '',
+                confidence: extractionResult.captured_data.confidence || 'low',
+                missingFields: extractionResult.captured_data.missing_fields || [],
+                responseText: extractionResult.response_text
+            });
+            setHasUploadedReceipt(true);
+
+            // 6. Add AI response to chat
+            if (extractionResult.response_text) {
+                const aiMsg: Message = {
+                    id: Date.now().toString(),
+                    role: 'assistant',
+                    text: extractionResult.response_text
+                };
+                setMessages(prev => [...prev, aiMsg]);
+            }
+
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+                toast.error(err.message);
+            } else {
+                setError('Failed to process receipt');
+                toast.error('Failed to process receipt');
+            }
+        } finally {
+            setIsUploading(false);
+            // Reset file input
+            e.target.value = '';
+        }
     };
 
     if (!licenseKey) {
@@ -209,6 +342,25 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* UPLOAD BUTTON - Only show before first message */}
+            {messages.length === 1 && !hasUploadedReceipt && (
+                <div className="mb-4">
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
+                        <Camera className="w-5 h-5 text-purple-600" />
+                        <span className="text-sm font-bold text-purple-900 uppercase tracking-widest">
+                            {isUploading ? 'Uploading...' : 'Upload Receipt'}
+                        </span>
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/jpg"
+                            onChange={handleReceiptUpload}
+                            className="hidden"
+                            disabled={isUploading}
+                        />
+                    </label>
                 </div>
             )}
 

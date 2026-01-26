@@ -30,10 +30,21 @@ export interface Setting {
     value: string;
 }
 
+export interface Receipt {
+    id: string;              // UUID
+    userId: string;          // License ID
+    s3Key: string;           // S3 object key
+    merchantName: string;    // Extracted merchant name
+    receiptDate: string;     // ISO date from receipt
+    uploadedAt: Date;        // Upload timestamp
+    expenseId?: string;      // Linked expense (null if not confirmed)
+}
+
 export class FinanceDB extends Dexie {
     expenses!: Table<Expense>;
     budgets!: Table<Budget>;
     settings!: Table<Setting>;
+    receipts!: Table<Receipt>;
 
     constructor() {
         super('FinanceDB');
@@ -49,6 +60,14 @@ export class FinanceDB extends Dexie {
         this.version(2).stores({
             expenses: 'id, name, amount, category, *tags, timestamp, createdAt',
             budgets: 'id, category, monthPeriod'
+        });
+
+        // Version 3: Add receipts table
+        this.version(3).stores({
+            expenses: 'id, name, amount, category, *tags, timestamp, createdAt',
+            budgets: 'id, category, monthPeriod',
+            settings: 'key',
+            receipts: 'id, userId, uploadedAt, expenseId'
         });
     }
 }

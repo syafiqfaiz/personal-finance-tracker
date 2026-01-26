@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinanceStore } from '../store/useFinanceStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { ShoppingBag } from 'lucide-react';
 import ExpenseCard from './ExpenseCard';
+import ReceiptViewer from './ReceiptViewer';
 import { toast } from 'sonner';
 import ConfirmDialog from './ConfirmDialog';
+import { receiptOperations } from '../db/receiptOperations';
 
 interface ExpenseListProps {
     filterCategory?: string;
@@ -15,8 +18,14 @@ interface ExpenseListProps {
 
 const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, filterMonth, filterYear }) => {
     const { expenses, deleteExpense } = useFinanceStore();
+    const { licenseKey } = useSettingsStore();
     const navigate = useNavigate();
-    const [deleteConfirmation, setDeleteConfirmation] = React.useState<string | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
+    const [viewingReceipt, setViewingReceipt] = useState<{
+        s3Key: string;
+        merchantName?: string;
+        receiptDate?: string;
+    } | null>(null);
 
     const filteredExpenses = expenses
         .filter(e => !filterCategory || e.category === filterCategory)
@@ -33,6 +42,30 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
             if (filterMonth === null || filterMonth === undefined) return yearMatch;
             return yearMatch && date.getMonth() === filterMonth;
         });
+
+    const handleReceiptClick = async (e: React.MouseEvent, expenseId: string, s3Key: string) => {
+        e.stopPropagation();
+
+        // Try to get receipt metadata from IndexedDB
+        try {
+            if (licenseKey) {
+                const receipt = await receiptOperations.getByExpenseId(expenseId);
+                if (receipt) {
+                    setViewingReceipt({
+                        s3Key: receipt.s3Key,
+                        merchantName: receipt.merchantName,
+                        receiptDate: receipt.receiptDate
+                    });
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load receipt metadata:', err);
+        }
+
+        // Fallback: just show the image without metadata
+        setViewingReceipt({ s3Key });
+    };
 
     // Group expenses by month
     const groupedExpenses = filteredExpenses.reduce((groups, expense) => {
@@ -67,6 +100,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
                                     e.stopPropagation();
                                     setDeleteConfirmation(expense.id);
                                 }}
+                                onReceiptClick={expense.receiptUrl ? (e) => handleReceiptClick(e, expense.id, expense.receiptUrl!) : undefined}
                             />
                         ))}
                     </div>
@@ -86,6 +120,15 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
                 }}
                 onCancel={() => setDeleteConfirmation(null)}
             />
+
+            {viewingReceipt && (
+                <ReceiptViewer
+                    s3Key={viewingReceipt.s3Key}
+                    merchantName={viewingReceipt.merchantName}
+                    receiptDate={viewingReceipt.receiptDate}
+                    onClose={() => setViewingReceipt(null)}
+                />
+            )}
         </div>
     );
 };
