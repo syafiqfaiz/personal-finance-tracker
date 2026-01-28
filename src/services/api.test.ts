@@ -196,7 +196,7 @@ describe('api service', () => {
                     },
                     body: JSON.stringify({
                         filename: 'receipt.jpg',
-                        content_type: 'image/jpeg'
+                        contentType: 'image/jpeg'
                     })
                 })
             );
@@ -260,7 +260,7 @@ describe('api service', () => {
                     missing_fields: []
                 },
                 receipt_metadata: {
-                    s3_key: 'user_storage/123/receipts/2026/2026-01/receipt.jpg',
+                    storage_key: 'user_storage/123/receipts/2026/2026-01/receipt.jpg',
                     merchant_name: 'Starbucks',
                     receipt_date: '2026-01-26'
                 },
@@ -288,7 +288,7 @@ describe('api service', () => {
                         'X-License-Key': 'valid-key'
                     },
                     body: JSON.stringify({
-                        s3_key: 'user_storage/123/receipts/2026/2026-01/receipt.jpg',
+                        storage_key: 'user_storage/123/receipts/2026/2026-01/receipt.jpg',
                         categories: ['Food', 'Transport'],
                         current_date: '2026-01-26',
                         available_payment_method: ['Cash', 'Credit Card']
@@ -382,15 +382,11 @@ describe('api service', () => {
             const result = await api.getViewUrl('user_storage/123/receipts/2026/2026-01/receipt.jpg');
 
             expect(fetchMock).toHaveBeenCalledWith(
-                `${API_BASE_url}/storage/view-url`,
+                `${API_BASE_url}/storage/view-url?key=${encodeURIComponent('user_storage/123/receipts/2026/2026-01/receipt.jpg')}`,
                 expect.objectContaining({
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+                    method: 'GET',
+                    headers: expect.objectContaining({
                         'X-License-Key': 'valid-key'
-                    },
-                    body: JSON.stringify({
-                        key: 'user_storage/123/receipts/2026/2026-01/receipt.jpg'
                     })
                 })
             );

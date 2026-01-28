@@ -9,10 +9,10 @@ import { License } from '../../core/licenseRepository';
 
 type Bindings = {
     LICENSE_STORE: KVNamespace;
-    AWS_ACCESS_KEY_ID: string;
-    AWS_SECRET_ACCESS_KEY: string;
-    AWS_BUCKET_NAME: string;
-    AWS_REGION: string;
+    R2_ACCESS_KEY_ID: string;
+    R2_SECRET_ACCESS_KEY: string;
+    R2_BUCKET_NAME: string;
+    R2_ENDPOINT_URL: string;
 };
 
 type Variables = {
@@ -34,14 +34,15 @@ app.get('/', async (c) => {
     }
 
     const s3Client = new S3Client({
-        region: c.env.AWS_REGION,
+        region: 'auto',
+        endpoint: c.env.R2_ENDPOINT_URL,
         credentials: {
-            accessKeyId: c.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: c.env.AWS_SECRET_ACCESS_KEY
+            accessKeyId: c.env.R2_ACCESS_KEY_ID,
+            secretAccessKey: c.env.R2_SECRET_ACCESS_KEY
         }
     });
 
-    const storage = new StorageService(s3Client, c.env.AWS_BUCKET_NAME);
+    const storage = new StorageService(s3Client, c.env.R2_BUCKET_NAME);
 
     try {
         const url = await storage.generateViewUrl(license.id, key);

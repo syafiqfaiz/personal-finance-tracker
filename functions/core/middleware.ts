@@ -13,6 +13,7 @@ type Variables = {
 export const authMiddleware = createMiddleware<{ Bindings: Bindings; Variables: Variables }>(async (c, next) => {
     const apiKey = c.req.header('X-License-Key');
 
+    // Debug logging
     if (!apiKey) {
         return c.json({ error: 'Missing License Key' }, 401);
     }

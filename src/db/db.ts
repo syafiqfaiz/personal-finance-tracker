@@ -33,7 +33,7 @@ export interface Setting {
 export interface Receipt {
     id: string;              // UUID
     userId: string;          // License ID
-    s3Key: string;           // S3 object key
+    storageKey: string;           // Storage key
     merchantName: string;    // Extracted merchant name
     receiptDate: string;     // ISO date from receipt
     uploadedAt: Date;        // Upload timestamp

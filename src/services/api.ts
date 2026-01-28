@@ -75,7 +75,7 @@ export const api = {
             },
             body: JSON.stringify({
                 filename,
-                content_type: contentType
+                contentType: contentType
             }),
         });
 
@@ -88,7 +88,7 @@ export const api = {
     },
 
     extractFromReceipt: async (
-        s3Key: string,
+        storageKey: string,
         categories: string[],
         currentDate: string,
         availablePaymentMethods: string[]
@@ -96,7 +96,7 @@ export const api = {
         response_text: string;
         captured_data: ExtractionResult['captured_data'];
         receipt_metadata: {
-            s3_key: string;
+            storage_key: string;
             merchant_name: string;
             receipt_date: string;
         };
@@ -117,7 +117,7 @@ export const api = {
                 'X-License-Key': licenseKey,
             },
             body: JSON.stringify({
-                s3_key: s3Key,
+                storage_key: storageKey,
                 categories,
                 current_date: currentDate,
                 available_payment_method: availablePaymentMethods,
@@ -135,22 +135,18 @@ export const api = {
         return response.json();
     },
 
-    getViewUrl: async (s3Key: string): Promise<string> => {
+    getViewUrl: async (storageKey: string): Promise<string> => { // Changed s3Key to storageKey
         const { licenseKey } = useSettingsStore.getState();
 
         if (!licenseKey) {
             throw new Error('LICENSE_REQUIRED');
         }
 
-        const response = await fetch(`${API_BASE_url}/storage/view-url`, {
-            method: 'POST',
+        const response = await fetch(`${API_BASE_url}/storage/view-url?key=${encodeURIComponent(storageKey)}`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
                 'X-License-Key': licenseKey,
             },
-            body: JSON.stringify({
-                key: s3Key
-            }),
         });
 
         if (!response.ok) {

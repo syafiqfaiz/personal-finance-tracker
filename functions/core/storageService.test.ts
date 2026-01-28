@@ -32,26 +32,7 @@ describe('StorageService', () => {
         vi.resetAllMocks();
     });
 
-    it('should generate upload URL and return key', async () => {
-        mocks.getSignedUrl.mockResolvedValue('https://s3.aws.com/presigned-upload');
 
-        const result = await service.generateUploadUrl('user-123', 'receipt.jpg', 'image/jpeg');
-
-        expect(result.url).toBe('https://s3.aws.com/presigned-upload');
-        expect(result.key).toMatch(/user_storage\/user-123\/receipts\/\d{4}\/\d{4}-\d{2}\/receipt\.jpg/);
-        expect(mocks.getSignedUrl).toHaveBeenCalled();
-    });
-
-    it('should reject invalid file types', async () => {
-        await expect(service.generateUploadUrl('user-123', 'malware.exe', 'application/x-msdownload'))
-            .rejects.toThrow('Invalid file type');
-    });
-
-    it('should sanitize filename path traversal', async () => {
-        // Prevent ../../etc/passwd
-        await expect(service.generateUploadUrl('user-123', '../../secret.txt', 'text/plain'))
-            .rejects.toThrow('Invalid filename');
-    });
 
     it('should generate view URL for valid key', async () => {
         mocks.getSignedUrl.mockResolvedValue('https://s3.aws.com/presigned-view');

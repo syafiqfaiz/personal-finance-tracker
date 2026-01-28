@@ -37,7 +37,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const [hasUploadedReceipt, setHasUploadedReceipt] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [receiptMetadata, setReceiptMetadata] = useState<{
-        s3Key: string;
+        storageKey: string;
         merchantName: string;
         receiptDate: string;
     } | null>(null);
@@ -91,8 +91,6 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const handleConfirm = async () => {
         if (!currentContext) return;
 
-        const { s3Config } = useSettingsStore.getState();
-
         // Use ExpenseService directly to get the expense ID
         const newExpense = await ExpenseService.addExpense({
             name: currentContext.name,
@@ -103,8 +101,8 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
             notes: currentContext.notes,
             paymentMethod: currentContext.paymentMethod || 'Cash',
             isTaxDeductible: false,
-            receiptUrl: receiptMetadata?.s3Key, // Store S3 key
-        }, s3Config);
+            receiptUrl: receiptMetadata?.storageKey, // Store storage key
+        });
 
         // Manually update the store state
         const { expenses } = useFinanceStore.getState();
@@ -121,15 +119,14 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
         // Link receipt to expense if exists
         if (receiptMetadata) {
             const receipts = await receiptOperations.getAllByUser(licenseKey!);
-            const receipt = receipts.find(r => r.s3Key === receiptMetadata.s3Key && !r.expenseId);
+            const receipt = receipts.find(r => r.storageKey === receiptMetadata.storageKey && !r.expenseId);
             if (receipt) {
                 await receiptOperations.linkToExpense(receipt.id, newExpense.id);
             }
         }
 
         toast.success('Expense added via AI');
-        // Reset state but keep chat history? Or reset everything? 
-        // User might want to start fresh.
+        // Reset state but keep chat history
         setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: 'Expense added! What else?' }]);
         setCurrentContext(undefined);
         setReceiptMetadata(null);
@@ -159,13 +156,10 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
         setError(null);
 
         try {
-            // 1. Request presigned S3 URL
-            const uploadUrlResponse = await api.getUploadUrl(
-                file.name,
-                file.type
-            );
+            // 1. Request presigned URL
+            const uploadUrlResponse = await api.getUploadUrl(file.name, file.type);
 
-            // 2. Upload to S3
+            // 2. Upload to R2 using presigned URL
             const uploadResponse = await fetch(uploadUrlResponse.url, {
                 method: 'PUT',
                 body: file,
@@ -189,14 +183,14 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
             // 4. Save receipt metadata to IndexedDB
             await receiptOperations.create({
                 userId: licenseKey!,
-                s3Key: uploadUrlResponse.key,
+                storageKey: uploadUrlResponse.key,
                 merchantName: extractionResult.receipt_metadata.merchant_name,
                 receiptDate: extractionResult.receipt_metadata.receipt_date
             });
 
             // 5. Update state
             setReceiptMetadata({
-                s3Key: extractionResult.receipt_metadata.s3_key,
+                storageKey: extractionResult.receipt_metadata.storage_key,
                 merchantName: extractionResult.receipt_metadata.merchant_name,
                 receiptDate: extractionResult.receipt_metadata.receipt_date
             });

@@ -5,7 +5,7 @@ A private, offline-first personal finance tracker built as a React PWA, backed b
 ## 🚀 Key Features
 - **Offline-First**: Track expenses anywhere, even without internet.
 - **AI-Powered**: Natural language expense entry using Google Gemini (via secure backend).
-- **Secure Cloud Storage**: Direct uploads to AWS S3 using presigned URLs.
+- **Secure Cloud Storage**: Direct uploads to Cloudflare R2 using presigned URLs.
 - **Privacy-Centric**: "Bring Your Own Key" architecture for local data, with backend acting as a secure proxy.
 - **Admin License Management**: Dedicated API for creating, updating, and managing user licenses.
 - **Observability**: Integrated Sentry error tracking.
@@ -13,7 +13,8 @@ A private, offline-first personal finance tracker built as a React PWA, backed b
 ## 🛠 Tech Stack
 - **Frontend**: React (TypeScript), Vite, Tailwind-like CSS, Lucide Icons.
 - **Backend**: Cloudflare Pages Functions (Hono Framework).
-- **Data**: IndexedDB (Local), Cloudflare KV (Licenses), AWS S3 (Receipts).
+- **Data**: IndexedDB (Local), Cloudflare KV (Licenses), Cloudflare R2 (Receipts).
+- **Storage Interface**: AWS SDK v3 (configured for Cloudflare R2 compatibility using S3 API).
 - **AI**: Google Gemini 2.0 Flash.
 
 ## ⚙️ Setup & Configuration
@@ -33,10 +34,10 @@ To run the full stack (Frontend + Backend), configure these variables in your de
 | `VITE_SENTRY_DSN` | Sentry DSN URL for error tracking. | No |
 | `VITE_GEMINI_API_KEY` | Google Gemini API Key. | **Yes** (Backend) |
 | `LICENSE_STORE` | Cloudflare KV Namespace ID. | **Yes** (Backend) |
-| `AWS_ACCESS_KEY_ID` | AWS IAM Access Key for S3. | **Yes** (Backend) |
-| `AWS_SECRET_ACCESS_KEY` | AWS IAM Secret Key. | **Yes** (Backend) |
-| `AWS_BUCKET_NAME` | S3 Bucket Name. | **Yes** (Backend) |
-| `AWS_REGION` | AWS Region (e.g., `us-east-1`). | **Yes** (Backend) |
+| `R2_ACCESS_KEY_ID` | R2 Access Key ID (for AWS SDK authentication). | **Yes** (Backend) |
+| `R2_SECRET_ACCESS_KEY` | R2 Secret Access Key. | **Yes** (Backend) |
+| `R2_BUCKET_NAME` | R2 Bucket Name (e.g., `belanja-storage`). | **Yes** (Backend) |
+| `R2_ENDPOINT_URL` | R2 S3 API Endpoint (e.g., `https://<account_id>.r2.cloudflarestorage.com`). | **Yes** (Backend) |
 | `ADMIN_SECRET` | Secret key for Admin API access. | **Yes** (Backend) |
 
 ### 2. Installation
@@ -55,14 +56,11 @@ npm run dev
 ## 🧪 Testing
 
 ### Automated Tests
-Run the full test suite (Unit & Integration):
+Run the full test suite (covering both Frontend components and Backend functions):
 ```bash
-# Frontend Tests
 npm test
-
-# Backend Functions Tests
-npm run test:functions
 ```
+*Powered by Vitest*
 
 ### Manual Testing
 - **API Docs (Swagger UI)**: Access `http://localhost:8788/api/docs` (or your production URL) to interactively test backend endpoints.
@@ -110,10 +108,10 @@ Upload your secrets to Cloudflare directly via CLI. You must do this for each en
 ```bash
 # For Staging
 npx wrangler pages secret put VITE_GEMINI_API_KEY --project-name personal-finance-tracker-staging
-npx wrangler pages secret put AWS_ACCESS_KEY_ID --project-name personal-finance-tracker-staging
-npx wrangler pages secret put AWS_SECRET_ACCESS_KEY --project-name personal-finance-tracker-staging
-npx wrangler pages secret put AWS_BUCKET_NAME --project-name personal-finance-tracker-staging
-npx wrangler pages secret put AWS_REGION --project-name personal-finance-tracker-staging
+npx wrangler pages secret put R2_ACCESS_KEY_ID --project-name personal-finance-tracker-staging
+npx wrangler pages secret put R2_SECRET_ACCESS_KEY --project-name personal-finance-tracker-staging
+npx wrangler pages secret put R2_BUCKET_NAME --project-name personal-finance-tracker-staging
+npx wrangler pages secret put R2_ENDPOINT_URL --project-name personal-finance-tracker-staging
 npx wrangler pages secret put ADMIN_SECRET --project-name personal-finance-tracker-staging
 
 # For Production (remove --project-name to use default from wrangler.toml or specify it)

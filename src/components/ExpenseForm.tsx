@@ -7,6 +7,7 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { TextArea } from './ui/TextArea';
+import { api } from '../services/api';
 
 interface ExpenseFormProps {
     initialData?: Partial<Expense>;
@@ -68,6 +69,29 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
         e.preventDefault();
         if (!name || !amount) return;
 
+        let receiptKey = initialData?.receiptUrl;
+
+        // Upload receipt if changed/new
+        if (receiptBlob && receiptBlob !== initialData?.localReceipt) {
+            try {
+                const filename = receiptBlob.type === 'application/pdf' ? 'receipt.pdf' : 'receipt.jpg';
+                const uploadUrlResponse = await api.getUploadUrl(filename, receiptBlob.type);
+
+                // Upload to R2 using presigned URL
+                await fetch(uploadUrlResponse.url, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': receiptBlob.type },
+                    body: receiptBlob
+                });
+
+                receiptKey = uploadUrlResponse.key;
+            } catch (error) {
+                console.error('Upload failed', error);
+                toast.error('Failed to upload receipt');
+                return;
+            }
+        }
+
         const expenseData = {
             name,
             amount: parseFloat(amount),
@@ -77,7 +101,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
             notes,
             paymentMethod,
             isTaxDeductible: initialData?.isTaxDeductible || false,
-            localReceipt: receiptBlob || undefined,
+            receiptUrl: receiptKey
         };
 
         if (isEditing && initialData.id) {
@@ -95,6 +119,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
             setAmount('');
             setNotes('');
             setPaymentMethod('Cash');
+            setReceiptBlob(null);
+            setReceiptPreview(null);
         }
     };
 

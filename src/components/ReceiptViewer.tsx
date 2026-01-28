@@ -3,13 +3,13 @@ import { X, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 
 interface ReceiptViewerProps {
-    s3Key: string;
+    storageKey: string;
     merchantName?: string;
     receiptDate?: string;
     onClose: () => void;
 }
 
-const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ s3Key, merchantName, receiptDate, onClose }) => {
+const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ storageKey, merchantName, receiptDate, onClose }) => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,7 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ s3Key, merchantName, rece
         const loadImage = async () => {
             try {
                 setIsLoading(true);
-                const url = await api.getViewUrl(s3Key);
+                const url = await api.getViewUrl(storageKey);
                 setImageUrl(url);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load receipt');
@@ -29,7 +29,7 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ s3Key, merchantName, rece
         };
 
         loadImage();
-    }, [s3Key]);
+    }, [storageKey]);
 
     const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.25, 3));
     const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5));

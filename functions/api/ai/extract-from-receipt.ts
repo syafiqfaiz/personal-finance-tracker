@@ -5,16 +5,16 @@ import { License, LicenseRepository } from '../../core/licenseRepository';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { corsMiddleware } from '../../core/corsMiddleware';
 import { securityMiddleware } from '../../core/securityMiddleware';
-import { StorageService } from '../../core/storageService';
-import { S3Client } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 type Bindings = {
     LICENSE_STORE: KVNamespace;
+    ASSETS_BUCKET: R2Bucket;
     VITE_GEMINI_API_KEY: string;
-    AWS_ACCESS_KEY_ID: string;
-    AWS_SECRET_ACCESS_KEY: string;
-    AWS_BUCKET_NAME: string;
-    AWS_REGION: string;
+    R2_ACCESS_KEY_ID: string;
+    R2_SECRET_ACCESS_KEY: string;
+    R2_BUCKET_NAME: string;
+    R2_ENDPOINT_URL: string;
 };
 
 type Variables = {
@@ -22,7 +22,7 @@ type Variables = {
 };
 
 interface ReceiptExtractionRequest {
-    s3_key: string;
+    storage_key: string;
     categories: string[];
     current_date: string;
     available_payment_method: string[];
@@ -71,31 +71,45 @@ app.post('/', async (c) => {
     }
 
     // Validate required fields
-    if (!body || !body.s3_key) {
-        return c.json({ error: 'Missing "s3_key" field' }, 400);
+    if (!body || !body.storage_key) {
+        return c.json({ error: 'Missing "storage_key" field' }, 400);
     }
 
     // Validate S3 Key Ownership
     const expectedPrefix = `user_storage/${license.id}/`;
-    if (!body.s3_key.startsWith(expectedPrefix)) {
-        return c.json({ error: 'Access denied: Invalid S3 key' }, 403);
+    if (!body.storage_key.startsWith(expectedPrefix)) {
+        return c.json({ error: 'Access denied: Invalid key' }, 403);
     }
 
-    // Generate Presigned View URL for the receipt image
+    // Fetch Image from R2 using AWS SDK (same as upload)
     const s3Client = new S3Client({
-        region: c.env.AWS_REGION,
+        region: 'auto',
+        endpoint: c.env.R2_ENDPOINT_URL,
         credentials: {
-            accessKeyId: c.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: c.env.AWS_SECRET_ACCESS_KEY
+            accessKeyId: c.env.R2_ACCESS_KEY_ID,
+            secretAccessKey: c.env.R2_SECRET_ACCESS_KEY
         }
     });
-    const storage = new StorageService(s3Client, c.env.AWS_BUCKET_NAME);
 
-    let imageUrl: string;
+    let imageBuffer: ArrayBuffer;
     try {
-        imageUrl = await storage.generateViewUrl(license.id, body.s3_key);
+
+        const command = new GetObjectCommand({
+            Bucket: c.env.R2_BUCKET_NAME,
+            Key: body.storage_key
+        });
+
+        const response = await s3Client.send(command);
+
+        if (!response.Body) {
+            console.error('[R2 DEBUG] No body in S3 response');
+            return c.json({ error: 'Receipt image not found' }, 404);
+        }
+
+        // Convert stream to ArrayBuffer
+        imageBuffer = await response.Body.transformToByteArray();
     } catch (error) {
-        console.error('S3 View URL Error:', error);
+        console.error('S3 Get Error:', error);
         return c.json({ error: 'Failed to access receipt image' }, 400);
     }
 
@@ -108,16 +122,14 @@ app.post('/', async (c) => {
 
     // Call Gemini Vision API
     const genAI = new GoogleGenerativeAI(c.env.VITE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
 
     try {
-        // Fetch the image from S3
-        const imageResponse = await fetch(imageUrl);
-        if (!imageResponse.ok) {
-            throw new Error('Failed to fetch image from S3');
-        }
-        const imageBuffer = await imageResponse.arrayBuffer();
+        // imageBuffer was already fetched above from S3  
         const base64Image = arrayBufferToBase64(imageBuffer);
+
+        // Call Gemini Vision with inline image data
 
         // Call Gemini Vision with inline image data
         const result = await model.generateContent([
@@ -153,7 +165,7 @@ app.post('/', async (c) => {
                 missing_fields: parsedData.missing_fields
             },
             receipt_metadata: {
-                s3_key: body.s3_key,
+                storage_key: body.storage_key,
                 merchant_name: merchantName,
                 receipt_date: receiptDate
             },
@@ -179,7 +191,7 @@ app.post('/', async (c) => {
                 missing_fields: ['name', 'amount', 'category', 'payment_method']
             },
             receipt_metadata: {
-                s3_key: body.s3_key,
+                storage_key: body.storage_key,
                 merchant_name: 'Unknown',
                 receipt_date: body.current_date
             },
@@ -189,6 +201,7 @@ app.post('/', async (c) => {
         });
     }
 });
+
 
 function buildVisionPrompt(categories: string[], paymentMethods: string[], currentDate: string): string {
     return `
@@ -275,8 +288,8 @@ function GetNextMonthStart(): string {
     return d.toISOString();
 }
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-    const bytes = new Uint8Array(buffer);
+function arrayBufferToBase64(buffer: Uint8Array | ArrayBuffer): string {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
     let binary = '';
     for (let i = 0; i < bytes.byteLength; i++) {
         binary += String.fromCharCode(bytes[i]);

@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useFinanceStore } from '../store/useFinanceStore';
-import { ChevronLeft, Edit3, Trash2, Calendar, CreditCard, FileText, Maximize2, X } from 'lucide-react';
+import { ChevronLeft, Edit3, Trash2, Calendar, CreditCard, FileText, Maximize2, X, Cloud } from 'lucide-react';
 import ConfirmDialog from '../components/ConfirmDialog';
+import ReceiptViewer from '../components/ReceiptViewer';
 import { blobToDataURL } from '../services/imageService';
 import { toast } from 'sonner';
 
@@ -14,6 +15,7 @@ const ExpenseDetail: React.FC = () => {
     const expense = expenses.find((e) => e.id === id);
     const [receiptUrl, setReceiptUrl] = React.useState<string | null>(null);
     const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
+    const [isRemoteViewerOpen, setIsRemoteViewerOpen] = React.useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
 
     React.useEffect(() => {
@@ -118,6 +120,7 @@ const ExpenseDetail: React.FC = () => {
                     )}
                 </div>
 
+                {/* Local Receipt View */}
                 {receiptUrl && (
                     <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-4">
                         <div className="flex items-center justify-between">
@@ -168,6 +171,32 @@ const ExpenseDetail: React.FC = () => {
                         )}
                     </div>
                 )}
+
+                {/* Remote Receipt View (when local is missing) */}
+                {!receiptUrl && expense.receiptUrl && (
+                    <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Receipt Attachment</p>
+                            <button
+                                onClick={() => setIsRemoteViewerOpen(true)}
+                                className="text-[10px] font-black text-blue-600 uppercase tracking-widest"
+                            >
+                                View full size
+                            </button>
+                        </div>
+
+                        <div
+                            className="relative group rounded-[20px] overflow-hidden border border-slate-100 bg-slate-50 cursor-pointer flex flex-col items-center justify-center p-8 h-40 gap-3 hover:bg-slate-100 transition-colors"
+                            onClick={() => setIsRemoteViewerOpen(true)}
+                        >
+                            <Cloud className="w-10 h-10 text-blue-400" />
+                            <div className="text-center">
+                                <p className="text-sm font-bold text-slate-700">Stored in Cloud</p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Tap to load image</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Lightbox / Fullscreen for Images Only */}
@@ -189,6 +218,17 @@ const ExpenseDetail: React.FC = () => {
                     />
                 </div>
             )}
+
+            {/* Remote Receipt Viewer */}
+            {isRemoteViewerOpen && expense.receiptUrl && (
+                <ReceiptViewer
+                    storageKey={expense.receiptUrl}
+                    merchantName={expense.name}
+                    receiptDate={expense.timestamp.toString()}
+                    onClose={() => setIsRemoteViewerOpen(false)}
+                />
+            )}
+
             {/* Confirmation Dialog */}
             <ConfirmDialog
                 isOpen={showDeleteConfirm}

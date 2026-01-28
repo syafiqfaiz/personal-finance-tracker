@@ -22,7 +22,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
     const navigate = useNavigate();
     const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
     const [viewingReceipt, setViewingReceipt] = useState<{
-        s3Key: string;
+        storageKey: string;
         merchantName?: string;
         receiptDate?: string;
     } | null>(null);
@@ -43,7 +43,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
             return yearMatch && date.getMonth() === filterMonth;
         });
 
-    const handleReceiptClick = async (e: React.MouseEvent, expenseId: string, s3Key: string) => {
+    const handleReceiptClick = async (e: React.MouseEvent, expenseId: string, storageKey: string) => {
         e.stopPropagation();
 
         // Try to get receipt metadata from IndexedDB
@@ -52,7 +52,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
                 const receipt = await receiptOperations.getByExpenseId(expenseId);
                 if (receipt) {
                     setViewingReceipt({
-                        s3Key: receipt.s3Key,
+                        storageKey: receipt.storageKey,
                         merchantName: receipt.merchantName,
                         receiptDate: receipt.receiptDate
                     });
@@ -64,7 +64,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
         }
 
         // Fallback: just show the image without metadata
-        setViewingReceipt({ s3Key });
+        setViewingReceipt({ storageKey });
     };
 
     // Group expenses by month
@@ -123,7 +123,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ filterCategory, searchQuery, 
 
             {viewingReceipt && (
                 <ReceiptViewer
-                    s3Key={viewingReceipt.s3Key}
+                    storageKey={viewingReceipt.storageKey}
                     merchantName={viewingReceipt.merchantName}
                     receiptDate={viewingReceipt.receiptDate}
                     onClose={() => setViewingReceipt(null)}

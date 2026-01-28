@@ -6,3 +6,6 @@ pages_build_output_dir = "dist"
 binding = "LICENSE_STORE"
 id = "4b0d68cdf4fe48019a487d6c0f4f85b9"
 preview_id = "869aeba05c074264b77817feac82bd45"
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "belanja-storage"

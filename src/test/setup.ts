@@ -30,15 +30,7 @@ Object.defineProperty(window, 'matchMedia', {
     })),
 });
 
-// Mock S3 Client
-vi.mock('@aws-sdk/client-s3', () => {
-    return {
-        S3Client: vi.fn(() => ({
-            send: vi.fn()
-        })),
-        PutObjectCommand: vi.fn()
-    };
-});
+
 
 // Mock Google Generative AI
 vi.mock('@google/generative-ai', () => {

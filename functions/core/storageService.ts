@@ -1,32 +1,10 @@
-import { PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export class StorageService {
     constructor(private s3Client: S3Client, private bucket: string) { }
 
-    async generateUploadUrl(userId: string, filename: string, contentType: string): Promise<{ url: string; key: string }> {
-        // Validate Filename (Prevent Path Traversal)
-        if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-            throw new Error('Invalid filename');
-        }
 
-        // Validate File Type (Images only - no PDF)
-        const allowedTypes = ['image/jpeg', 'image/png'];
-        if (!allowedTypes.includes(contentType)) {
-            throw new Error('Invalid file type');
-        }
-
-        const key = `user_storage/${userId}/receipts/${new Date().getFullYear()}/${new Date().toISOString().slice(0, 7)}/${filename}`;
-
-        const command = new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: key,
-            ContentType: contentType
-        });
-
-        const url = await getSignedUrl(this.s3Client, command, { expiresIn: 300 }); // 5 minutes
-        return { url, key };
-    }
 
     async generateViewUrl(userId: string, key: string): Promise<string> {
         // Strict Path Validation: Ensure Key starts with user's prefix

@@ -19,8 +19,7 @@ const activeLicense = {
 // Hoist mocks to be available in vi.mock factory
 const mocks = vi.hoisted(() => ({
     generateContent: vi.fn(),
-    s3Send: vi.fn(),
-    fetchImage: vi.fn()
+    s3Send: vi.fn()
 }));
 
 // Mock Gemini Vision API
@@ -37,26 +36,15 @@ vi.mock('@google/generative-ai', () => {
     };
 });
 
-// Mock S3 Client
+// Mock AWS S3 Client
 vi.mock('@aws-sdk/client-s3', () => {
     return {
         S3Client: class {
-            constructor() { }
             send = mocks.s3Send;
         },
-        GetObjectCommand: vi.fn()
+        GetObjectCommand: class { }
     };
 });
-
-// Mock s3-request-presigner
-vi.mock('@aws-sdk/s3-request-presigner', () => {
-    return {
-        getSignedUrl: vi.fn(() => Promise.resolve('https://s3.amazonaws.com/presigned-url'))
-    };
-});
-
-// Mock global fetch for image fetching
-global.fetch = mocks.fetchImage as any;
 
 describe('POST /api/ai/extract-from-receipt', () => {
     let env: any;
@@ -65,10 +53,10 @@ describe('POST /api/ai/extract-from-receipt', () => {
         env = {
             LICENSE_STORE: kvMock,
             VITE_GEMINI_API_KEY: 'test-gemini-key',
-            AWS_ACCESS_KEY_ID: 'test-access-key',
-            AWS_SECRET_ACCESS_KEY: 'test-secret-key',
-            AWS_BUCKET_NAME: 'test-bucket',
-            AWS_REGION: 'us-east-1'
+            R2_BUCKET_NAME: 'test-bucket',
+            R2_ACCESS_KEY_ID: 'test',
+            R2_SECRET_ACCESS_KEY: 'test',
+            R2_ENDPOINT_URL: 'https://r2'
         };
         vi.resetAllMocks();
     });
@@ -85,35 +73,35 @@ describe('POST /api/ai/extract-from-receipt', () => {
     } as any);
 
     const validPayload = {
-        s3_key: 'user_storage/test-user-123/receipts/2026/2026-01/receipt.jpg',
+        storage_key: 'user_storage/test-user-123/receipts/2026/2026-01/receipt.jpg',
         categories: ['Food', 'Transport', 'Shopping'],
         current_date: '2026-01-25',
         available_payment_method: ['Cash', 'Credit Card', 'QR Pay']
     };
 
-    it('should return 400 if s3_key is missing', async () => {
+    it('should return 400 if storage_key is missing', async () => {
         (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
 
         const req = new Request('http://localhost/api/ai/extract-from-receipt', {
             method: 'POST',
-            body: JSON.stringify({ ...validPayload, s3_key: undefined }),
+            body: JSON.stringify({ ...validPayload, storage_key: undefined }),
             headers: { 'X-License-Key': 'valid-key' }
         });
 
         const res = await onRequest(createMockContext(req, env));
         expect(res.status).toBe(400);
         const json: any = await res.json();
-        expect(json.error).toBe('Missing "s3_key" field');
+        expect(json.error).toBe('Missing "storage_key" field');
     });
 
-    it('should return 403 if s3_key does not belong to user', async () => {
+    it('should return 403 if storage_key does not belong to user', async () => {
         (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
 
         const req = new Request('http://localhost/api/ai/extract-from-receipt', {
             method: 'POST',
             body: JSON.stringify({
                 ...validPayload,
-                s3_key: 'user_storage/other-user/receipts/2026/2026-01/receipt.jpg' // Wrong user
+                storage_key: 'user_storage/other-user/receipts/2026/2026-01/receipt.jpg' // Wrong user
             }),
             headers: { 'X-License-Key': 'valid-key' }
         });
@@ -143,10 +131,11 @@ describe('POST /api/ai/extract-from-receipt', () => {
     it('should successfully extract receipt data with high confidence', async () => {
         (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
 
-        // Mock image fetch
-        mocks.fetchImage.mockResolvedValue({
-            ok: true,
-            arrayBuffer: () => Promise.resolve(new ArrayBuffer(100))
+        // Mock S3 Get
+        mocks.s3Send.mockResolvedValue({
+            Body: {
+                transformToByteArray: () => Promise.resolve(new Uint8Array(100))
+            }
         });
 
         // Mock Gemini Vision response
@@ -190,7 +179,7 @@ response_text: I see a receipt from Starbucks for RM18.50. Paid with Credit Card
         });
 
         expect(body.receipt_metadata).toEqual({
-            s3_key: validPayload.s3_key,
+            storage_key: validPayload.storage_key,
             merchant_name: 'Starbucks',
             receipt_date: '2026-01-25'
         });
@@ -201,10 +190,11 @@ response_text: I see a receipt from Starbucks for RM18.50. Paid with Credit Card
     it('should return low confidence when category is missing', async () => {
         (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
 
-        // Mock image fetch
-        mocks.fetchImage.mockResolvedValue({
-            ok: true,
-            arrayBuffer: () => Promise.resolve(new ArrayBuffer(100))
+        // Mock S3 Get
+        mocks.s3Send.mockResolvedValue({
+            Body: {
+                transformToByteArray: () => Promise.resolve(new Uint8Array(100))
+            }
         });
 
         // Mock Gemini Vision response with missing category
@@ -244,10 +234,11 @@ response_text: Got it! I see RM45.00 from Guardian Pharmacy on Jan 24. What cate
     it('should return conversational fallback on Gemini Vision API failure', async () => {
         (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
 
-        // Mock image fetch success
-        mocks.fetchImage.mockResolvedValue({
-            ok: true,
-            arrayBuffer: () => Promise.resolve(new ArrayBuffer(100))
+        // Mock S3 Get success
+        mocks.s3Send.mockResolvedValue({
+            Body: {
+                transformToByteArray: () => Promise.resolve(new Uint8Array(100))
+            }
         });
 
         // Mock Gemini Vision API failure

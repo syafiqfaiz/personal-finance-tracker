@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { db, type Expense, type Budget } from '../db/db';
 export type { Expense, Budget };
 import { v4 as uuidv4 } from 'uuid';
-import { useSettingsStore } from './useSettingsStore';
 import { CategoryService } from '../services/CategoryService';
 import { ExpenseService } from '../services/ExpenseService';
 
@@ -115,8 +114,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     },
 
     addExpense: async (expenseData) => {
-        const { s3Config } = useSettingsStore.getState();
-        const newExpense = await ExpenseService.addExpense(expenseData, s3Config);
+        const newExpense = await ExpenseService.addExpense(expenseData);
 
         set((state) => {
             const list = [newExpense, ...state.expenses];
@@ -134,8 +132,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     },
 
     updateExpense: async (id, updates) => {
-        const { s3Config } = useSettingsStore.getState();
-        const updatedFields = await ExpenseService.updateExpense(id, updates, s3Config);
+        const updatedFields = await ExpenseService.updateExpense(id, updates);
 
         set((state) => ({
             expenses: state.expenses.map((e) => (e.id === id ? { ...e, ...updatedFields } : e))
