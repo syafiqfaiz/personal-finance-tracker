@@ -4,8 +4,13 @@ import AIChat from './AIChat';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { extractExpenseWithAI } from '../services/aiService';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // Mock dependencies
+vi.mock('../hooks/useIsMobile', () => ({
+    useIsMobile: vi.fn(),
+}));
+
 vi.mock('../store/useSettingsStore', () => ({
     useSettingsStore: Object.assign(
         vi.fn(),
@@ -81,11 +86,35 @@ describe('AIChat', () => {
         expect(screen.getByPlaceholderText('Type expenses naturally...')).toBeEnabled();
     });
 
-    it('sets capture environment on receipt file input', () => {
+    it('sets capture environment on receipt file input on mobile', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        (useIsMobile as any).mockReturnValue(true);
         const { container } = render(<AIChat />);
-        const input = container.querySelector('input[type="file"]');
-        expect(input).toHaveAttribute('capture', 'environment');
+
+        // Should have 2 inputs
+        const inputs = container.querySelectorAll('input[type="file"]');
+        expect(inputs).toHaveLength(2);
+
+        // One should have capture environment (Camera)
+        const cameraInput = Array.from(inputs).find(input => input.hasAttribute('capture'));
+        expect(cameraInput).toHaveAttribute('capture', 'environment');
+
+        // One should NOT have capture environment (Gallery)
+        const galleryInput = Array.from(inputs).find(input => !input.hasAttribute('capture'));
+        expect(galleryInput).toBeInTheDocument();
+    });
+
+    it('does not set capture environment on receipt file input on desktop', () => {
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        (useIsMobile as any).mockReturnValue(false);
+        const { container } = render(<AIChat />);
+
+        // Should have 1 input
+        const inputs = container.querySelectorAll('input[type="file"]');
+        expect(inputs).toHaveLength(1);
+
+        const input = inputs[0];
+        expect(input).not.toHaveAttribute('capture');
     });
 
     it('handles low confidence response correctly', async () => {
