@@ -122,7 +122,7 @@ response_text: <value>
 
     // Call Gemini API
     const genAI = new GoogleGenerativeAI(c.env.VITE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
 
     try {
         const result = await model.generateContent([prompt, `User Input: "${body.raw_text}"`]);
