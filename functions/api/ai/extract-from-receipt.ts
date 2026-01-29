@@ -15,6 +15,8 @@ type Bindings = {
     R2_SECRET_ACCESS_KEY: string;
     R2_BUCKET_NAME: string;
     R2_ENDPOINT_URL: string;
+    AI_GATEWAY_ACCOUNT_ID?: string;
+    AI_GATEWAY_NAME?: string;
 };
 
 type Variables = {
@@ -122,7 +124,14 @@ app.post('/', async (c) => {
 
     // Call Gemini Vision API
     const genAI = new GoogleGenerativeAI(c.env.VITE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+
+    // Configure AI Gateway if credentials are present
+    const requestOptions: any = {};
+    if (c.env.AI_GATEWAY_ACCOUNT_ID && c.env.AI_GATEWAY_NAME) {
+        requestOptions.baseUrl = `https://gateway.ai.cloudflare.com/v1/${c.env.AI_GATEWAY_ACCOUNT_ID}/${c.env.AI_GATEWAY_NAME}/google-ai-studio`;
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' }, requestOptions);
 
 
     try {

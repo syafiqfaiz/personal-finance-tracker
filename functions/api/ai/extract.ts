@@ -9,6 +9,8 @@ import { securityMiddleware } from '../../core/securityMiddleware';
 type Bindings = {
     LICENSE_STORE: KVNamespace;
     VITE_GEMINI_API_KEY: string;
+    AI_GATEWAY_ACCOUNT_ID?: string;
+    AI_GATEWAY_NAME?: string;
 };
 
 type Variables = {
@@ -122,7 +124,14 @@ response_text: <value>
 
     // Call Gemini API
     const genAI = new GoogleGenerativeAI(c.env.VITE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+
+    // Configure AI Gateway if credentials are present
+    const requestOptions: any = {};
+    if (c.env.AI_GATEWAY_ACCOUNT_ID && c.env.AI_GATEWAY_NAME) {
+        requestOptions.baseUrl = `https://gateway.ai.cloudflare.com/v1/${c.env.AI_GATEWAY_ACCOUNT_ID}/${c.env.AI_GATEWAY_NAME}/google-ai-studio`;
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' }, requestOptions);
 
     try {
         const result = await model.generateContent([prompt, `User Input: "${body.raw_text}"`]);
