@@ -350,6 +350,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                         <input
                             type="file"
                             accept="image/jpeg,image/png,image/jpg"
+                            capture="environment"
                             onChange={handleReceiptUpload}
                             className="hidden"
                             disabled={isUploading}
