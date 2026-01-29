@@ -81,6 +81,13 @@ describe('AIChat', () => {
         expect(screen.getByPlaceholderText('Type expenses naturally...')).toBeEnabled();
     });
 
+    it('sets capture environment on receipt file input', () => {
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        const { container } = render(<AIChat />);
+        const input = container.querySelector('input[type="file"]');
+        expect(input).toHaveAttribute('capture', 'environment');
+    });
+
     it('handles low confidence response correctly', async () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
         (extractExpenseWithAI as any).mockResolvedValue({
