@@ -4,6 +4,7 @@ import AIChat from './AIChat';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { extractExpenseWithAI } from '../services/aiService';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // Mock dependencies
 vi.mock('../store/useSettingsStore', () => ({
@@ -40,6 +41,10 @@ vi.mock('../store/useFinanceStore', () => ({
 
 vi.mock('../services/aiService', () => ({
     extractExpenseWithAI: vi.fn(),
+}));
+
+vi.mock('../hooks/useIsMobile', () => ({
+    useIsMobile: vi.fn(),
 }));
 
 vi.mock('../services/ExpenseService', () => ({
@@ -81,11 +86,32 @@ describe('AIChat', () => {
         expect(screen.getByPlaceholderText('Type expenses naturally...')).toBeEnabled();
     });
 
-    it('sets capture environment on receipt file input', () => {
+    it('shows single upload button without capture on desktop', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        (useIsMobile as any).mockReturnValue(false);
         const { container } = render(<AIChat />);
-        const input = container.querySelector('input[type="file"]');
-        expect(input).toHaveAttribute('capture', 'environment');
+
+        const inputs = container.querySelectorAll('input[type="file"]');
+        expect(inputs).toHaveLength(1);
+        expect(inputs[0]).not.toHaveAttribute('capture');
+        expect(screen.getByText('Upload Receipt')).toBeInTheDocument();
+    });
+
+    it('shows camera and file buttons on mobile', () => {
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        (useIsMobile as any).mockReturnValue(true);
+        const { container } = render(<AIChat />);
+
+        const inputs = container.querySelectorAll('input[type="file"]');
+        expect(inputs).toHaveLength(2);
+
+        // Camera input
+        expect(inputs[0]).toHaveAttribute('capture', 'environment');
+        expect(screen.getByText('Camera')).toBeInTheDocument();
+
+        // File input
+        expect(inputs[1]).not.toHaveAttribute('capture');
+        expect(screen.getByText('File')).toBeInTheDocument();
     });
 
     it('handles low confidence response correctly', async () => {

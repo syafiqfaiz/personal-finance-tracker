@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { extractExpenseWithAI, type ExtractedExpense } from '../services/aiService';
-import { Send, Sparkles, AlertCircle, Loader2, Camera } from 'lucide-react';
+import { Send, Sparkles, AlertCircle, Loader2, Camera, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { getRandomGreeting } from '../constants/greetings';
 import { validateReceiptFile } from '../utils/fileValidation';
 import { api } from '../services/api';
 import { receiptOperations } from '../db/receiptOperations';
 import { ExpenseService } from '../services/ExpenseService';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface AIChatProps {
     onSuccess?: () => void;
@@ -23,6 +24,7 @@ interface Message {
 const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const { categories } = useFinanceStore();
     const { licenseKey } = useSettingsStore();
+    const isMobile = useIsMobile();
 
     const [messages, setMessages] = useState<Message[]>(() => [
         { id: Date.now().toString(), role: 'assistant', text: getRandomGreeting() }
@@ -339,23 +341,54 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                 </div>
             )}
 
-            {/* UPLOAD BUTTON - Only show before first message */}
+            {/* UPLOAD BUTTONS - Only show before first message */}
             {messages.length === 1 && !hasUploadedReceipt && (
                 <div className="mb-4">
-                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
-                        <Camera className="w-5 h-5 text-purple-600" />
-                        <span className="text-sm font-bold text-purple-900 uppercase tracking-widest">
-                            {isUploading ? 'Uploading...' : 'Upload Receipt'}
-                        </span>
-                        <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/jpg"
-                            capture="environment"
-                            onChange={handleReceiptUpload}
-                            className="hidden"
-                            disabled={isUploading}
-                        />
-                    </label>
+                    {isMobile ? (
+                        <div className="flex gap-2">
+                            <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
+                                <Camera className="w-5 h-5 text-purple-600" />
+                                <span className="text-sm font-bold text-purple-900 uppercase tracking-widest">
+                                    {isUploading ? '...' : 'Camera'}
+                                </span>
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg"
+                                    capture="environment"
+                                    onChange={handleReceiptUpload}
+                                    className="hidden"
+                                    disabled={isUploading}
+                                />
+                            </label>
+                            <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
+                                <ImageIcon className="w-5 h-5 text-purple-600" />
+                                <span className="text-sm font-bold text-purple-900 uppercase tracking-widest">
+                                    {isUploading ? '...' : 'File'}
+                                </span>
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg"
+                                    onChange={handleReceiptUpload}
+                                    className="hidden"
+                                    disabled={isUploading}
+                                />
+                            </label>
+                        </div>
+                    ) : (
+                        <label className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
+                            <Camera className="w-5 h-5 text-purple-600" />
+                            <span className="text-sm font-bold text-purple-900 uppercase tracking-widest">
+                                {isUploading ? 'Uploading...' : 'Upload Receipt'}
+                            </span>
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/jpg"
+                                onChange={handleReceiptUpload}
+                                className="hidden"
+                                disabled={isUploading}
+                            />
+                        </label>
+                    )}
                 </div>
             )}
 
