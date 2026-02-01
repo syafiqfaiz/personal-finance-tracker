@@ -96,11 +96,53 @@ Payment Methods: [${body.available_payment_method.join(', ')}]
 Current Date: ${body.current_date}
 
 PREVIOUSLY CAPTURED DATA:
-${JSON.stringify(body.captured_data, null, 2)}
+${body.captured_data ? JSON.stringify(body.captured_data, null, 2) : 'None'}
+
+EXAMPLES:
+
+User Input: "Satay 12"
+Previous Data: None
+Output:
+name: Satay
+amount: 12
+category: Food
+payment_method: Cash
+date: 2026-02-01
+notes:
+confidence: high
+missing_fields:
+response_text: Satay for RM12.00 (Food). Paid with Cash?
+
+User Input: "Actually QR"
+Previous Data: { "name": "Satay", "amount": 12, "category": "Food", "payment_method": "Cash", ... }
+Output:
+name: Satay
+amount: 12
+category: Food
+payment_method: QR Pay
+date: 2026-02-01
+notes:
+confidence: high
+missing_fields:
+response_text: Updated to QR Pay. Ready to save?
+
+User Input: "It was 15"
+Previous Data: { "name": "Satay", "amount": 12, ... }
+Output:
+name: Satay
+amount: 15
+category: Food
+payment_method: QR Pay
+date: 2026-02-01
+notes:
+confidence: high
+missing_fields:
+response_text: Got it, RM15.00 instead. Confirm?
+
 
 INSTRUCTIONS:
 1. Analyze the "User Input" below.
-2. Update the captured data.
+2. Update the captured data. You MUST include ALL fields in your output, including those from PREVIOUSLY CAPTURED DATA that have not changed. Do not output partial updates.
 3. If information is missing or ambiguous, ask a clarification question in 'response_text'.
 4. The name is important. Try to infer a specific name. Only use "Miscellaneous" if absolutely no name can be inferred.
 5. If no date is provided or can be inferred, use the Current Date. Ensure dates (input and output) are strictly in ISO 8601 format (YYYY-MM-DD).

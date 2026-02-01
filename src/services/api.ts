@@ -54,7 +54,7 @@ export const api = {
                 throw new Error('INVALID_LICENSE'); // Could be missing or invalid/expired
             }
             const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || 'EXTRACTION_FAILED');
+            throw new Error(error.message || error.error || 'EXTRACTION_FAILED');
         }
 
         return response.json();
@@ -81,7 +81,7 @@ export const api = {
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || 'UPLOAD_URL_FAILED');
+            throw new Error(error.message || error.error || 'UPLOAD_URL_FAILED');
         }
 
         return response.json();
@@ -129,7 +129,7 @@ export const api = {
                 throw new Error('INVALID_LICENSE');
             }
             const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || 'RECEIPT_EXTRACTION_FAILED');
+            throw new Error(error.message || error.error || 'RECEIPT_EXTRACTION_FAILED');
         }
 
         return response.json();
@@ -151,7 +151,7 @@ export const api = {
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || 'VIEW_URL_FAILED');
+            throw new Error(error.message || error.error || 'VIEW_URL_FAILED');
         }
 
         const data = await response.json();
