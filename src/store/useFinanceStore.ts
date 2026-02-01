@@ -54,6 +54,13 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             db.budgets.toArray()
         ]);
 
+        // Helper to safely get timestamp value (handles both Date objects and ISO strings)
+        const getTime = (dateValue: Date | string | undefined): number => {
+            if (!dateValue) return 0;
+            if (dateValue instanceof Date) return dateValue.getTime();
+            return new Date(dateValue).getTime();
+        };
+
         // MIGRATION: Backfill missing timestamps
         const expensesToUpdate: Expense[] = [];
         const migratedExpenses = expenses.map(e => {
@@ -81,10 +88,10 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         // 2. Created At (descending) - for same day entries
         const sortExpenses = (list: Expense[]) => {
             return list.sort((a, b) => {
-                const dateDiff = (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0);
+                const dateDiff = getTime(b.timestamp) - getTime(a.timestamp);
                 if (dateDiff !== 0) return dateDiff;
-                const createdA = a.createdAt?.getTime() || 0;
-                const createdB = b.createdAt?.getTime() || 0;
+                const createdA = getTime(a.createdAt);
+                const createdB = getTime(b.createdAt);
                 return createdB - createdA;
             });
         };
@@ -116,15 +123,22 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     addExpense: async (expenseData) => {
         const newExpense = await ExpenseService.addExpense(expenseData);
 
+        // Helper to safely get timestamp value (handles both Date objects and ISO strings)
+        const getTime = (dateValue: Date | string | undefined): number => {
+            if (!dateValue) return 0;
+            if (dateValue instanceof Date) return dateValue.getTime();
+            return new Date(dateValue).getTime();
+        };
+
         set((state) => {
             const list = [newExpense, ...state.expenses];
             // Re-sort using same logic
             return {
                 expenses: list.sort((a, b) => {
-                    const dateDiff = (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0);
+                    const dateDiff = getTime(b.timestamp) - getTime(a.timestamp);
                     if (dateDiff !== 0) return dateDiff;
-                    const createdA = a.createdAt?.getTime() || 0;
-                    const createdB = b.createdAt?.getTime() || 0;
+                    const createdA = getTime(a.createdAt);
+                    const createdB = getTime(b.createdAt);
                     return createdB - createdA;
                 })
             };

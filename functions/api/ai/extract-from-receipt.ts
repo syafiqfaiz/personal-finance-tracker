@@ -93,7 +93,8 @@ app.post('/', async (c) => {
         }
     });
 
-    let imageBuffer: ArrayBuffer;
+
+    let imageBuffer: Uint8Array;
     try {
 
         const command = new GetObjectCommand({
@@ -108,7 +109,7 @@ app.post('/', async (c) => {
             return c.json({ error: 'Receipt image not found' }, 404);
         }
 
-        // Convert stream to ArrayBuffer
+        // Convert stream to Uint8Array
         imageBuffer = await response.Body.transformToByteArray();
     } catch (error) {
         console.error('S3 Get Error:', error);
@@ -126,7 +127,7 @@ app.post('/', async (c) => {
     const genAI = new GoogleGenerativeAI(c.env.VITE_GEMINI_API_KEY);
 
     // Configure AI Gateway if credentials are present
-    const requestOptions: any = {};
+    const requestOptions: Record<string, string> = {};
     if (c.env.AI_GATEWAY_ACCOUNT_ID && c.env.AI_GATEWAY_NAME) {
         requestOptions.baseUrl = `https://gateway.ai.cloudflare.com/v1/${c.env.AI_GATEWAY_ACCOUNT_ID}/${c.env.AI_GATEWAY_NAME}/google-ai-studio`;
     }

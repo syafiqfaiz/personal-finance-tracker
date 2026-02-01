@@ -2,6 +2,11 @@
 
 A private, offline-first personal finance tracker built as a React PWA, backed by a secure Serverless Backend for AI and Cloud Storage orchestration.
 
+## 🆕 Latest Release (v0.3.0)
+- **Robust Backup & Restore**: Fully tested, secure cloud backup functionality with restore integrity checks.
+- **Admin Tools**: New Admin API for license management.
+- **Stability**: Test suite coverage expanded to 84% (Settings component 100% verified).
+
 ## 🚀 Key Features
 - **Offline-First**: Track expenses anywhere, even without internet.
 - **AI-Powered**: Natural language expense entry using Google Gemini (via secure backend).

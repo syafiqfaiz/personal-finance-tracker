@@ -1,126 +1,139 @@
-# PRD: Backup & Restore (Multi-Device Support)
+# PRD: Cloud Backup & Restore
 
 ## 1. Overview
-**Goal:** Enable users to move their financial data between devices (e.g., Laptop ↔ Phone) and secure their data against device loss, without requiring a central server or account creation.
-
-**Strategy:** A **"Suitcase" Model**. The user packs their data into a portable file (Export) and unpacks it on another device (Import).
-**Mechanism:** Manual File Export/Import using a ZIP archive containing structured JSON data and raw image assets.
-**Conflict Resolution:** **Wipe & Replace**. Importing a backup completely overwrites the current device's local database.
+**Goal:** Provide a seamless, automated way for users to secure their data and sync it between devices using Cloudflare R2.
+**Strategy:** **"Cloud Sync" Model**. The app periodically snapshots the local database and uploads it to the secure cloud.
+**Architecture:**
+*   **Storage:** Cloudflare R2.
+*   **Organization:** Buckets are strictly purposefully scoped by `license_key`.
+*   **Versioning:** The server maintains the **last 5 backups** per user (FIFO rotation).
+*   **Assets:** Receipt images remain in R2; the backup file only contains *references* (keys).
 
 ## 2. User Stories
-*   **As a user**, I want to download a backup of all my expenses and receipts so I can switch to a new phone without losing data.
-*   **As a user**, I want to transfer my data from my computer to my mobile phone so I can add expenses on the go.
-*   **As a user**, I want to restore my data from a backup file so I can recover if I clear my browser cache accidentally.
+*   **As a user**, I want to click one button to back up my data immediately.
+*   **As a user**, I want to know exactly when my last backup was performed.
+*   **As a user**, I want the app to automatically back up my data daily, but only if I've actually added new expenses.
+*   **As a user**, I want to restore my data on a new phone just by entering my License Key.
 
-## 3. The Backup File Format
-The system will generate a `.zip` archive (suggested filename: `finance_backup_YYYY-MM-DD.zip`).
+## 3. Functional Requirements
 
-**Internal Structure:**
-```text
-backup.zip
-├── data.json           # The relational data
-└── images/             # The binary assets
-    ├── {expense_id_1}  # Raw image blob for Expense 1
-    ├── {expense_id_2}  # Raw image blob for Expense 2
-    └── ...
-```
+### 3.1. Manual Backup
+*   **UI Location:** Settings Page > "Data Management" section.
+*   **UI Elements:**
+    *   **"Backup Now" Button**: Triggers an immediate backup.
+    *   **Status Label**: Displays "Last Backup: [Date/Time]" or "Never".
+*   **Process:**
+    1.  User clicks "Backup Now".
+    2.  App gathers all data (`expenses`, `receipts`, `budgets`, `settings`).
+    3.  **Integrity Check (Signing)**: App calculates `HMAC-SHA256` of the data using the `License Key` as the secret.
+    4.  App sends JSON (including `integrityHash`) to `POST /api/backup`.
+    5.  **Failure Handling**:
+        *   If upload fails (network error, timeout), app **retries once**.
+        *   If still failing, show "Backup Failed" toast. Do **not** update "Last Backup" timestamp.
+    6.  On success, update local "Last Backup" timestamp.
+    7.  **Success Feedback**: Show "Backup Successful" toast.
 
-**`data.json` Schema:**
+### 3.2. Automated "Smart" Backup
+*   **Trigger:** Checked on Application Launch (or Resume).
+*   **Conditions (ALL must be true):**
+    1.  **Time Elapsed:** It has been > 24 hours since the last successful backup.
+    2.  **Data Changed:** New data has been added/modified since the last backup.
+        *   *Implementation:* Compare `lastBackupTimestamp` vs. `lastDataModificationTimestamp`.
+*   **Background Behavior:**
+    *   The backup happens silently in the background.
+    *   If it fails, retry quietly on next launch (do not alert user unless critical).
+
+### 3.3. Restore Sync
+*   **Trigger:** "Restore Data" button (or "Sync from Cloud" on fresh install).
+*   **Process:**
+    1.  App calls `GET /api/backup/latest`.
+    2.  **Server** verifies License Key.
+    3.  **Server** returns the most recent backup JSON.
+    4.  **Integrity Check (Verify)**: App calculates `HMAC-SHA256` of the received data using the local `License Key`.
+        *   *Failure:* If hash mismatches, assert "Data Corruption" or "Wrong License". Abort.
+    5.  **User Confirmation (Crucial)**:
+        *   Show Dialog: "Backup found from [Date]. Restore and overwrite local data?"
+        *   User must click "CONFIRM" explicitly.
+    6.  **App** wipes local DB.
+    7.  **App** imports the JSON data.
+    8.  **App** reloads.
+
+## 4. Technical Specifications
+
+### 4.1. API Endpoints
+
+#### `POST /api/backup`
+*   **Headers:** `X-License-Key`, `Content-Type: application/json`
+*   **Body:** Full `data.json` dump.
+*   **Server Logic:**
+    1.  Validate License Key.
+    2.  **Save to R2**: Attempt to save `user_storage/{license_key}/backup/{timestamp}.json`.
+        *   *Failure Handling:* If this fails (network/R2 error), abort immediately. Return 500. Do **NOT** delete any old backups.
+    3.  **Rotation (Cleanup)**: 
+        *   List all files in `user_storage/{license_key}/backup/`.
+        *   Sort by date.
+        *   If count > 5, delete the oldest file(s) until count == 5.
+    4.  Return `{ success: true, timestamp: "..." }`.
+
+#### `GET /api/backup/latest`
+*   **Headers:** `X-License-Key`
+*   **Server Logic:**
+    1.  List files in `user_storage/{license_key}/backup/`.
+    2.  Sort by timestamp (descending).
+    3.  Fetch and return the content of the first (newest) file.
+    4.  If empty, return 404.
+
+#### `GET /api/backup/status` (Optional Optimization)
+*   **Headers:** `X-License-Key`
+*   **Server Logic:** Return metadata of the latest backup `{ timestamp: "..." }`.
+*   *Use Case:* Allows the app to update the "Last Backup" label if a backup was made on a *different* device.
+
+### 4.2. Local State Management (Settings Store)
+*   `lastBackupAt`: Timestamp of last successful upload.
+*   `dataModifiedAt`: Timestamp of last local write operation (add expense, update budget, etc.).
+
+## 5. Security & Privacy
+*   **Auth:** The `License Key` acts as the authentication token.
+    *   *Risk:* If someone guesses a license key, they can restore that user's data.
+    *   *Mitigation:* License keys must be UUIDs (high entropy). Rate limiting on API endpoints to prevent brute-force scanning.
+*   **Encryption:** Data is stored as JSON in R2. (Future Scope: Client-side encryption before upload).
+
+## 6. Schema (Backup Format)
+(Same as V3 Schema defined previously)
 ```json
 {
-  "version": 1,
-  "timestamp": "2025-12-31T10:00:00.000Z",
-  "metadata": {
-    "appVersion": "1.0.0",
-    "deviceType": "web"
-  },
-  "data": {
-    "expenses": [ ... ], // Array of Expense objects (excluding Blobs)
-    "budgets": [ ... ],  // Array of Budget objects
-    "settings": [ ... ]  // Array of Setting objects
-  }
+  "version": 3,
+  "timestamp": "ISO-Date",
+  "integrityHash": "hmac-sha256-...", 
+  "data": { "expenses": [...], "receipts": [...], ... }
 }
 ```
 
-## 4. Functional Requirements
+## 7. Success Criteria
+1.  **Performance:** Backup upload completes in < 2 seconds for a typical user database (< 2MB).
+2.  **Reliability:** Restore successfully recovers 100% of linked records (Expenses ↔ Receipts) on a clean device.
+3.  **Data Integrity:** Restore **MUST** fail if the `integrityHash` does not match the computed HMAC (Data + License Key).
+4.  **Safety:** Restore **MUST** require explicit user confirmation after download and before write.
+4.  **Data Hygiene:** The server **never** stores more than 5 backup files per user.
+5.  **Smart Automation:** The app **never** uploads a backup if no data has changed since the last backup (saving bandwidth).
 
-### 4.1. Export (Backup)
-1.  **Trigger:** Button in Settings > "Data Management" > "Export Backup".
-2.  **Process:**
-    *   Query all tables (`expenses`, `budgets`, `settings`) from `IndexedDB`.
-    *   Iterate through `expenses`. If an expense has a `localReceipt` (Blob):
-        *   Add the Blob to the ZIP's `images/` folder using the Expense ID as the filename.
-        *   Ensure the JSON object *excludes* the Blob field (to avoid duplication/serialization errors).
-    *   Serialize remaining text data into `data.json`.
-    *   Generate ZIP file using `JSZip`.
-3.  **Output:** Browser triggers a file download of the ZIP.
+## 8. Testing Plan
 
-### 4.2. Import (Restore)
-1.  **Trigger:** Button in Settings > "Data Management" > "Restore Backup".
-2.  **Input:** User selects a local `.zip` file.
-3.  **Process:**
-    *   **Validation:**
-        *   Unzip file.
-        *   Check for existence of `data.json`.
-        *   Parse JSON and verify schema version.
-    *   **Reconstruction:**
-        *   Load `data.json` into memory.
-        *   Iterate through `expenses`. Check `images/` folder for a matching file (Expense ID).
-        *   If image exists, read it as a Blob and attach it to the `localReceipt` property of the expense object.
-    *   **Database Write (Atomic Transaction):**
-        *   **Clear** all existing data in `expenses`, `budgets`, and `settings` tables.
-        *   **Bulk Add** the reconstructed objects.
-4.  **Post-Process:**
-    *   Trigger a full application reload (`window.location.reload()`) to ensure the Zustand store and UI reflect the new database state.
+### 8.1. Unit Tests
+*   **Backend (`functions/api/backup`)**:
+    *   `POST /`: Mock R2. Verify valid JSON is saved. Verify 6th file triggers deletion of the 1st file. Verify invalid license returns 401.
+    *   `GET /latest`: Verify it returns the file with the largest timestamp. Verify 404 if directory empty.
+*   **Frontend (`src/services/backupService`)**:
+    *   `shouldRunBackup()`: Test logic matrix:
+        *   (Time < 24h, Data Changed) -> False
+        *   (Time > 24h, Data Unchanged) -> False
+        *   (Time > 24h, Data Changed) -> True
+    *   `integrityCheck`: Verify that modifying 1 character in the JSON causes verification to fail.
 
-## 5. Data Integrity & Schema Migration
-To ensure compatibility as the application evolves, the system must handle backups created with older versions of the application.
-
-### 5.1. Version Tagging
-*   **Export:** Every generated `data.json` MUST include a top-level `version` integer (e.g., `"version": 1`).
-*   **Definition:** This version number corresponds to the database schema version defined in the code (`CURRENT_SCHEMA_VERSION`).
-
-### 5.2. Migration Logic (Import Pipeline)
-When importing a backup:
-1.  **Check Version:** Read `backup.version`.
-2.  **Case A: version == CURRENT_VERSION:**
-    *   Proceed with standard import.
-3.  **Case B: version < CURRENT_VERSION:**
-    *   Execute sequential migration functions to transform data structure to match the current schema.
-    *   *Example:* If version 1 lacks a `currency` field, the migration injects `currency: "MYR"` into every expense object.
-4.  **Case C: version > CURRENT_VERSION:**
-    *   **BLOCK Import.** Display error: "Backup is from a newer version of the app. Please update your app to restore this data."
-    *   *Reasoning:* Backward compatibility (loading new data into old code) is unsafe and undefined.
-
-### 5.3. Default Fallbacks
-*   Legacy backups (created before versioning was implemented) should be treated as `version: 0`.
-
-## 6. User Experience (UX)
-
-### 6.1. The "Wipe" Warning
-Before the Import process begins, the user must explicitly confirm the destructive action.
-
-> **⚠️ Warning: Overwrite Data?**
-> Restoring this backup will **replace all current data** on this device. This action cannot be undone.
-> [ Cancel ] [ Yes, Overwrite ]
-
-### 6.2. Success Feedback
-Upon successful restore:
-> **Success!**
-> Data restored successfully. The app will now reload.
-
-### 6.3. Error Handling
-*   **Invalid File:** "This does not appear to be a valid backup file."
-*   **Corrupt Data:** "Unable to read backup data. The file might be corrupted."
-*   **Version Mismatch:** "This backup is from a newer version of the app. Please update the app first."
-
-## 7. Technical Dependencies
-*   **Library:** `jszip` (v3.10.1 or later)
-    *   Used for client-side compression and decompression.
-*   **Storage:** `IndexedDB` (via `Dexie.js`)
-    *   Target for data operations.
-
-## 8. Future Considerations (Out of Scope)
-*   **Cloud Sync:** Direct integration with Google Drive / Dropbox.
-*   **Merging:** Intelligent conflict resolution to allow adding data on two devices simultaneously.
-*   **Encryption:** Password-protecting the ZIP file.
+### 8.2. Integration Tests
+*   **End-to-End Restoration Flow**:
+    1.  Seeding: Create a user, add 5 expenses, upload 2 receipts.
+    2.  Backup: Trigger manual backup.
+    3.  Wipe: Clear IndexedDB (Simulate new device).
+    4.  Restore: Click "Restore" with same license key.
+    5.  Verification: Assert DB contains exactly 5 expenses and 2 receipts. Assert receipts point to valid R2 URLs.

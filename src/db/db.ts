@@ -69,7 +69,29 @@ export class FinanceDB extends Dexie {
             settings: 'key',
             receipts: 'id, userId, uploadedAt, expenseId'
         });
+
+        // Add hooks to track data modification
+        this.expenses.hook('creating', () => this.updateModificationTime());
+        this.expenses.hook('updating', () => this.updateModificationTime());
+        this.expenses.hook('deleting', () => this.updateModificationTime());
+
+        this.receipts.hook('creating', () => this.updateModificationTime());
+        this.receipts.hook('updating', () => this.updateModificationTime());
+        this.receipts.hook('deleting', () => this.updateModificationTime());
+
+        this.budgets.hook('creating', () => this.updateModificationTime());
+        this.budgets.hook('updating', () => this.updateModificationTime());
+        this.budgets.hook('deleting', () => this.updateModificationTime());
+    }
+
+    private updateModificationTime() {
+        // We use a debounce or just fire-and-forget?
+        // Dexie hooks are sync/async. We can just fire a put to settings.
+        // Needs to avoid infinite loop if we track settings too.
+        // Luckily we don't hook settings.
+        this.settings.put({ key: 'data_modified_at', value: new Date().toISOString() });
     }
 }
+
 
 export const db = new FinanceDB();

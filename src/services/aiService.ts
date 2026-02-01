@@ -32,7 +32,7 @@ export const extractExpenseWithAI = async (
         missing_fields: previousState.missingFields
     } : undefined;
 
-    console.log('[AI Service] Sending context:', capturedContext);
+
 
     const result = await api.extractExpenses(input, categories, currentDate, availablePaymentMethods, capturedContext);
     const data = result.captured_data;

@@ -12,6 +12,7 @@ import SettingsPage from './pages/SettingsPage'
 import { useFinanceStore } from './store/useFinanceStore'
 import { useSettingsStore } from './store/useSettingsStore'
 import { AnalyticsService } from './services/analytics'
+import { backupService } from './services/backupService'
 import './App.css'
 
 import LandingPage from './pages/LandingPage'
@@ -46,6 +47,8 @@ function App() {
 
     loadAppData();
     loadSettings();
+    // smart backup check (fire and forget)
+    backupService.checkForSmartBackup();
   }, [loadAppData, loadSettings]);
 
   if (isFinanceLoading || isSettingsLoading) {

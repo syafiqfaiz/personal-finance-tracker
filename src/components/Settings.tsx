@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
-import { ShieldCheck, X, User } from 'lucide-react';
+import { ShieldCheck, X, User, Cloud, RefreshCw, Smartphone } from 'lucide-react';
 import { Button } from './ui/Button';
+import { backupService } from '../services/backupService';
+import ConfirmDialog from './ConfirmDialog';
 
 const Settings: React.FC = () => {
     const { userName, licenseKey, setUserName, setLicenseKey, isLoading } = useSettingsStore();
@@ -9,6 +11,10 @@ const Settings: React.FC = () => {
     const [localUserName, setLocalUserName] = useState(userName);
     const [localLicenseKey, setLocalLicenseKey] = useState(licenseKey);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+    const [isBackingUp, setIsBackingUp] = useState(false);
+    const [isRestoring, setIsRestoring] = useState(false);
+    const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+    const { lastBackupAt } = useSettingsStore();
 
     useEffect(() => {
         // eslint-disable-next-line
@@ -38,6 +44,19 @@ const Settings: React.FC = () => {
         } catch {
             setStatus({ type: 'error', message: 'Failed to save license key.' });
         }
+    };
+
+    const handleBackup = async () => {
+        setIsBackingUp(true);
+        await backupService.createBackup(true); // manual=true to show toasts
+        setIsBackingUp(false);
+    };
+
+    const handleRestoreConfirm = async () => {
+        setIsRestoreDialogOpen(false);
+        setIsRestoring(true);
+        await backupService.restoreBackup();
+        setIsRestoring(false);
     };
 
     return (
@@ -127,8 +146,87 @@ const Settings: React.FC = () => {
                     </div>
                 </section>
 
+                {/* Data Management */}
+                <section className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm space-y-6">
+                    <div className="flex items-center space-x-4">
+                        <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                            <Cloud className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">Cloud Backup</h2>
+                            <p className="text-[10px] text-slate-500 font-bold font-jakarta uppercase">Sync & Restore Data</p>
+                        </div>
+                    </div>
 
+                    <div className="space-y-4">
+                        <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between border border-slate-100">
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-white rounded-xl text-slate-400 shadow-sm border border-slate-100">
+                                    <Smartphone className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-slate-700">Last Backup</p>
+                                    <p className="text-[10px] text-slate-500 font-medium font-jakarta">
+                                        {lastBackupAt ? new Date(lastBackupAt).toLocaleString() : 'Never'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <Button
+                                type="button"
+                                onClick={handleBackup}
+                                disabled={isBackingUp || !licenseKey}
+                                className="relative overflow-hidden"
+                            >
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    {isBackingUp ? (
+                                        <>Backing up...</>
+                                    ) : (
+                                        <>
+                                            <Cloud className="w-4 h-4" /> Backup Now
+                                        </>
+                                    )}
+                                </span>
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() => setIsRestoreDialogOpen(true)}
+                                disabled={isRestoring || !licenseKey}
+                            >
+                                <span className="flex items-center justify-center gap-2">
+                                    {isRestoring ? (
+                                        <>Restoring...</>
+                                    ) : (
+                                        <>
+                                            <RefreshCw className="w-4 h-4" /> Restore Data
+                                        </>
+                                    )}
+                                </span>
+                            </Button>
+                        </div>
+                        {!licenseKey && (
+                            <p className="text-[10px] text-red-500 font-medium text-center bg-red-50 py-2 rounded-xl">
+                                License key required for backup
+                            </p>
+                        )}
+                    </div>
+                </section>
             </div>
+
+            <ConfirmDialog
+                isOpen={isRestoreDialogOpen}
+                title="Restore Data?"
+                message="This will OVERWRITE all current data on this device with the version from the cloud. This action cannot be undone."
+                confirmText="Yes, Overwrite"
+                cancelText="Cancel"
+                onConfirm={handleRestoreConfirm}
+                onCancel={() => setIsRestoreDialogOpen(false)}
+                variant="info"
+            />
 
             <footer className="text-center space-y-1 py-4">
                 <p className="text-[10px] font-bold font-jakarta text-slate-400 uppercase tracking-widest flex items-center justify-center gap-1">

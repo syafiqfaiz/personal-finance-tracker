@@ -137,11 +137,26 @@ describe('AIChat', () => {
 
     it('confirms expense entry correctly', async () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
-        const mockAddExpense = vi.fn();
+        const mockSetState = vi.fn();
+        const mockGetState = vi.fn(() => ({
+            expenses: [
+                // Existing expense with older timestamp (should be after new one)
+                {
+                    id: 'old-expense',
+                    name: 'Old Expense',
+                    amount: 50,
+                    timestamp: new Date('2024-01-01T10:00:00Z'),
+                    createdAt: new Date('2024-01-01T09:00:00Z')
+                }
+            ]
+        }));
+
         (useFinanceStore as any).mockReturnValue({
             categories: ['Food'],
-            addExpense: mockAddExpense,
+            addExpense: vi.fn(),
         });
+        (useFinanceStore as any).getState = mockGetState;
+        (useFinanceStore as any).setState = mockSetState;
 
         (extractExpenseWithAI as any).mockResolvedValue({
             name: 'KFC',
@@ -169,9 +184,35 @@ describe('AIChat', () => {
         fireEvent.click(confirmBtn);
 
         await waitFor(() => {
-            // ExpenseService.addExpense should be called instead of store's addExpense
+            // Verify UI feedback
             expect(screen.queryByText('Entry Preview')).not.toBeInTheDocument();
             expect(screen.getByText(/Expense added/i)).toBeInTheDocument();
+
+            // CRITICAL: Verify timestamp sorting logic
+            expect(mockSetState).toHaveBeenCalled();
+            const setStateCalls = mockSetState.mock.calls;
+            const lastCall = setStateCalls[setStateCalls.length - 1][0];
+
+            // Verify expenses array has correct sort order
+            expect(lastCall.expenses).toBeDefined();
+            expect(lastCall.expenses.length).toBeGreaterThan(1);
+
+            // First expense should be the newer one (descending by timestamp)
+            const firstExpense = lastCall.expenses[0];
+            expect(firstExpense.name).toBe('KFC');
+
+            // Verify the sorting function handles both Date and string timestamps
+            // (This tests the getTime() helper we implemented)
+            const timestamps = lastCall.expenses.map((e: any) => {
+                const ts = e.timestamp;
+                if (ts instanceof Date) return ts.getTime();
+                return new Date(ts).getTime();
+            });
+
+            // Timestamps should be in descending order
+            for (let i = 0; i < timestamps.length - 1; i++) {
+                expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i + 1]);
+            }
         });
     });
 

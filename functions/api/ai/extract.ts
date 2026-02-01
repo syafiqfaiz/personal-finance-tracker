@@ -168,7 +168,7 @@ response_text: <value>
     const genAI = new GoogleGenerativeAI(c.env.VITE_GEMINI_API_KEY);
 
     // Configure AI Gateway if credentials are present
-    const requestOptions: any = {};
+    const requestOptions: Record<string, string> = {};
     if (c.env.AI_GATEWAY_ACCOUNT_ID && c.env.AI_GATEWAY_NAME) {
         requestOptions.baseUrl = `https://gateway.ai.cloudflare.com/v1/${c.env.AI_GATEWAY_ACCOUNT_ID}/${c.env.AI_GATEWAY_NAME}/google-ai-studio`;
     }

@@ -104,14 +104,21 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
             receiptUrl: receiptMetadata?.storageKey, // Store storage key
         });
 
+        // Helper to safely get timestamp value (handles both Date objects and ISO strings)
+        const getTime = (dateValue: Date | string | undefined): number => {
+            if (!dateValue) return 0;
+            if (dateValue instanceof Date) return dateValue.getTime();
+            return new Date(dateValue).getTime();
+        };
+
         // Manually update the store state
         const { expenses } = useFinanceStore.getState();
         useFinanceStore.setState({
             expenses: [newExpense, ...expenses].sort((a, b) => {
-                const dateDiff = (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0);
+                const dateDiff = getTime(b.timestamp) - getTime(a.timestamp);
                 if (dateDiff !== 0) return dateDiff;
-                const createdA = a.createdAt?.getTime() || 0;
-                const createdB = b.createdAt?.getTime() || 0;
+                const createdA = getTime(a.createdAt);
+                const createdB = getTime(b.createdAt);
                 return createdB - createdA;
             })
         });
