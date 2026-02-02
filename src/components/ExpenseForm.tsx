@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFinanceStore, SYSTEM_CATEGORY, type Expense } from '../store/useFinanceStore';
-import { PlusCircle, Upload, FileText, Trash2 } from 'lucide-react';
+import { PlusCircle, Upload, FileText, Trash2, Camera } from 'lucide-react';
 import { compressImage, blobToDataURL } from '../services/imageService';
 import { toast } from 'sonner';
 import { Button } from './ui/Button';
@@ -198,7 +198,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                     />
                 </div>
 
-                {/* Receipt Photo Section */}
+    /* Receipt Photo Section */
                 <div className="space-y-4">
                     <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Receipt Photo</label>
                     {receiptPreview ? (
@@ -213,24 +213,48 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                             )}
 
                             <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center gap-4">
-                                <label className="p-4 bg-white rounded-full text-slate-900 cursor-pointer shadow-lg">
+                                <label className="p-4 bg-white rounded-full text-slate-900 cursor-pointer shadow-lg hover:bg-slate-50 transition-colors">
                                     <Upload className="w-6 h-6" />
                                     <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} />
                                 </label>
-                                <button type="button" onClick={removeReceipt} className="p-4 bg-white rounded-full text-red-500 shadow-lg">
+                                <button type="button" onClick={removeReceipt} className="p-4 bg-white rounded-full text-red-500 shadow-lg hover:bg-red-50 transition-colors">
                                     <Trash2 className="w-6 h-6" />
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <label className="flex flex-col items-center justify-center py-10 bg-white border border-slate-100 rounded-[28px] shadow-sm hover:border-blue-500 transition-all cursor-pointer group">
-                            <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors">
-                                <Upload className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
-                            </div>
-                            <span className="text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Upload Receipt</span>
-                            <span className="text-[10px] text-slate-400 font-medium mt-1">PDF or Images</span>
-                            <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} />
-                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Camera Button - Mobile friendly direct capture */}
+                            <label className="flex flex-col items-center justify-center py-8 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:border-blue-500 transition-all cursor-pointer group active:scale-95">
+                                <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors text-blue-500">
+                                    <Camera className="w-6 h-6" />
+                                </div>
+                                <span className="text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Camera</span>
+                                <span className="text-[10px] text-slate-400 font-medium mt-1">Take Photo</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                />
+                            </label>
+
+                            {/* Upload Button - File explorer */}
+                            <label className="flex flex-col items-center justify-center py-8 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:border-blue-500 transition-all cursor-pointer group active:scale-95">
+                                <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors text-slate-400 group-hover:text-blue-500">
+                                    <Upload className="w-6 h-6" />
+                                </div>
+                                <span className="text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Upload</span>
+                                <span className="text-[10px] text-slate-400 font-medium mt-1">Files or PDF</span>
+                                <input
+                                    type="file"
+                                    accept="image/*,application/pdf"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                />
+                            </label>
+                        </div>
                     )}
                 </div>
 
