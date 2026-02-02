@@ -9,6 +9,7 @@ import EditExpense from './pages/EditExpense'
 import AddExpense from './pages/AddExpense'
 import Budgets from './pages/Budgets'
 import SettingsPage from './pages/SettingsPage'
+import RecurringExpensesPage from './pages/RecurringExpensesPage'
 import { useFinanceStore } from './store/useFinanceStore'
 import { useSettingsStore } from './store/useSettingsStore'
 import { AnalyticsService } from './services/analytics'
@@ -79,6 +80,7 @@ function App() {
           <Route path="/expenses/:id/edit" element={<EditExpense />} />
           <Route path="/add" element={<AddExpense />} />
           <Route path="/budgets" element={<Budgets />} />
+          <Route path="/recurring-expenses" element={<RecurringExpensesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 

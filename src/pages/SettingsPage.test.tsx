@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import SettingsPage from './SettingsPage';
 
 // Mock child components
@@ -9,7 +10,11 @@ vi.mock('../components/Settings', () => ({
 
 describe('SettingsPage', () => {
     it('renders the page header and settings component', () => {
-        render(<SettingsPage />);
+        render(
+            <MemoryRouter>
+                <SettingsPage />
+            </MemoryRouter>
+        );
 
         expect(screen.getByText('Settings')).toBeInTheDocument();
         expect(screen.getByText('Connectivity & Security')).toBeInTheDocument();

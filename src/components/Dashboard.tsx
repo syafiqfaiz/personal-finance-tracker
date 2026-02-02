@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import ExpenseCard from './ExpenseCard';
 import MonthExpenseSnapshot from './MonthExpenseSnapshot';
 import MonthlyBudgetProgress from './MonthlyBudgetProgress';
+import RecurringExpenseChecklist from './RecurringExpenseChecklist';
 
 
 const Dashboard: React.FC = () => {
@@ -80,6 +81,9 @@ const Dashboard: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Recurring Expense Checklist */}
+            <RecurringExpenseChecklist />
 
             {/* Monthly Budget Progress */}
             <MonthlyBudgetProgress totalSpent={totalSpentMonth} totalBudget={totalBudget} />

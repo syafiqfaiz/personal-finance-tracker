@@ -2,13 +2,19 @@
 
 A private, offline-first personal finance tracker built as a React PWA, backed by a secure Serverless Backend for AI and Cloud Storage orchestration.
 
-## 🆕 Latest Release (v0.3.0)
-- **Robust Backup & Restore**: Fully tested, secure cloud backup functionality with restore integrity checks.
-- **Admin Tools**: New Admin API for license management.
-- **Stability**: Test suite coverage expanded to 84% (Settings component 100% verified).
+## 🆕 Latest Release (v0.4.0)
+- **Recurring Expenses**: Automated monthly expense tracking with smart reminders.
+  - Create templates for recurring bills (rent, subscriptions, utilities)
+  - Payment checklist widget on home page with due date tracking
+  - Flexible actions: Pay, Skip, or Snooze reminders
+  - Support for both fixed and variable amounts
+  - Pause/resume templates as needed
+- **Enhanced UX**: Full-page slide-up dialogs with smooth animations matching app design language.
+- **Test Coverage**: Comprehensive test suite for RecurringExpenseService.
 
 ## 🚀 Key Features
 - **Offline-First**: Track expenses anywhere, even without internet.
+- **Recurring Expenses**: Automated monthly bill tracking with smart reminders and flexible payment actions.
 - **AI-Powered**: Natural language expense entry using Google Gemini (via secure backend).
 - **Secure Cloud Storage**: Direct uploads to Cloudflare R2 using presigned URLs.
 - **Privacy-Centric**: "Bring Your Own Key" architecture for local data, with backend acting as a secure proxy.

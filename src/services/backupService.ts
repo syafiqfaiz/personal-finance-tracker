@@ -18,6 +18,8 @@ interface BackupData {
         budgets: any[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         settings: any[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        recurringExpenses: any[];
     };
 }
 
@@ -67,7 +69,8 @@ export const backupService = {
                 expenses: await db.expenses.toArray(),
                 receipts: await db.receipts.toArray(),
                 budgets: await db.budgets.toArray(),
-                settings: await db.settings.toArray()
+                settings: await db.settings.toArray(),
+                recurringExpenses: await db.recurringExpenses.toArray()
             };
 
             // 2. Sign Data
@@ -200,12 +203,13 @@ export const backupService = {
             // 4. Wipe & Restore
 
             try {
-                await db.transaction('rw', db.expenses, db.receipts, db.budgets, db.settings, async () => {
+                await db.transaction('rw', [db.expenses, db.receipts, db.budgets, db.settings, db.recurringExpenses], async () => {
 
                     await db.expenses.clear();
                     await db.receipts.clear();
                     await db.budgets.clear();
                     await db.settings.clear();
+                    await db.recurringExpenses.clear();
 
 
                     // Note: Using bulkPut instead of bulkAdd to handle any keys
@@ -221,6 +225,9 @@ export const backupService = {
                     }
                     if (backup.data.settings.length > 0) {
                         await db.settings.bulkPut(backup.data.settings);
+                    }
+                    if (backup.data.recurringExpenses && backup.data.recurringExpenses.length > 0) {
+                        await db.recurringExpenses.bulkPut(backup.data.recurringExpenses);
                     }
 
                 });

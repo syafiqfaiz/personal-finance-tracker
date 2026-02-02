@@ -14,6 +14,8 @@ export interface Expense {
     isTaxDeductible: boolean;
     receiptUrl?: string;
     localReceipt?: Blob;
+    recurringExpenseId?: string;  // Foreign Key to RecurringExpense
+    isRecurringInstance?: boolean; // Flag for UI logic
 }
 
 export interface Budget {
@@ -40,11 +42,30 @@ export interface Receipt {
     expenseId?: string;      // Linked expense (null if not confirmed)
 }
 
+export interface RecurringExpense {
+    id: string;                    // UUID
+    userId?: string;               // Optional for multi-user support
+    name: string;
+    amount: number;                // Can be 0 for variable inputs
+    categoryId: string;
+    frequency: 'MONTHLY' | 'WEEKLY' | 'YEARLY'; // MVP: UI restricted to MONTHLY
+    dayOfMonth: number;            // 1-31
+    startDate: string;             // ISO Date (YYYY-MM-DD)
+    nextDueDate: string;           // ISO Date (Pre-calculated next occurrence)
+    lastActionedDate?: string;     // ISO Date (The DUE DATE of last action)
+    lastActionType?: 'PAID' | 'SKIPPED' | 'MISSED';
+    snoozedUntil?: string;         // ISO Date. If present AND > Today, hide reminder
+    isActive: boolean;
+    createdAt: string;             // ISO Date
+    updatedAt: string;             // ISO Date
+}
+
 export class FinanceDB extends Dexie {
     expenses!: Table<Expense>;
     budgets!: Table<Budget>;
     settings!: Table<Setting>;
     receipts!: Table<Receipt>;
+    recurringExpenses!: Table<RecurringExpense>;
 
     constructor() {
         super('FinanceDB');
@@ -70,6 +91,15 @@ export class FinanceDB extends Dexie {
             receipts: 'id, userId, uploadedAt, expenseId'
         });
 
+        // Version 4: Add recurring_expenses table
+        this.version(4).stores({
+            expenses: 'id, name, amount, category, *tags, timestamp, createdAt',
+            budgets: 'id, category, monthPeriod',
+            settings: 'key',
+            receipts: 'id, userId, uploadedAt, expenseId',
+            recurringExpenses: 'id, isActive, nextDueDate, snoozedUntil'
+        });
+
         // Add hooks to track data modification
         this.expenses.hook('creating', () => this.updateModificationTime());
         this.expenses.hook('updating', () => this.updateModificationTime());
@@ -82,6 +112,10 @@ export class FinanceDB extends Dexie {
         this.budgets.hook('creating', () => this.updateModificationTime());
         this.budgets.hook('updating', () => this.updateModificationTime());
         this.budgets.hook('deleting', () => this.updateModificationTime());
+
+        this.recurringExpenses.hook('creating', () => this.updateModificationTime());
+        this.recurringExpenses.hook('updating', () => this.updateModificationTime());
+        this.recurringExpenses.hook('deleting', () => this.updateModificationTime());
     }
 
     private updateModificationTime() {
