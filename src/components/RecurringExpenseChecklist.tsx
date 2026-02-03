@@ -7,19 +7,21 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import SnoozeDialog from './SnoozeDialog';
 import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { useFinanceStore } from '../store/useFinanceStore';
 
 interface PaymentDialogProps {
     template: RecurringExpense;
     onClose: () => void;
-    onConfirm: (amount: number) => void;
+    onConfirm: (amount: number, date: string) => void;
 }
 
 function PaymentDialog({ template, onClose, onConfirm }: PaymentDialogProps) {
     const [amount, setAmount] = useState(template.amount);
+    const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onConfirm(amount);
+        onConfirm(amount, date);
     };
 
     return createPortal(
@@ -63,6 +65,19 @@ function PaymentDialog({ template, onClose, onConfirm }: PaymentDialogProps) {
                         </div>
                     </div>
 
+                    <div className="mb-6 space-y-2">
+                        <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                            Payment Date
+                        </label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full bg-white rounded-2xl border border-slate-200 py-4 px-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-bold font-jakarta text-slate-900 transition-all"
+                            required
+                        />
+                    </div>
+
                     <div className="pt-4 space-y-3">
                         <button
                             type="submit"
@@ -91,6 +106,7 @@ export default function RecurringExpenseChecklist() {
     const [showAll, setShowAll] = useState(false);
     const [paymentDialog, setPaymentDialog] = useState<RecurringExpense | null>(null);
     const [snoozeDialog, setSnoozeDialog] = useState<RecurringExpense | null>(null);
+    const { loadAppData } = useFinanceStore();
 
     const loadReminders = async () => {
         try {
@@ -109,17 +125,17 @@ export default function RecurringExpenseChecklist() {
         loadReminders();
     }, []);
 
-    const handlePay = async (template: RecurringExpense, amount: number) => {
+    const handlePay = async (template: RecurringExpense, amount: number, date: string) => {
         try {
-            const today = format(new Date(), 'yyyy-MM-dd');
             await RecurringExpenseService.processAction(template.id, {
                 type: 'PAY',
                 amount,
-                date: today
+                date
             });
             toast.success(`Marked ${template.name} as paid`);
             setPaymentDialog(null);
             await loadReminders();
+            await loadAppData(); // Reload expenses to show the new expense immediately
         } catch (error) {
             console.error('Failed to process payment:', error);
             toast.error('Failed to mark as paid');
@@ -246,7 +262,7 @@ export default function RecurringExpenseChecklist() {
                 <PaymentDialog
                     template={paymentDialog}
                     onClose={() => setPaymentDialog(null)}
-                    onConfirm={(amount) => handlePay(paymentDialog, amount)}
+                    onConfirm={(amount, date) => handlePay(paymentDialog, amount, date)}
                 />
             )}
 

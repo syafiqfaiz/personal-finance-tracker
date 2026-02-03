@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RecurringExpenseService } from './RecurringExpenseService';
 import { db } from '../db/db';
-import { addMonths, format } from 'date-fns';
+import { addMonths, format, parseISO } from 'date-fns';
 
 // Mock the database
 vi.mock('../db/db', () => ({
@@ -172,6 +172,51 @@ describe('RecurringExpenseService', () => {
                 snoozedUntil: undefined, // CLEARED
                 updatedAt: expect.any(String)
             });
+        });
+
+        it('should create expense with the specified payment date', async () => {
+            const mockTemplate = {
+                id: 'template-1',
+                name: 'Netflix',
+                amount: 49,
+                categoryId: 'entertainment',
+                defaultPaymentMethod: 'Credit Card',
+                frequency: 'MONTHLY' as const,
+                dayOfMonth: 1,
+                startDate: '2026-02-01',
+                nextDueDate: '2026-02-01',
+                isActive: true
+            };
+
+            const mockGet = vi.fn().mockResolvedValue(mockTemplate);
+            const mockUpdate = vi.fn().mockResolvedValue(1);
+            const mockAddExpense = vi.fn().mockResolvedValue('expense-id');
+
+            (db.recurringExpenses.get as any) = mockGet;
+            (db.recurringExpenses.update as any) = mockUpdate;
+            (db.expenses.add as any) = mockAddExpense;
+
+            // Pay with a custom date (not today)
+            await RecurringExpenseService.processAction('template-1', {
+                type: 'PAY',
+                amount: 49,
+                date: '2026-02-15' // Custom payment date
+            });
+
+            // Verify expense was created with the correct timestamp
+            expect(mockAddExpense).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    name: 'Netflix',
+                    amount: 49,
+                    timestamp: expect.any(Date),
+                    paymentMethod: 'Credit Card'
+                })
+            );
+
+            // Verify the timestamp matches the payment date
+            const createdExpense = mockAddExpense.mock.calls[0][0];
+            // parseISO interprets the date string in local timezone, so we compare using the same method
+            expect(createdExpense.timestamp).toEqual(parseISO('2026-02-15'));
         });
     });
 
