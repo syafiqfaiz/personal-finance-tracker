@@ -16,6 +16,7 @@ interface ProcessActionPayload {
     amount?: number;
     date: string; // YYYY-MM-DD (the original due date)
     snoozeUntil?: string; // YYYY-MM-DD (for SNOOZE action)
+    receiptUrl?: string; // Optional receipt URL for PAY action
 }
 
 export const RecurringExpenseService = {
@@ -123,7 +124,8 @@ export const RecurringExpenseService = {
                     paymentMethod: template.defaultPaymentMethod || 'Cash',
                     isTaxDeductible: false,
                     recurringExpenseId: templateId,
-                    isRecurringInstance: true
+                    isRecurringInstance: true,
+                    receiptUrl: action.receiptUrl
                 };
 
                 await db.expenses.add(expense);

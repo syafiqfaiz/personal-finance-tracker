@@ -6,22 +6,54 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import SnoozeDialog from './SnoozeDialog';
-import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Upload, FileText, Trash2, Camera, Image } from 'lucide-react';
 import { useFinanceStore } from '../store/useFinanceStore';
+import { compressImage, blobToDataURL } from '../services/imageService';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { api } from '../services/api';
 
 interface PaymentDialogProps {
     template: RecurringExpense;
     onClose: () => void;
-    onConfirm: (amount: number, date: string) => void;
+    onConfirm: (amount: number, date: string, receiptBlob: Blob | null) => void;
 }
 
 function PaymentDialog({ template, onClose, onConfirm }: PaymentDialogProps) {
     const [amount, setAmount] = useState(template.amount);
     const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [receiptBlob, setReceiptBlob] = useState<Blob | null>(null);
+    const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+    const isMobile = useIsMobile();
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            if (file.type === 'application/pdf') {
+                setReceiptBlob(file);
+                const preview = await blobToDataURL(file);
+                setReceiptPreview(preview);
+            } else {
+                const compressed = await compressImage(file);
+                setReceiptBlob(compressed);
+                const preview = await blobToDataURL(compressed);
+                setReceiptPreview(preview);
+            }
+        } catch (err) {
+            console.error('Failed to process file:', err);
+            toast.error('Failed to process file. Please try another one.');
+        }
+    };
+
+    const removeReceipt = () => {
+        setReceiptBlob(null);
+        setReceiptPreview(null);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onConfirm(amount, date);
+        onConfirm(amount, date, receiptBlob);
     };
 
     return createPortal(
@@ -78,6 +110,83 @@ function PaymentDialog({ template, onClose, onConfirm }: PaymentDialogProps) {
                         />
                     </div>
 
+                    {/* Receipt Upload */}
+                    <div className="space-y-4">
+                        <label className="block text-center text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Receipt Photo</label>
+                        {receiptPreview ? (
+                            <div className="relative group rounded-[28px] overflow-hidden border border-slate-100 aspect-video bg-white shadow-sm flex items-center justify-center">
+                                {receiptBlob?.type === 'application/pdf' ? (
+                                    <div className="text-center space-y-2">
+                                        <FileText className="w-12 h-12 text-red-500 mx-auto" />
+                                        <p className="text-xs font-bold text-slate-700">PDF Document</p>
+                                    </div>
+                                ) : (
+                                    <img src={receiptPreview} alt="Receipt" className="w-full h-full object-contain" />
+                                )}
+
+                                <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center gap-4">
+                                    <label className="p-4 bg-white rounded-full text-slate-900 cursor-pointer shadow-lg hover:bg-slate-50 transition-colors">
+                                        <Upload className="w-6 h-6" />
+                                        <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} />
+                                    </label>
+                                    <button type="button" onClick={removeReceipt} className="p-4 bg-white rounded-full text-red-500 shadow-lg hover:bg-red-50 transition-colors">
+                                        <Trash2 className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            isMobile ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Camera Button */}
+                                    <label className="flex flex-col items-center justify-center py-8 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:border-blue-500 transition-all cursor-pointer group active:scale-95">
+                                        <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors text-blue-500">
+                                            <Camera className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Camera</span>
+                                        <span className="text-[10px] text-slate-400 font-medium mt-1">Take Photo</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                        />
+                                    </label>
+
+                                    {/* Gallery Button */}
+                                    <label className="flex flex-col items-center justify-center py-8 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:border-blue-500 transition-all cursor-pointer group active:scale-95">
+                                        <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors text-slate-400 group-hover:text-blue-500">
+                                            <Image className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-xs font-bold font-jakarta text-slate-900 uppercase tracking-widest">Gallery</span>
+                                        <span className="text-[10px] text-slate-400 font-medium mt-1">Files or PDF</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*,application/pdf"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                        />
+                                    </label>
+                                </div>
+                            ) : (
+                                /* Desktop Upload Button */
+                                <label className="flex flex-col items-center justify-center py-12 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:border-blue-500 transition-all cursor-pointer group active:scale-95 border-dashed border-2">
+                                    <div className="bg-slate-50 p-4 rounded-full mb-3 group-hover:bg-blue-50 transition-colors text-slate-400 group-hover:text-blue-500">
+                                        <Upload className="w-8 h-8" />
+                                    </div>
+                                    <span className="text-sm font-bold font-jakarta text-slate-900 uppercase tracking-widest">Upload Receipt</span>
+                                    <span className="text-xs text-slate-400 font-medium mt-1">Drag & drop or click to browse</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*,application/pdf"
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                    />
+                                </label>
+                            )
+                        )}
+                    </div>
+
                     <div className="pt-4 space-y-3">
                         <button
                             type="submit"
@@ -125,12 +234,36 @@ export default function RecurringExpenseChecklist() {
         loadReminders();
     }, []);
 
-    const handlePay = async (template: RecurringExpense, amount: number, date: string) => {
+    const handlePay = async (template: RecurringExpense, amount: number, date: string, receiptBlob: Blob | null) => {
         try {
+            let receiptUrl: string | undefined;
+
+            // Upload receipt if provided
+            if (receiptBlob) {
+                try {
+                    const filename = receiptBlob.type === 'application/pdf' ? 'receipt.pdf' : 'receipt.jpg';
+                    const uploadUrlResponse = await api.getUploadUrl(filename, receiptBlob.type);
+
+                    // Upload to R2 using presigned URL
+                    await fetch(uploadUrlResponse.url, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': receiptBlob.type },
+                        body: receiptBlob
+                    });
+
+                    receiptUrl = uploadUrlResponse.key;
+                } catch (error) {
+                    console.error('Upload failed', error);
+                    toast.error('Failed to upload receipt');
+                    return;
+                }
+            }
+
             await RecurringExpenseService.processAction(template.id, {
                 type: 'PAY',
                 amount,
-                date
+                date,
+                receiptUrl
             });
             toast.success(`Marked ${template.name} as paid`);
             setPaymentDialog(null);
@@ -262,7 +395,7 @@ export default function RecurringExpenseChecklist() {
                 <PaymentDialog
                     template={paymentDialog}
                     onClose={() => setPaymentDialog(null)}
-                    onConfirm={(amount, date) => handlePay(paymentDialog, amount, date)}
+                    onConfirm={(amount, date, receiptBlob) => handlePay(paymentDialog, amount, date, receiptBlob)}
                 />
             )}
 
