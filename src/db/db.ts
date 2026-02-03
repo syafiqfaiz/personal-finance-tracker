@@ -48,6 +48,7 @@ export interface RecurringExpense {
     name: string;
     amount: number;                // Can be 0 for variable inputs
     categoryId: string;
+    defaultPaymentMethod?: string; // Default payment method for created expenses
     frequency: 'MONTHLY' | 'WEEKLY' | 'YEARLY'; // MVP: UI restricted to MONTHLY
     dayOfMonth: number;            // 1-31
     startDate: string;             // ISO Date (YYYY-MM-DD)

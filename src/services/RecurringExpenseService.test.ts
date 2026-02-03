@@ -215,4 +215,123 @@ describe('RecurringExpenseService', () => {
             });
         });
     });
+
+    describe('defaultPaymentMethod', () => {
+        it('should create template with custom payment method', async () => {
+            const templateData = {
+                name: 'Netflix',
+                amount: 49,
+                categoryId: 'entertainment',
+                dayOfMonth: 1,
+                startDate: '2026-02-01',
+                defaultPaymentMethod: 'Credit Card'
+            };
+
+            const mockAdd = vi.fn().mockResolvedValue('test-id');
+            (db.recurringExpenses.add as any) = mockAdd;
+
+            await RecurringExpenseService.createTemplate(templateData);
+
+            expect(mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    name: 'Netflix',
+                    defaultPaymentMethod: 'Credit Card'
+                })
+            );
+        });
+
+        it('should default to Cash when payment method not provided', async () => {
+            const templateData = {
+                name: 'Rent',
+                amount: 1500,
+                categoryId: 'housing',
+                dayOfMonth: 1,
+                startDate: '2026-02-01'
+                // No defaultPaymentMethod
+            };
+
+            const mockAdd = vi.fn().mockResolvedValue('test-id');
+            (db.recurringExpenses.add as any) = mockAdd;
+
+            await RecurringExpenseService.createTemplate(templateData);
+
+            expect(mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    defaultPaymentMethod: 'Cash'
+                })
+            );
+        });
+
+        it('should use template payment method when creating expense via PAY action', async () => {
+            const mockTemplate = {
+                id: 'template-1',
+                name: 'Netflix',
+                amount: 49,
+                categoryId: 'entertainment',
+                defaultPaymentMethod: 'Credit Card',
+                frequency: 'MONTHLY' as const,
+                dayOfMonth: 1,
+                startDate: '2026-02-01',
+                nextDueDate: '2026-02-01',
+                isActive: true
+            };
+
+            const mockGet = vi.fn().mockResolvedValue(mockTemplate);
+            const mockUpdate = vi.fn().mockResolvedValue(1);
+            const mockAddExpense = vi.fn().mockResolvedValue('expense-id');
+
+            (db.recurringExpenses.get as any) = mockGet;
+            (db.recurringExpenses.update as any) = mockUpdate;
+            (db.expenses.add as any) = mockAddExpense;
+
+            await RecurringExpenseService.processAction('template-1', {
+                type: 'PAY',
+                amount: 49,
+                date: '2026-02-01'
+            });
+
+            // Verify expense was created with correct payment method
+            expect(mockAddExpense).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    paymentMethod: 'Credit Card'
+                })
+            );
+        });
+
+        it('should default to Cash when template has no payment method (backward compatibility)', async () => {
+            const mockTemplate = {
+                id: 'template-1',
+                name: 'Old Rent',
+                amount: 1500,
+                categoryId: 'housing',
+                // No defaultPaymentMethod field (old template)
+                frequency: 'MONTHLY' as const,
+                dayOfMonth: 1,
+                startDate: '2026-01-01',
+                nextDueDate: '2026-02-01',
+                isActive: true
+            };
+
+            const mockGet = vi.fn().mockResolvedValue(mockTemplate);
+            const mockUpdate = vi.fn().mockResolvedValue(1);
+            const mockAddExpense = vi.fn().mockResolvedValue('expense-id');
+
+            (db.recurringExpenses.get as any) = mockGet;
+            (db.recurringExpenses.update as any) = mockUpdate;
+            (db.expenses.add as any) = mockAddExpense;
+
+            await RecurringExpenseService.processAction('template-1', {
+                type: 'PAY',
+                amount: 1500,
+                date: '2026-02-01'
+            });
+
+            // Should default to 'Cash' for backward compatibility
+            expect(mockAddExpense).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    paymentMethod: 'Cash'
+                })
+            );
+        });
+    });
 });

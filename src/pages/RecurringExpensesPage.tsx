@@ -8,28 +8,33 @@ import { toast } from 'sonner';
 import { Plus, Edit2, Trash2, Power, PowerOff, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 
+const PAYMENT_METHODS = ['Cash', 'Debit Card', 'Credit Card', 'Bank Transfer'];
+
 interface TemplateFormData {
     name: string;
     amount: number;
     categoryId: string;
     dayOfMonth: number;
     startDate: string;
+    defaultPaymentMethod: string;
 }
 
 interface TemplateDialogProps {
     template?: RecurringExpense;
     categories: string[];
+    paymentMethods: string[];
     onClose: () => void;
     onSave: (data: TemplateFormData) => void;
 }
 
-function TemplateDialog({ template, categories, onClose, onSave }: TemplateDialogProps) {
+function TemplateDialog({ template, categories, paymentMethods, onClose, onSave }: TemplateDialogProps) {
     const [formData, setFormData] = useState<TemplateFormData>({
         name: template?.name || '',
         amount: template?.amount || 0,
         categoryId: template?.categoryId || categories[0] || '',
         dayOfMonth: template?.dayOfMonth || 1,
-        startDate: template?.startDate || format(new Date(), 'yyyy-MM-dd')
+        startDate: template?.startDate || format(new Date(), 'yyyy-MM-dd'),
+        defaultPaymentMethod: template?.defaultPaymentMethod || paymentMethods[0] || 'Cash'
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -102,6 +107,24 @@ function TemplateDialog({ template, categories, onClose, onSave }: TemplateDialo
                             {categories.map((cat) => (
                                 <option key={cat} value={cat}>
                                     {cat}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                            Payment Method
+                        </label>
+                        <select
+                            value={formData.defaultPaymentMethod}
+                            onChange={(e) => setFormData({ ...formData, defaultPaymentMethod: e.target.value })}
+                            className="w-full bg-white rounded-2xl border border-slate-200 py-4 px-5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-bold font-jakarta text-slate-900 transition-all"
+                            required
+                        >
+                            {paymentMethods.map((method) => (
+                                <option key={method} value={method}>
+                                    {method}
                                 </option>
                             ))}
                         </select>
@@ -330,6 +353,7 @@ export default function RecurringExpensesPage() {
                 <TemplateDialog
                     template={dialogTemplate === 'new' ? undefined : dialogTemplate}
                     categories={categories}
+                    paymentMethods={PAYMENT_METHODS}
                     onClose={() => setDialogTemplate(null)}
                     onSave={handleSave}
                 />

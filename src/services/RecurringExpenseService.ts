@@ -8,6 +8,7 @@ interface CreateTemplateData {
     categoryId: string;
     dayOfMonth: number;
     startDate: string; // YYYY-MM-DD
+    defaultPaymentMethod?: string; // Optional default payment method
 }
 
 interface ProcessActionPayload {
@@ -30,6 +31,7 @@ export const RecurringExpenseService = {
             name: data.name,
             amount: data.amount,
             categoryId: data.categoryId,
+            defaultPaymentMethod: data.defaultPaymentMethod || 'Cash',
             frequency: 'MONTHLY', // MVP: Fixed to monthly
             dayOfMonth: data.dayOfMonth,
             startDate: data.startDate,
@@ -118,7 +120,7 @@ export const RecurringExpenseService = {
                     timestamp: parseISO(action.date),
                     createdAt: new Date(),
                     updatedAt: new Date(),
-                    paymentMethod: 'Cash', // Default
+                    paymentMethod: template.defaultPaymentMethod || 'Cash',
                     isTaxDeductible: false,
                     recurringExpenseId: templateId,
                     isRecurringInstance: true
@@ -191,7 +193,7 @@ export const RecurringExpenseService = {
      */
     async updateTemplate(
         templateId: string,
-        updates: Partial<Pick<RecurringExpense, 'name' | 'amount' | 'categoryId' | 'dayOfMonth' | 'isActive'>>
+        updates: Partial<Pick<RecurringExpense, 'name' | 'amount' | 'categoryId' | 'dayOfMonth' | 'defaultPaymentMethod' | 'isActive'>>
     ): Promise<void> {
         await db.recurringExpenses.update(templateId, {
             ...updates,
