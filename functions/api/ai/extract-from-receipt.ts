@@ -119,7 +119,7 @@ app.post('/', async (c) => {
     // Construct Vision Prompt
     const prompt = buildVisionPrompt(
         body.categories || [],
-        body.available_payment_method || ['Cash', 'Credit Card', 'QR Pay', 'Transfer'],
+        body.available_payment_method || ['Cash', 'Credit Card', 'Debit Card', 'QR Pay', 'Transfer'],
         body.current_date || new Date().toISOString().split('T')[0]
     );
 

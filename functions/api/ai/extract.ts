@@ -148,10 +148,14 @@ INSTRUCTIONS:
 5. If no date is provided or can be inferred, use the Current Date. Ensure dates (input and output) are strictly in ISO 8601 format (YYYY-MM-DD).
 6. Notes should contain any extra context not covered by other fields.
 7. Confidence should be 'low' if important fields (name, amount, category, payment_method) are missing.
-8. If confidence is high, set 'response_text' to a cheerful, warm confirmation message.
+8. For response_text:
+   - If this is the FIRST message (no previous data), give a friendly confirmation question.
+   - If this is an UPDATE/CORRECTION to existing data, give a VERY BRIEF acknowledgment (e.g., "Updated ✓", "Got it", "Changed to [value]"). Keep it under 5 words.
+   - The user can see a live preview card, so you don't need to repeat all the details.
 9. Select possible category from the list of categories provided. If none are possible, select "Uncategorized".
 10. Select possible payment method from the list of payment methods provided. If none are possible, select "Cash".
 11. Output strictly in the following Key-Value format (no markdown, no json):
+
 
 name: <value>
 amount: <value>

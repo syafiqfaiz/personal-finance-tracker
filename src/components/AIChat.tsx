@@ -43,6 +43,9 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
         receiptDate: string;
     } | null>(null);
 
+    // Inline editing state
+    const [editingField, setEditingField] = useState<string | null>(null);
+
     const isMobile = useIsMobile();
 
     // Auto-scroll to bottom
@@ -298,42 +301,137 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                 </div>
             )}
 
-            {/* CONFIRMATION CARD (Only when confidence is high) */}
-            {currentContext && currentContext.confidence === 'high' && (
+            {/* CONFIRMATION CARD (Always show when there's context and not processing) */}
+            {currentContext && !isProcessing && (
                 <div className="bg-white rounded-[20px] shadow-xl shadow-purple-900/5 border border-purple-100 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 flex-shrink-0">
                     <div className="bg-slate-900 px-4 py-3 flex items-center space-x-2">
                         <Sparkles className="w-3 h-3 text-purple-400" />
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">Entry Preview</span>
                     </div>
                     <div className="p-4 space-y-4">
-                        <div className="flex justify-between items-baseline">
-                            <div className="space-y-0.5">
+                        <div className="flex justify-between items-baseline gap-4">
+                            <div className="space-y-0.5 flex-1">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Merchant</label>
-                                <p className="text-xl font-serif text-slate-900">{currentContext.name}</p>
+                                {editingField === 'name' ? (
+                                    <input
+                                        type="text"
+                                        value={currentContext.name}
+                                        onChange={(e) => setCurrentContext({ ...currentContext, name: e.target.value })}
+                                        onBlur={() => setEditingField(null)}
+                                        onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
+                                        className="text-xl font-serif text-slate-900 border-b-2 border-blue-500 outline-none w-full bg-transparent"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <p
+                                        className="text-xl font-serif text-slate-900 cursor-pointer hover:text-blue-600 transition-colors"
+                                        onClick={() => setEditingField('name')}
+                                        title="Click to edit"
+                                    >
+                                        {currentContext.name}
+                                    </p>
+                                )}
                             </div>
                             <div className="text-right space-y-0.5">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</label>
-                                <p className="text-xl font-black text-slate-900 tracking-tight">RM {currentContext.amount.toFixed(2)}</p>
+                                {editingField === 'amount' ? (
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={currentContext.amount}
+                                        onChange={(e) => setCurrentContext({ ...currentContext, amount: Number(e.target.value) })}
+                                        onBlur={() => setEditingField(null)}
+                                        onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
+                                        className="text-xl font-black text-slate-900 tracking-tight border-b-2 border-blue-500 outline-none w-24 bg-transparent text-right"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <p
+                                        className="text-xl font-black text-slate-900 tracking-tight cursor-pointer hover:text-blue-600 transition-colors"
+                                        onClick={() => setEditingField('amount')}
+                                        title="Click to edit"
+                                    >
+                                        RM {currentContext.amount.toFixed(2)}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         <div className="bg-slate-50 rounded-xl p-3 space-y-2">
                             <div className="flex justify-between items-center">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</span>
-                                <span className="text-xs font-semibold text-slate-900">{currentContext.category}</span>
+                                {editingField === 'category' ? (
+                                    <select
+                                        value={currentContext.category}
+                                        onChange={(e) => { setCurrentContext({ ...currentContext, category: e.target.value }); setEditingField(null); }}
+                                        onBlur={() => setEditingField(null)}
+                                        className="text-xs font-semibold text-slate-900 border border-blue-500 rounded px-2 py-1 outline-none bg-white"
+                                        autoFocus
+                                    >
+                                        {categories.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <span
+                                        className="text-xs font-semibold text-slate-900 cursor-pointer hover:text-blue-600 transition-colors"
+                                        onClick={() => setEditingField('category')}
+                                        title="Click to edit"
+                                    >
+                                        {currentContext.category}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</span>
-                                <span className="text-xs font-semibold text-slate-900">
-                                    {(() => {
-                                        const d = new Date(currentContext.date);
-                                        return `${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`;
-                                    })()}
-                                </span>
+                                {editingField === 'date' ? (
+                                    <input
+                                        type="date"
+                                        value={currentContext.date}
+                                        onChange={(e) => setCurrentContext({ ...currentContext, date: e.target.value })}
+                                        onBlur={() => setEditingField(null)}
+                                        onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
+                                        className="text-xs font-semibold text-slate-900 border border-blue-500 rounded px-2 py-1 outline-none bg-white"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <span
+                                        className="text-xs font-semibold text-slate-900 cursor-pointer hover:text-blue-600 transition-colors"
+                                        onClick={() => setEditingField('date')}
+                                        title="Click to edit"
+                                    >
+                                        {(() => {
+                                            const d = new Date(currentContext.date);
+                                            return `${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`;
+                                        })()}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Payment</span>
-                                <span className="text-xs font-semibold text-slate-900">{currentContext.paymentMethod}</span>
+                                {editingField === 'paymentMethod' ? (
+                                    <select
+                                        value={currentContext.paymentMethod}
+                                        onChange={(e) => { setCurrentContext({ ...currentContext, paymentMethod: e.target.value }); setEditingField(null); }}
+                                        onBlur={() => setEditingField(null)}
+                                        className="text-xs font-semibold text-slate-900 border border-blue-500 rounded px-2 py-1 outline-none bg-white"
+                                        autoFocus
+                                    >
+                                        <option value="Cash">Cash</option>
+                                        <option value="Credit Card">Credit Card</option>
+                                        <option value="Debit Card">Debit Card</option>
+                                        <option value="QR Pay">QR Pay</option>
+                                        <option value="Transfer">Transfer</option>
+                                    </select>
+                                ) : (
+                                    <span
+                                        className="text-xs font-semibold text-slate-900 cursor-pointer hover:text-blue-600 transition-colors"
+                                        onClick={() => setEditingField('paymentMethod')}
+                                        title="Click to edit"
+                                    >
+                                        {currentContext.paymentMethod}
+                                    </span>
+                                )}
                             </div>
                         </div>
 

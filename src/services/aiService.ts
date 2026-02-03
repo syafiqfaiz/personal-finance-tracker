@@ -17,7 +17,7 @@ export const extractExpenseWithAI = async (
     categories: string[],
     previousState?: ExtractedExpense
 ): Promise<ExtractedExpense> => {
-    const availablePaymentMethods = ["Cash", "Credit Card", "QR Pay", "Transfer"]; // Default or fetch from store if available
+    const availablePaymentMethods = ["Cash", "Credit Card", "Debit Card", "QR Pay", "Transfer"];
     const currentDate = new Date().toISOString();
 
     // Map frontend camelCase to backend snake_case

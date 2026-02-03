@@ -140,7 +140,7 @@ describe('AIChat', () => {
         await waitFor(() => {
             expect(extractExpenseWithAI).toHaveBeenCalledWith('Lunch at KFC', ['Food', 'Transport'], undefined);
             expect(screen.getByText('I need the amount.')).toBeInTheDocument();
-            expect(screen.queryByText('Entry Preview')).not.toBeInTheDocument(); // Confirmation card hidden
+            expect(screen.getByText('Entry Preview')).toBeInTheDocument(); // Confirmation card now shows for all contexts
         });
     });
 
