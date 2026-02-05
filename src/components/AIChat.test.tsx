@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import AIChat from './AIChat';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { extractExpenseWithAI } from '../services/aiService';
+import { api } from '../services/api';
 
 import { useIsMobile } from '../hooks/useIsMobile';
 
@@ -28,23 +30,32 @@ vi.mock('../store/useSettingsStore', () => ({
     ),
 }));
 
-vi.mock('../store/useFinanceStore', () => ({
-    useFinanceStore: Object.assign(
-        vi.fn(() => ({
-            categories: ['Food', 'Transport'],
-            addExpense: vi.fn(),
-        })),
-        {
-            getState: vi.fn(() => ({
-                expenses: []
-            })),
-            setState: vi.fn()
-        }
-    ),
-}));
+vi.mock('../store/useFinanceStore', () => {
+    const stableState = {
+        categories: ['Food', 'Transport'],
+        addExpense: vi.fn(),
+    };
+    return {
+        useFinanceStore: Object.assign(
+            vi.fn(() => stableState),
+            {
+                getState: vi.fn(() => ({
+                    expenses: []
+                })),
+                setState: vi.fn()
+            }
+        ),
+    };
+});
 
 vi.mock('../services/aiService', () => ({
     extractExpenseWithAI: vi.fn(),
+}));
+
+vi.mock('../services/analytics', () => ({
+    AnalyticsService: {
+        trackEvent: vi.fn()
+    }
 }));
 
 vi.mock('../services/ExpenseService', () => ({
@@ -55,8 +66,16 @@ vi.mock('../services/ExpenseService', () => ({
 
 vi.mock('../db/receiptOperations', () => ({
     receiptOperations: {
+        create: vi.fn(() => Promise.resolve({ id: 'mock-id' })),
         getAllByUser: vi.fn(() => Promise.resolve([])),
         linkToExpense: vi.fn(() => Promise.resolve())
+    }
+}));
+
+vi.mock('../services/api', () => ({
+    api: {
+        extractFromReceipt: vi.fn(),
+        getUploadUrl: vi.fn()
     }
 }));
 
@@ -67,12 +86,6 @@ vi.mock('../constants/greetings', () => ({
 // Mock scrollIntoView
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
-// Mock react-router-dom
-vi.mock('react-router-dom', () => ({
-    useLocation: vi.fn(() => ({ state: null })),
-    useNavigate: vi.fn(),
-}));
-
 describe('AIChat', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -80,13 +93,21 @@ describe('AIChat', () => {
 
     it('shows license required message when no license key', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: '' });
-        render(<AIChat />);
+        render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
         expect(screen.getByText('License Required')).toBeInTheDocument();
     });
 
     it('shows initial greeting', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
-        render(<AIChat />);
+        render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
         expect(screen.getByText('Mock Greeting')).toBeInTheDocument();
         expect(screen.queryByText('Start a conversation')).not.toBeInTheDocument();
         expect(screen.getByPlaceholderText('Type expenses naturally...')).toBeEnabled();
@@ -95,7 +116,11 @@ describe('AIChat', () => {
     it('sets capture environment on receipt file input on mobile', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
         (useIsMobile as any).mockReturnValue(true);
-        const { container } = render(<AIChat />);
+        const { container } = render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         // Should have 2 inputs
         const inputs = container.querySelectorAll('input[type="file"]');
@@ -113,7 +138,11 @@ describe('AIChat', () => {
     it('does not sets capture environment on receipt file input on desktop', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
         (useIsMobile as any).mockReturnValue(false);
-        const { container } = render(<AIChat />);
+        const { container } = render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         // Should have 1 input
         const inputs = container.querySelectorAll('input[type="file"]');
@@ -126,7 +155,11 @@ describe('AIChat', () => {
     it('should accept PDF files in file input', () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
         (useIsMobile as any).mockReturnValue(false);
-        const { container } = render(<AIChat />);
+        const { container } = render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         const fileInput = container.querySelector('input[type="file"]');
         expect(fileInput).toHaveAttribute('accept');
@@ -135,6 +168,67 @@ describe('AIChat', () => {
         expect(acceptAttr).toContain('application/pdf');
         expect(acceptAttr).toContain('image/jpeg');
         expect(acceptAttr).toContain('image/png');
+    });
+
+    it('accepts shared receipt from location state', async () => {
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        const mockSharedReceipt = {
+            storageKey: 'test-key',
+            fileName: 'receipt.jpg',
+            fileType: 'image/jpeg'
+        };
+
+        // Mock extraction response
+        (api.extractFromReceipt as any).mockResolvedValue({
+            response_text: 'Extracted from shared receipt',
+            captured_data: {
+                name: 'Shared Merchant',
+                amount: 42.00,
+                category: 'Food',
+                payment_method: 'Credit Card',
+                date: '2023-10-27',
+                notes: 'Shared',
+                confidence: 'high',
+                missing_fields: []
+            },
+            receipt_metadata: {
+                storage_key: 'test-key',
+                merchant_name: 'Shared Merchant',
+                receipt_date: '2023-10-27'
+            }
+        });
+
+        render(
+            <MemoryRouter initialEntries={[{ pathname: '/add', state: { sharedReceipt: mockSharedReceipt } }]}>
+                <AIChat />
+            </MemoryRouter>
+        );
+
+        // Verify processing state appears
+        expect(screen.getByText('Extracting details from your receipt...')).toBeInTheDocument();
+
+        // Verify extraction call
+        await waitFor(() => {
+            expect(api.extractFromReceipt).toHaveBeenCalledWith(
+                'test-key',
+                expect.any(Array),
+                expect.any(String),
+                expect.any(Array)
+            );
+        });
+
+        // Verify result UI
+        await waitFor(() => {
+            expect(screen.getByText('Entry Preview')).toBeInTheDocument();
+            expect(screen.getByText('Shared Merchant')).toBeInTheDocument();
+            // Amount is usually formatted with currency or decimal, check leniently or exact
+            // The DOM showed: <p>RM 42.00</p> separate spans maybe?
+            // DOM dump: <p>RM 42.00</p> as one text node or nested?
+            // Step 659 line 257-258: "RM " and "42.00" are separate text nodes or just formatted text content?
+            // DOM dump shows newlines. "RM  42.00".
+            // Use regex for amount
+            expect(screen.getByText(/42\.00/)).toBeInTheDocument();
+        });
     });
 
     it('handles low confidence response correctly', async () => {
@@ -151,7 +245,11 @@ describe('AIChat', () => {
             responseText: 'I need the amount.'
         });
 
-        render(<AIChat />);
+        render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         const input = screen.getByPlaceholderText('Type expenses naturally...');
         fireEvent.change(input, { target: { value: 'Lunch at KFC' } });
@@ -178,7 +276,11 @@ describe('AIChat', () => {
             responseText: 'Got it!'
         });
 
-        render(<AIChat />);
+        render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         const input = screen.getByPlaceholderText('Type expenses naturally...');
         fireEvent.change(input, { target: { value: 'KFC 15' } });
@@ -226,7 +328,11 @@ describe('AIChat', () => {
             responseText: 'Got it!'
         });
 
-        render(<AIChat />);
+        render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         const input = screen.getByPlaceholderText('Type expenses naturally...');
         fireEvent.change(input, { target: { value: 'KFC 15' } });
@@ -292,7 +398,11 @@ describe('AIChat', () => {
             responseText: 'Got it!'
         });
 
-        render(<AIChat />);
+        render(
+            <MemoryRouter>
+                <AIChat />
+            </MemoryRouter>
+        );
 
         const input = screen.getByPlaceholderText('Type expenses naturally...');
         fireEvent.change(input, { target: { value: 'KFC 15' } });

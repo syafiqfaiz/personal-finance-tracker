@@ -125,7 +125,7 @@ const ShareReceiptPage = () => {
                 // 5. Cleanup and Redirect
                 await clearSharedData();
 
-                navigate('/', {
+                navigate('/add', {
                     state: {
                         sharedReceipt: {
                             storageKey: uploadUrlResponse.key,
