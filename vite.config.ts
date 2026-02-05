@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
-  const csp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.googletagmanager.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' ${isDev ? 'http://localhost:* ws://localhost:*' : ''} https://generativelanguage.googleapis.com https://*.amazonaws.com https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://*.ingest.sentry.io;`;
+  const csp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.googletagmanager.com https://static.cloudflareinsights.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' ${isDev ? 'http://localhost:* ws://localhost:*' : ''} https://generativelanguage.googleapis.com https://*.amazonaws.com https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io;`;
 
   return {
     plugins: [
