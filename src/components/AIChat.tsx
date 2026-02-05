@@ -507,6 +507,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                     placeholder={currentContext ? "Reply to refine..." : "Type expenses naturally..."}
                     className="w-full bg-white rounded-full border border-slate-200 shadow-sm py-4 pl-6 pr-14 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-400 text-sm font-medium transition-all placeholder:text-slate-400"
                     disabled={isProcessing}
+                    autoComplete="off"
                 />
                 <button
                     type="submit"
