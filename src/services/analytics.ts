@@ -25,5 +25,13 @@ export const AnalyticsService = {
             action,
             label
         });
+    },
+
+    trackEvent: (eventName: string, params?: Record<string, unknown>) => {
+        if (!import.meta.env.PROD || !import.meta.env.VITE_GA_ID) {
+            console.log(`[Analytics] ${eventName}`, params);
+            return;
+        }
+        ReactGA.event(eventName, params);
     }
 };

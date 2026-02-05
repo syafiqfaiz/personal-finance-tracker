@@ -67,6 +67,12 @@ vi.mock('../constants/greetings', () => ({
 // Mock scrollIntoView
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
+// Mock react-router-dom
+vi.mock('react-router-dom', () => ({
+    useLocation: vi.fn(() => ({ state: null })),
+    useNavigate: vi.fn(),
+}));
+
 describe('AIChat', () => {
     beforeEach(() => {
         vi.clearAllMocks();

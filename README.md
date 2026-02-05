@@ -2,15 +2,13 @@
 
 A private, offline-first personal finance tracker built as a React PWA, backed by a secure Serverless Backend for AI and Cloud Storage orchestration.
 
-## 🆕 Latest Release (v0.4.0)
-- **Recurring Expenses**: Automated monthly expense tracking with smart reminders.
-  - Create templates for recurring bills (rent, subscriptions, utilities)
-  - Payment checklist widget on home page with due date tracking
-  - Flexible actions: Pay, Skip, or Snooze reminders
-  - Support for both fixed and variable amounts
-  - Pause/resume templates as needed
-- **Enhanced UX**: Full-page slide-up dialogs with smooth animations matching app design language.
-- **Test Coverage**: Comprehensive test suite for RecurringExpenseService.
+## 🆕 Latest Release (v0.5.0)
+- **Share Receipt to AI Chat (Android)**: Share receipts directly from any app to the Personal Finance Tracker.
+  - Seamless integration with Android Share Sheet
+  - Auto-clears chat and starts extraction immediately
+  - Supports PDF and Image files
+  - Secure offline-first processing via Service Worker
+
 
 ## 🚀 Key Features
 - **Offline-First**: Track expenses anywhere, even without internet.

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { extractExpenseWithAI, type ExtractedExpense } from '../services/aiService';
@@ -11,6 +12,7 @@ import { api } from '../services/api';
 import { receiptOperations } from '../db/receiptOperations';
 import { ExpenseService } from '../services/ExpenseService';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD, IMAGE_ACCEPT_ATTRIBUTE, FILE_ACCEPT_ATTRIBUTE } from '../constants/app';
+import { AnalyticsService } from '../services/analytics';
 
 interface AIChatProps {
     onSuccess?: () => void;
@@ -25,6 +27,7 @@ interface Message {
 const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const { categories } = useFinanceStore();
     const { licenseKey } = useSettingsStore();
+    const location = useLocation();
 
     const [messages, setMessages] = useState<Message[]>(() => [
         { id: Date.now().toString(), role: 'assistant', text: getRandomGreeting() }
@@ -48,6 +51,100 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
     const [editingField, setEditingField] = useState<string | null>(null);
 
     const isMobile = useIsMobile();
+
+    // Check for shared receipt from ShareTarget flow
+    useEffect(() => {
+        const handleSharedReceipt = async (receipt: { storageKey: string, fileName: string, fileType: string }) => {
+            // Clear existing state (per PRD decision: start fresh)
+            setMessages([{
+                id: Date.now().toString(),
+                role: 'assistant',
+                text: 'Extracting details from your receipt...'
+            }]);
+            setCurrentContext(undefined);
+            setReceiptMetadata(null);
+            setError(null);
+            setHasUploadedReceipt(true); // Hide upload buttons
+            setIsUploading(true);
+            setIsProcessing(true); // Show processing state
+
+            try {
+                AnalyticsService.trackEvent('share_extraction_start', { file_type: receipt.fileType });
+                const startTime = Date.now();
+
+                // Direct extraction since file is already uploaded
+                const extractionResult = await api.extractFromReceipt(
+                    receipt.storageKey,
+                    categories,
+                    new Date().toISOString().split('T')[0],
+                    [...PAYMENT_METHODS]
+                );
+
+                // Save receipt metadata
+                await receiptOperations.create({
+                    userId: licenseKey!,
+                    storageKey: receipt.storageKey,
+                    merchantName: extractionResult.receipt_metadata.merchant_name,
+                    receiptDate: extractionResult.receipt_metadata.receipt_date
+                });
+
+                // Update state
+                setReceiptMetadata({
+                    storageKey: extractionResult.receipt_metadata.storage_key,
+                    merchantName: extractionResult.receipt_metadata.merchant_name,
+                    receiptDate: extractionResult.receipt_metadata.receipt_date
+                });
+
+                setCurrentContext({
+                    name: extractionResult.captured_data.name || '',
+                    amount: extractionResult.captured_data.amount || 0,
+                    category: extractionResult.captured_data.category || '',
+                    paymentMethod: extractionResult.captured_data.payment_method || DEFAULT_PAYMENT_METHOD,
+                    date: extractionResult.captured_data.date || new Date().toISOString().split('T')[0],
+                    notes: extractionResult.captured_data.notes || '',
+                    confidence: extractionResult.captured_data.confidence || 'low',
+                    missingFields: extractionResult.captured_data.missing_fields || [],
+                    responseText: extractionResult.response_text
+                });
+
+                // Add AI response
+                if (extractionResult.response_text) {
+                    setMessages(prev => [...prev, {
+                        id: Date.now().toString(),
+                        role: 'assistant',
+                        text: extractionResult.response_text
+                    }]);
+                }
+
+                AnalyticsService.trackEvent('share_extraction_success', {
+                    duration_ms: Date.now() - startTime,
+                    confidence: extractionResult.captured_data.confidence
+                });
+
+            } catch (err) {
+                console.error('Shared receipt processing failed:', err);
+                const errorMessage = err instanceof Error ? err.message : 'Failed to process receipt';
+                setError(errorMessage);
+                setMessages(prev => [...prev, {
+                    id: Date.now().toString(),
+                    role: 'assistant',
+                    text: `Sorry, I couldn't extract details from that receipt. ${errorMessage}`
+                }]);
+                AnalyticsService.trackEvent('share_extraction_failure', { error: errorMessage });
+            } finally {
+                setIsUploading(false);
+                setIsProcessing(false);
+            }
+        };
+
+        const sharedReceipt = location.state?.sharedReceipt;
+        if (sharedReceipt) {
+            handleSharedReceipt(sharedReceipt);
+
+            // Clear history state so we don't re-process on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state, categories, licenseKey]);
 
     // Auto-scroll to bottom
     useEffect(() => {

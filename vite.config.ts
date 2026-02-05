@@ -22,6 +22,22 @@ export default defineConfig(({ mode }) => {
           theme_color: '#2563eb',
           background_color: '#f8fafc',
           display: 'standalone',
+          // Share Target Configuration for Android
+          share_target: {
+            action: '/share',
+            method: 'POST',
+            enctype: 'multipart/form-data',
+            params: {
+              files: [
+                {
+                  name: 'receipt',
+                  accept: ['image/*', 'application/pdf']
+                }
+              ],
+              text: 'text',
+              url: 'url'
+            }
+          },
           icons: [
             {
               src: 'pwa-192x192.png',
@@ -36,6 +52,10 @@ export default defineConfig(({ mode }) => {
               purpose: 'any'
             }
           ]
+        },
+        workbox: {
+          // Import custom element to handle share target POST requests
+          importScripts: ['share-target-handler.js']
         }
       }),
       {

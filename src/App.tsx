@@ -17,6 +17,7 @@ import { backupService } from './services/backupService'
 import './App.css'
 
 import LandingPage from './pages/LandingPage'
+import ShareReceiptPage from './pages/ShareReceiptPage'
 
 // Route Tracker Component
 const RouteTracker = () => {
@@ -67,6 +68,9 @@ function App() {
       <Routes>
         {/* Public Route */}
         <Route path="/welcome" element={<LandingPage />} />
+
+        {/* Share Target Route - Must be public to handle unauthenticated users */}
+        <Route path="/share" element={<ShareReceiptPage />} />
 
         {/* Protected App Routes */}
         <Route element={
