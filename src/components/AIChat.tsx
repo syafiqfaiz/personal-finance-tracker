@@ -470,11 +470,11 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                             <label className="flex flex-col items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors h-full">
                                 <Image className="w-5 h-5 text-purple-600" />
                                 <span className="text-xs font-bold text-purple-900 uppercase tracking-widest">
-                                    {isUploading ? 'Uploading...' : 'Gallery'}
+                                    {isUploading ? 'Uploading...' : 'Choose File'}
                                 </span>
                                 <input
                                     type="file"
-                                    accept="image/jpeg,image/png,image/jpg"
+                                    accept="image/jpeg,image/png,image/jpg,application/pdf"
                                     onChange={handleReceiptUpload}
                                     className="hidden"
                                     disabled={isUploading}
@@ -485,11 +485,11 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                         <label className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
                             <Camera className="w-5 h-5 text-purple-600" />
                             <span className="text-sm font-bold text-purple-900 uppercase tracking-widest">
-                                {isUploading ? 'Uploading...' : 'Upload Receipt'}
+                                {isUploading ? 'Uploading...' : 'Upload Receipt (Image/PDF)'}
                             </span>
                             <input
                                 type="file"
-                                accept="image/jpeg,image/png,image/jpg"
+                                accept="image/jpeg,image/png,image/jpg,application/pdf"
                                 onChange={handleReceiptUpload}
                                 className="hidden"
                                 disabled={isUploading}

@@ -260,4 +260,83 @@ response_text: Got it! I see RM45.00 from Guardian Pharmacy on Jan 24. What cate
         expect(body.receipt_metadata.merchant_name).toBe('Unknown');
         expect(body.usage.remaining).toBe(89); // Quota still incremented
     });
+
+    it('should successfully extract data from PDF receipt', async () => {
+        (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
+
+        // Mock S3 Get with PDF ContentType
+        mocks.s3Send.mockResolvedValue({
+            Body: {
+                transformToByteArray: () => Promise.resolve(new Uint8Array(100))
+            },
+            ContentType: 'application/pdf'
+        });
+
+        // Mock Gemini Vision response
+        const kvResponse = `
+name: IKEA
+amount: 299.00
+category: Shopping
+payment_method: Credit Card
+date: 2026-02-05
+notes: Furniture
+confidence: high
+missing_fields: 
+response_text: Got it! IKEA receipt for RM299.00 on Feb 5. Categorized as Shopping.
+        `;
+
+        mocks.generateContent.mockResolvedValue({
+            response: {
+                text: () => kvResponse
+            }
+        });
+
+        const pdfPayload = {
+            ...validPayload,
+            storage_key: 'user_storage/test-user-123/receipts/2026/2026-02/receipt.pdf'
+        };
+
+        const req = new Request('http://localhost/api/ai/extract-from-receipt', {
+            method: 'POST',
+            body: JSON.stringify(pdfPayload),
+            headers: { 'X-License-Key': 'valid-key' }
+        });
+
+        const res = await onRequest(createMockContext(req, env));
+        expect(res.status).toBe(200);
+
+        const body: any = await res.json();
+        expect(body.captured_data.name).toBe('IKEA');
+        expect(body.captured_data.amount).toBe(299.00);
+        expect(body.receipt_metadata.storage_key).toContain('.pdf');
+    });
+
+    it('should reject unsupported file types', async () => {
+        (kvMock.get as Mock).mockImplementation(() => JSON.parse(JSON.stringify(activeLicense)));
+
+        // Mock S3 Get with unsupported ContentType
+        mocks.s3Send.mockResolvedValue({
+            Body: {
+                transformToByteArray: () => Promise.resolve(new Uint8Array(100))
+            },
+            ContentType: 'video/mp4' // Unsupported type
+        });
+
+        const unsupportedPayload = {
+            ...validPayload,
+            storage_key: 'user_storage/test-user-123/receipts/2026/2026-02/video.mp4' // Unsupported extension
+        };
+
+        const req = new Request('http://localhost/api/ai/extract-from-receipt', {
+            method: 'POST',
+            body: JSON.stringify(unsupportedPayload),
+            headers: { 'X-License-Key': 'valid-key' }
+        });
+
+        const res = await onRequest(createMockContext(req, env));
+        expect(res.status).toBe(400);
+
+        const body: any = await res.json();
+        expect(body.error).toContain('Unsupported file type');
+    });
 });

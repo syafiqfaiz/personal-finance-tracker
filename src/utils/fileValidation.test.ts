@@ -18,13 +18,13 @@ describe('validateReceiptFile', () => {
         expect(error).toBeNull();
     });
 
-    it('should reject file over 5MB', () => {
+    it('should reject file over 10MB', () => {
         const file = new File(['test'], 'receipt.jpg', { type: 'image/jpeg' });
-        Object.defineProperty(file, 'size', { value: 6 * 1024 * 1024 }); // 6MB
+        Object.defineProperty(file, 'size', { value: 11 * 1024 * 1024 }); // 11MB
 
         const error = validateReceiptFile(file);
         expect(error).toContain('File too large');
-        expect(error).toContain('6.00MB');
+        expect(error).toContain('10MB');
     });
 
     it('should reject file under 1KB (minimum size)', () => {
@@ -44,13 +44,29 @@ describe('validateReceiptFile', () => {
         expect(error).toBeNull();
     });
 
-    it('should reject invalid file type (PDF)', () => {
+    it('should accept valid PDF file under 10MB', () => {
         const file = new File(['test'], 'receipt.pdf', { type: 'application/pdf' });
         Object.defineProperty(file, 'size', { value: 1024 * 1024 }); // 1MB
 
         const error = validateReceiptFile(file);
-        expect(error).toContain('Invalid file type');
-        expect(error).toContain('JPEG or PNG');
+        expect(error).toBeNull();
+    });
+
+    it('should accept PDF file exactly at 10MB limit', () => {
+        const file = new File(['test'], 'receipt.pdf', { type: 'application/pdf' });
+        Object.defineProperty(file, 'size', { value: 10 * 1024 * 1024 }); // Exactly 10MB
+
+        const error = validateReceiptFile(file);
+        expect(error).toBeNull();
+    });
+
+    it('should reject PDF file over 10MB', () => {
+        const file = new File(['test'], 'receipt.pdf', { type: 'application/pdf' });
+        Object.defineProperty(file, 'size', { value: 11 * 1024 * 1024 }); // 11MB
+
+        const error = validateReceiptFile(file);
+        expect(error).toContain('File too large');
+        expect(error).toContain('10MB');
     });
 
     it('should reject invalid file type (HEIC)', () => {

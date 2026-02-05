@@ -117,6 +117,20 @@ describe('AIChat', () => {
         expect(input).not.toHaveAttribute('capture');
     });
 
+    it('should accept PDF files in file input', () => {
+        (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
+        (useIsMobile as any).mockReturnValue(false);
+        const { container } = render(<AIChat />);
+
+        const fileInput = container.querySelector('input[type="file"]');
+        expect(fileInput).toHaveAttribute('accept');
+
+        const acceptAttr = fileInput?.getAttribute('accept');
+        expect(acceptAttr).toContain('application/pdf');
+        expect(acceptAttr).toContain('image/jpeg');
+        expect(acceptAttr).toContain('image/png');
+    });
+
     it('handles low confidence response correctly', async () => {
         (useSettingsStore as any).mockReturnValue({ licenseKey: 'valid-key' });
         (extractExpenseWithAI as any).mockResolvedValue({

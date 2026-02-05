@@ -95,6 +95,7 @@ app.post('/', async (c) => {
 
 
     let imageBuffer: Uint8Array;
+    let contentType: string;
     try {
 
         const command = new GetObjectCommand({
@@ -107,6 +108,34 @@ app.post('/', async (c) => {
         if (!response.Body) {
             console.error('[R2 DEBUG] No body in S3 response');
             return c.json({ error: 'Receipt image not found' }, 404);
+        }
+
+        // Get ContentType from R2 response
+        contentType = response.ContentType || 'image/jpeg';
+
+        // Validate against storage key extension as fallback
+        const extension = body.storage_key.split('.').pop()?.toLowerCase();
+
+        // Map extension to expected MIME type
+        const extensionMimeMap: Record<string, string> = {
+            'pdf': 'application/pdf',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'png': 'image/png'
+        };
+
+        const expectedMimeType = extensionMimeMap[extension || ''];
+
+        // Only use fallback if we have a known extension and MIME type mismatch
+        if (expectedMimeType && contentType !== expectedMimeType) {
+            console.warn(`[MIME Mismatch] R2 returned ${contentType}, expected ${expectedMimeType} based on extension`);
+            contentType = expectedMimeType;
+        }
+
+        // Validate that MIME type is supported
+        const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+        if (!supportedTypes.includes(contentType)) {
+            return c.json({ error: 'Unsupported file type' }, 400);
         }
 
         // Convert stream to Uint8Array
@@ -139,14 +168,12 @@ app.post('/', async (c) => {
         // imageBuffer was already fetched above from S3  
         const base64Image = arrayBufferToBase64(imageBuffer);
 
-        // Call Gemini Vision with inline image data
-
-        // Call Gemini Vision with inline image data
+        // Call Gemini Vision with inline image/PDF data
         const result = await model.generateContent([
             prompt,
             {
                 inlineData: {
-                    mimeType: 'image/jpeg',
+                    mimeType: contentType, // Use detected MIME type
                     data: base64Image
                 }
             }

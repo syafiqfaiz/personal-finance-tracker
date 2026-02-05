@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, Loader2, Download } from 'lucide-react';
 import { api } from '../services/api';
 
 interface ReceiptViewerProps {
@@ -14,6 +14,8 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ storageKey, merchantName,
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [zoom, setZoom] = useState(1);
+    const [isPDF, setIsPDF] = useState(false);
+    const [pdfLoadError, setPdfLoadError] = useState(false);
 
     useEffect(() => {
         const loadImage = async () => {
@@ -21,6 +23,10 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ storageKey, merchantName,
                 setIsLoading(true);
                 const url = await api.getViewUrl(storageKey);
                 setImageUrl(url);
+
+                // Detect if file is PDF based on storage key extension
+                const extension = storageKey.split('.').pop()?.toLowerCase();
+                setIsPDF(extension === 'pdf');
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load receipt');
             } finally {
@@ -67,32 +73,34 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ storageKey, merchantName,
                     )}
                 </div>
 
-                {/* Zoom Controls */}
-                <div className="flex items-center gap-2 mr-4">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleZoomOut();
-                        }}
-                        className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                        disabled={zoom <= 0.5}
-                    >
-                        <ZoomOut className="w-5 h-5 text-white" />
-                    </button>
-                    <span className="text-white text-sm font-bold min-w-[3rem] text-center">
-                        {Math.round(zoom * 100)}%
-                    </span>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleZoomIn();
-                        }}
-                        className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                        disabled={zoom >= 3}
-                    >
-                        <ZoomIn className="w-5 h-5 text-white" />
-                    </button>
-                </div>
+                {/* Zoom Controls - Only show for images */}
+                {!isPDF && (
+                    <div className="flex items-center gap-2 mr-4">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleZoomOut();
+                            }}
+                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                            disabled={zoom <= 0.5}
+                        >
+                            <ZoomOut className="w-5 h-5 text-white" />
+                        </button>
+                        <span className="text-white text-sm font-bold min-w-[3rem] text-center">
+                            {Math.round(zoom * 100)}%
+                        </span>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleZoomIn();
+                            }}
+                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                            disabled={zoom >= 3}
+                        >
+                            <ZoomIn className="w-5 h-5 text-white" />
+                        </button>
+                    </div>
+                )}
 
                 {/* Close Button */}
                 <button
@@ -103,7 +111,7 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ storageKey, merchantName,
                 </button>
             </div>
 
-            {/* Image Container */}
+            {/* Content Container */}
             <div
                 className="flex-1 overflow-auto flex items-center justify-center p-4"
                 onClick={(e) => e.stopPropagation()}
@@ -128,12 +136,38 @@ const ReceiptViewer: React.FC<ReceiptViewerProps> = ({ storageKey, merchantName,
                 )}
 
                 {imageUrl && !isLoading && !error && (
-                    <img
-                        src={imageUrl}
-                        alt="Receipt"
-                        className="max-w-full max-h-full object-contain transition-transform duration-200"
-                        style={{ transform: `scale(${zoom})` }}
-                    />
+                    <>
+                        {isPDF ? (
+                            pdfLoadError ? (
+                                <div className="text-center">
+                                    <p className="text-white mb-4">Unable to display PDF in browser</p>
+                                    <a
+                                        href={imageUrl}
+                                        download
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Download PDF
+                                    </a>
+                                </div>
+                            ) : (
+                                <embed
+                                    src={imageUrl}
+                                    type="application/pdf"
+                                    className="w-full h-full"
+                                    onError={() => setPdfLoadError(true)}
+                                />
+                            )
+                        ) : (
+                            <img
+                                src={imageUrl}
+                                alt="Receipt"
+                                className="max-w-full max-h-full object-contain transition-transform duration-200"
+                                style={{ transform: `scale(${zoom})` }}
+                            />
+                        )}
+                    </>
                 )}
             </div>
         </div>
