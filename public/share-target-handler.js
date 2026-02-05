@@ -60,7 +60,8 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
     // Intercept POST requests to /share
-    if (event.request.method === 'POST' && url.pathname === '/share') {
+    // Match /share or /share/ to be robust
+    if (event.request.method === 'POST' && url.pathname.replace(/\/$/, '') === '/share') {
         event.respondWith(
             (async () => {
                 try {
