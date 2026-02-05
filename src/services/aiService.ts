@@ -1,4 +1,5 @@
 import { api } from './api';
+import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../constants/app';
 
 export interface ExtractedExpense {
     name: string;
@@ -17,8 +18,8 @@ export const extractExpenseWithAI = async (
     categories: string[],
     previousState?: ExtractedExpense
 ): Promise<ExtractedExpense> => {
-    const availablePaymentMethods = ["Cash", "Credit Card", "Debit Card", "QR Pay", "Transfer"];
     const currentDate = new Date().toISOString();
+
 
     // Map frontend camelCase to backend snake_case
     const capturedContext = previousState ? {
@@ -34,14 +35,14 @@ export const extractExpenseWithAI = async (
 
 
 
-    const result = await api.extractExpenses(input, categories, currentDate, availablePaymentMethods, capturedContext);
+    const result = await api.extractExpenses(input, categories, currentDate, [...PAYMENT_METHODS], capturedContext);
     const data = result.captured_data;
 
     return {
         name: data.name || "Miscellaneous",
         amount: data.amount || 0,
         category: data.category || "Others",
-        paymentMethod: data.payment_method || "Cash",
+        paymentMethod: data.payment_method || DEFAULT_PAYMENT_METHOD,
         date: data.date || currentDate,
         notes: data.notes || "",
         confidence: data.confidence || "low",

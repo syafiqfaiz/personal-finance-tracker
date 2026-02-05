@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { RecurringExpenseService } from '../services/RecurringExpenseService';
 import { type RecurringExpense } from '../db/db';
@@ -11,6 +11,7 @@ import { useFinanceStore } from '../store/useFinanceStore';
 import { compressImage, blobToDataURL } from '../services/imageService';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { api } from '../services/api';
+import { generateFilename } from '../constants/app';
 
 interface PaymentDialogProps {
     template: RecurringExpense;
@@ -241,7 +242,7 @@ export default function RecurringExpenseChecklist() {
             // Upload receipt if provided
             if (receiptBlob) {
                 try {
-                    const filename = receiptBlob.type === 'application/pdf' ? 'receipt.pdf' : 'receipt.jpg';
+                    const filename = generateFilename(receiptBlob.type);
                     const uploadUrlResponse = await api.getUploadUrl(filename, receiptBlob.type);
 
                     // Upload to R2 using presigned URL

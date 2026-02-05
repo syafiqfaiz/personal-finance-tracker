@@ -1,11 +1,7 @@
-export const APP_VERSION = __APP_VERSION__;
-
-// Schema Version for IndexedDB migrations
-// Increment this number whenever the database schema changes (e.g. adding new stores)
-// Version 1: Initial release (Expenses, Budgets, Settings)
-// Version 2: Added createdAt/updatedAt to Expense
-// Version 3: Added Recurring Expenses
-export const SCHEMA_VERSION = 2; // Matching current db.ts version
+/**
+ * Backend constants for serverless functions
+ * Centralized location for shared constants
+ */
 
 // ============================================================================
 // File Validation Constants
@@ -30,26 +26,6 @@ export const ALLOWED_FILE_EXTENSIONS = [
     'png',
     'pdf'
 ] as const;
-
-/**
- * Minimum file size in bytes (1KB)
- */
-export const MIN_FILE_SIZE = 1024;
-
-/**
- * Maximum file size in bytes (10MB)
- */
-export const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-/**
- * Pre-formatted accept attribute for file inputs
- */
-export const FILE_ACCEPT_ATTRIBUTE = ALLOWED_MIME_TYPES.join(',');
-
-/**
- * Pre-formatted accept attribute for image-only inputs
- */
-export const IMAGE_ACCEPT_ATTRIBUTE = 'image/jpeg,image/png,image/jpg';
 
 // ============================================================================
 // Payment Method Constants
@@ -100,14 +76,6 @@ export function getExtensionFromMimeType(mimeType: string): string {
         'application/pdf': 'pdf'
     };
     return extensionMap[mimeType] || 'jpg';
-}
-
-/**
- * Generate filename based on MIME type
- */
-export function generateFilename(mimeType: string, baseName = 'receipt'): string {
-    const extension = getExtensionFromMimeType(mimeType);
-    return `${baseName}.${extension}`;
 }
 
 // ============================================================================

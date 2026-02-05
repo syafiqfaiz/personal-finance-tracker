@@ -6,6 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { corsMiddleware } from '../../core/corsMiddleware';
 import { securityMiddleware } from '../../core/securityMiddleware';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { ALLOWED_MIME_TYPES, PAYMENT_METHODS, getMimeTypeFromExtension } from '../../core/constants';
 
 type Bindings = {
     LICENSE_STORE: KVNamespace;
@@ -116,15 +117,8 @@ app.post('/', async (c) => {
         // Validate against storage key extension as fallback
         const extension = body.storage_key.split('.').pop()?.toLowerCase();
 
-        // Map extension to expected MIME type
-        const extensionMimeMap: Record<string, string> = {
-            'pdf': 'application/pdf',
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'png': 'image/png'
-        };
-
-        const expectedMimeType = extensionMimeMap[extension || ''];
+        // Use helper function to get MIME type from extension
+        const expectedMimeType = extension ? getMimeTypeFromExtension(extension) : null;
 
         // Only use fallback if we have a known extension and MIME type mismatch
         if (expectedMimeType && contentType !== expectedMimeType) {
@@ -133,8 +127,7 @@ app.post('/', async (c) => {
         }
 
         // Validate that MIME type is supported
-        const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-        if (!supportedTypes.includes(contentType)) {
+        if (!ALLOWED_MIME_TYPES.includes(contentType as typeof ALLOWED_MIME_TYPES[number])) {
             return c.json({ error: 'Unsupported file type' }, 400);
         }
 
@@ -148,7 +141,7 @@ app.post('/', async (c) => {
     // Construct Vision Prompt
     const prompt = buildVisionPrompt(
         body.categories || [],
-        body.available_payment_method || ['Cash', 'Credit Card', 'Debit Card', 'QR Pay', 'Transfer'],
+        [...PAYMENT_METHODS],
         body.current_date || new Date().toISOString().split('T')[0]
     );
 

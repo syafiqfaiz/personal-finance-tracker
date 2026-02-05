@@ -1,6 +1,4 @@
-const MIN_FILE_SIZE = 1024; // 1KB
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+import { ALLOWED_MIME_TYPES, MIN_FILE_SIZE, MAX_FILE_SIZE } from '../constants/app';
 
 /**
  * Validate a receipt file before upload
@@ -20,7 +18,8 @@ export function validateReceiptFile(file: File): string | null {
     }
 
     // Check file type
-    if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+    const lowerCaseType = file.type.toLowerCase();
+    if (!ALLOWED_MIME_TYPES.includes(lowerCaseType as typeof ALLOWED_MIME_TYPES[number])) {
         return `Invalid file type. Please upload JPEG, PNG images or PDF files only.`;
     }
 

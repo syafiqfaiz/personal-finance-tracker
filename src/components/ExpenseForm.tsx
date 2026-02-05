@@ -9,6 +9,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { TextArea } from './ui/TextArea';
 import { api } from '../services/api';
+import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD, generateFilename } from '../constants/app';
 
 interface ExpenseFormProps {
     initialData?: Partial<Expense>;
@@ -22,7 +23,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
     const [category, setCategory] = useState(initialData?.category || categories[0] || SYSTEM_CATEGORY);
     const [date, setDate] = useState(initialData?.timestamp ? new Date(initialData.timestamp).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-    const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || 'Cash');
+    const [paymentMethod, setPaymentMethod] = useState(initialData?.paymentMethod || DEFAULT_PAYMENT_METHOD);
     const [notes, setNotes] = useState(initialData?.notes || '');
     const [receiptBlob, setReceiptBlob] = useState<Blob | null>(initialData?.localReceipt || null);
     const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -76,7 +77,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
         // Upload receipt if changed/new
         if (receiptBlob && receiptBlob !== initialData?.localReceipt) {
             try {
-                const filename = receiptBlob.type === 'application/pdf' ? 'receipt.pdf' : 'receipt.jpg';
+                const filename = generateFilename(receiptBlob.type);
                 const uploadUrlResponse = await api.getUploadUrl(filename, receiptBlob.type);
 
                 // Upload to R2 using presigned URL
@@ -120,7 +121,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
             setName('');
             setAmount('');
             setNotes('');
-            setPaymentMethod('Cash');
+            setPaymentMethod(DEFAULT_PAYMENT_METHOD);
             setReceiptBlob(null);
             setReceiptPreview(null);
         }
@@ -185,7 +186,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, onSuccess }) => 
                         onChange={(e) => setPaymentMethod(e.target.value)}
                         centerText
                     >
-                        {['Cash', 'Debit Card', 'Credit Card', 'Bank Transfer'].map((method) => (
+                        {PAYMENT_METHODS.map((method) => (
                             <option key={method} value={method}>{method}</option>
                         ))}
                     </Select>

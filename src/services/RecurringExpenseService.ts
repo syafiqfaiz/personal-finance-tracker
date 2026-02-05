@@ -1,6 +1,7 @@
 import { db, type RecurringExpense, type Expense } from '../db/db';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, addWeeks, addYears, format, parseISO, lastDayOfMonth, min } from 'date-fns';
+import { DEFAULT_PAYMENT_METHOD } from '../constants/app';
 
 interface CreateTemplateData {
     name: string;
@@ -32,7 +33,7 @@ export const RecurringExpenseService = {
             name: data.name,
             amount: data.amount,
             categoryId: data.categoryId,
-            defaultPaymentMethod: data.defaultPaymentMethod || 'Cash',
+            defaultPaymentMethod: data.defaultPaymentMethod || DEFAULT_PAYMENT_METHOD,
             frequency: 'MONTHLY', // MVP: Fixed to monthly
             dayOfMonth: data.dayOfMonth,
             startDate: data.startDate,
@@ -121,7 +122,7 @@ export const RecurringExpenseService = {
                     timestamp: parseISO(action.date),
                     createdAt: new Date(),
                     updatedAt: new Date(),
-                    paymentMethod: template.defaultPaymentMethod || 'Cash',
+                    paymentMethod: template.defaultPaymentMethod || DEFAULT_PAYMENT_METHOD,
                     isTaxDeductible: false,
                     recurringExpenseId: templateId,
                     isRecurringInstance: true,

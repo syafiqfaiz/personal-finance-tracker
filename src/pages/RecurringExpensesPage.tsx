@@ -7,8 +7,7 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import { toast } from 'sonner';
 import { Plus, Edit2, Trash2, Power, PowerOff, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
-
-const PAYMENT_METHODS = ['Cash', 'Debit Card', 'Credit Card', 'Bank Transfer'];
+import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../constants/app';
 
 interface TemplateFormData {
     name: string;
@@ -34,7 +33,7 @@ function TemplateDialog({ template, categories, paymentMethods, onClose, onSave 
         categoryId: template?.categoryId || categories[0] || '',
         dayOfMonth: template?.dayOfMonth || 1,
         startDate: template?.startDate || format(new Date(), 'yyyy-MM-dd'),
-        defaultPaymentMethod: template?.defaultPaymentMethod || paymentMethods[0] || 'Cash'
+        defaultPaymentMethod: template?.defaultPaymentMethod || paymentMethods[0] || DEFAULT_PAYMENT_METHOD
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -353,7 +352,7 @@ export default function RecurringExpensesPage() {
                 <TemplateDialog
                     template={dialogTemplate === 'new' ? undefined : dialogTemplate}
                     categories={categories}
-                    paymentMethods={PAYMENT_METHODS}
+                    paymentMethods={[...PAYMENT_METHODS]}
                     onClose={() => setDialogTemplate(null)}
                     onSave={handleSave}
                 />

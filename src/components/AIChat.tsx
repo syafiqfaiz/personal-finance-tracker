@@ -10,6 +10,7 @@ import { validateReceiptFile } from '../utils/fileValidation';
 import { api } from '../services/api';
 import { receiptOperations } from '../db/receiptOperations';
 import { ExpenseService } from '../services/ExpenseService';
+import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD, IMAGE_ACCEPT_ATTRIBUTE, FILE_ACCEPT_ATTRIBUTE } from '../constants/app';
 
 interface AIChatProps {
     onSuccess?: () => void;
@@ -105,7 +106,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
             tags: [],
             timestamp: new Date(currentContext.date),
             notes: currentContext.notes,
-            paymentMethod: currentContext.paymentMethod || 'Cash',
+            paymentMethod: currentContext.paymentMethod || DEFAULT_PAYMENT_METHOD,
             isTaxDeductible: false,
             receiptUrl: receiptMetadata?.storageKey, // Store storage key
         });
@@ -190,7 +191,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                 uploadUrlResponse.key,
                 categories,
                 new Date().toISOString().split('T')[0],
-                ['Cash', 'Credit Card', 'QR Pay', 'Transfer']
+                [...PAYMENT_METHODS]
             );
 
             // 4. Save receipt metadata to IndexedDB
@@ -211,7 +212,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                 name: extractionResult.captured_data.name || '',
                 amount: extractionResult.captured_data.amount || 0,
                 category: extractionResult.captured_data.category || '',
-                paymentMethod: extractionResult.captured_data.payment_method || 'Cash',
+                paymentMethod: extractionResult.captured_data.payment_method || DEFAULT_PAYMENT_METHOD,
                 date: extractionResult.captured_data.date || new Date().toISOString().split('T')[0],
                 notes: extractionResult.captured_data.notes || '',
                 confidence: extractionResult.captured_data.confidence || 'low',
@@ -417,11 +418,9 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                                         className="text-xs font-semibold text-slate-900 border border-blue-500 rounded px-2 py-1 outline-none bg-white"
                                         autoFocus
                                     >
-                                        <option value="Cash">Cash</option>
-                                        <option value="Credit Card">Credit Card</option>
-                                        <option value="Debit Card">Debit Card</option>
-                                        <option value="QR Pay">QR Pay</option>
-                                        <option value="Transfer">Transfer</option>
+                                        {PAYMENT_METHODS.map(method => (
+                                            <option key={method} value={method}>{method}</option>
+                                        ))}
                                     </select>
                                 ) : (
                                     <span
@@ -459,7 +458,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                                 </span>
                                 <input
                                     type="file"
-                                    accept="image/jpeg,image/png,image/jpg"
+                                    accept={IMAGE_ACCEPT_ATTRIBUTE}
                                     capture="environment"
                                     onChange={handleReceiptUpload}
                                     className="hidden"
@@ -474,7 +473,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                                 </span>
                                 <input
                                     type="file"
-                                    accept="image/jpeg,image/png,image/jpg,application/pdf"
+                                    accept={FILE_ACCEPT_ATTRIBUTE}
                                     onChange={handleReceiptUpload}
                                     className="hidden"
                                     disabled={isUploading}
@@ -489,7 +488,7 @@ const AIChat: React.FC<AIChatProps> = ({ onSuccess }) => {
                             </span>
                             <input
                                 type="file"
-                                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                                accept={FILE_ACCEPT_ATTRIBUTE}
                                 onChange={handleReceiptUpload}
                                 className="hidden"
                                 disabled={isUploading}
