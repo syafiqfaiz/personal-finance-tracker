@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { Target, Save } from 'lucide-react';
+import { getLocalMonthPeriod } from '../utils/dateUtils';
 
 const BudgetManager: React.FC = () => {
     const { categories, budgets, upsertBudget } = useFinanceStore();
     const [selectedCategory, setSelectedCategory] = useState(categories[0] || '');
     const [limit, setLimit] = useState('');
 
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const currentMonth = getLocalMonthPeriod();
     const currentBudget = budgets.find(b => b.category === selectedCategory && b.monthPeriod === currentMonth);
 
     const handleSave = async (e: React.FormEvent) => {
