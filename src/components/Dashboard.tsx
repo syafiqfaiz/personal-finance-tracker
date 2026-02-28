@@ -6,6 +6,7 @@ import ExpenseCard from './ExpenseCard';
 import MonthExpenseSnapshot from './MonthExpenseSnapshot';
 import MonthlyBudgetProgress from './MonthlyBudgetProgress';
 import RecurringExpenseChecklist from './RecurringExpenseChecklist';
+import { getLocalMonthPeriod } from '../utils/dateUtils';
 
 
 const Dashboard: React.FC = () => {
@@ -14,7 +15,7 @@ const Dashboard: React.FC = () => {
     const navigate = useNavigate();
 
     const now = new Date();
-    const currentMonth = now.toISOString().slice(0, 7);
+    const currentMonth = getLocalMonthPeriod(now);
 
 
     // Get time-based greeting
@@ -22,7 +23,7 @@ const Dashboard: React.FC = () => {
     const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
 
     const monthlyExpenses = expenses.filter(e =>
-        new Date(e.timestamp).toISOString().slice(0, 7) === currentMonth
+        getLocalMonthPeriod(new Date(e.timestamp)) === currentMonth
     );
 
 

@@ -4,19 +4,20 @@ import { Tag, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import BudgetCard from './budgets/BudgetCard';
 import EditCategoryDialog, { type CategoryFormData } from './budgets/EditCategoryDialog';
+import { getLocalMonthPeriod } from '../utils/dateUtils';
 
 const CategoryBudgetManager: React.FC = () => {
     const { categories, budgets, expenses, categoryIcons, addCategory, updateCategoryIcon, deleteCategory, renameCategory, upsertBudget } = useFinanceStore();
     const [editingData, setEditingData] = useState<CategoryFormData | null>(null);
 
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = getLocalMonthPeriod();
 
     // Performance Optimization: Memoize stats calculation
     // Complexity reduces from O(N*M) per render to only when dependencies change
     const categoryData = useMemo(() => {
         return categories.map(cat => {
             const monthlyExpenses = expenses.filter(e =>
-                new Date(e.timestamp).toISOString().slice(0, 7) === currentMonth && e.category === cat
+                getLocalMonthPeriod(new Date(e.timestamp)) === currentMonth && e.category === cat
             );
             const spent = monthlyExpenses.reduce((sum, e) => sum + e.amount, 0);
             const budget = budgets.find(b => b.category === cat && b.monthPeriod === currentMonth);

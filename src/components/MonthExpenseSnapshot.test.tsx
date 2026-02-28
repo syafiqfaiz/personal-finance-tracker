@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import MonthExpenseSnapshot from './MonthExpenseSnapshot';
 import { BrowserRouter } from 'react-router-dom';
+import { getLocalMonthPeriod } from '../utils/dateUtils';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -42,13 +43,13 @@ const mockBudgets = [
         id: '1',
         category: 'Healthcare',
         limit: 150, // Over budget (200 > 150)
-        monthPeriod: new Date().toISOString().slice(0, 7),
+        monthPeriod: getLocalMonthPeriod(),
     },
     {
         id: '2',
         category: 'Food',
         limit: 500, // Under budget (300 < 500)
-        monthPeriod: new Date().toISOString().slice(0, 7),
+        monthPeriod: getLocalMonthPeriod(),
     },
 ];
 

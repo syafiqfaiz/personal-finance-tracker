@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFinanceStore } from '../store/useFinanceStore';
+import { getLocalMonthPeriod } from '../utils/dateUtils';
 
 interface BudgetProgressProps {
     showAll?: boolean;
@@ -7,10 +8,10 @@ interface BudgetProgressProps {
 
 const BudgetProgress: React.FC<BudgetProgressProps> = ({ showAll = false }) => {
     const { expenses, budgets, categories } = useFinanceStore();
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = getLocalMonthPeriod();
 
     const monthlyExpenses = expenses.filter(e =>
-        new Date(e.timestamp).toISOString().slice(0, 7) === currentMonth
+        getLocalMonthPeriod(new Date(e.timestamp)) === currentMonth
     );
 
     const budgetData = categories.map(cat => {
