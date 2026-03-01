@@ -13,7 +13,7 @@ const activeLicense = {
     id: 'test-user-123',
     status: 'active',
     limits: { ai_requests_per_month: 100 },
-    usage: { billing_cycle: '2026-02', ai_requests_used: 10 }
+    usage: { billing_cycle: new Date().toISOString().slice(0, 7), ai_requests_used: 10 }
 };
 
 // Hoist mocks to be available in vi.mock factory
